@@ -159,7 +159,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
       const response = await registerDriver(formData);
       Alert.alert('Success', 'Driver registration completed successfully!');
       setTimeout(() => {
-        navigation.navigate('VehicleRegistration', { driver: response.user });
+        navigation.navigate('DriverDashboard', { driver: response.user });
       }, 2000);
     } catch (error) {
       console.error('Driver registration error:', error);

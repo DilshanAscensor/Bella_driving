@@ -180,7 +180,7 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                     {
                         text: 'Continue',
                         onPress: () =>
-                            navigation.navigate('driverWelcomeScreen', { driver }),
+                            navigation.navigate('DriverDashboard', { driver }),
                     },
                 ]
             );

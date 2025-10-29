@@ -12,25 +12,81 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    ActivityIndicator,
+    Alert,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { PRIMARY_COLOR, ACCENT_COLOR } from '../assets/theme/colors';
+import styles from '../assets/styles/login';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { userLogin } from '../api/registration/auth';
 
-const LoginScreen = () => {
-    const navigation = useNavigation();
+const LoginScreen = ({ navigation }) => {
     const scheme = useColorScheme();
     const isDarkMode = scheme === 'dark';
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const backgroundColors = isDarkMode ? ['#000', '#172554'] : [PRIMARY_COLOR, '#e0e7ff'];
     const textColor = isDarkMode ? '#fff' : '#000';
     const inputBgColor = isDarkMode ? '#334155' : '#f1f5f9';
     const placeholderColor = isDarkMode ? '#a5b4fc' : '#94a3b8';
     const buttonTextColor = '#fff';
+
+    const validateInputs = () => {
+        if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            return 'Please enter a valid email';
+        }
+        if (!password || password.length < 6) {
+            return 'Password must be at least 6 characters';
+        }
+        return '';
+    };
+
+    const handleRegister = async () => {
+        setError('');
+        const validationError = validateInputs();
+        if (validationError) {
+            setError(validationError);
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const formData = new FormData();
+            formData.append('email', String(email));
+            formData.append('password', String(password));
+
+            const response = await userLogin(formData);
+
+            if (response?.token) {
+                await AsyncStorage.setItem('auth_token', response.token);
+                console.log('Token saved:', response.token);
+            }
+
+            Alert.alert('Success', response.message || 'Login successful.');
+
+            if (response?.user) {
+                if (response.user.role === 'driver') {
+                    navigation.navigate('DriverDashboard', { driver: response.user });
+                } else if (response.user.role === 'customer') {
+                    navigation.navigate('CustomerDashboard', { customer: response.user });
+                }
+            } else {
+                navigation.navigate('Home');
+            }
+        } catch (err) {
+            setError(err?.message || String(err));
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <LinearGradient
@@ -46,7 +102,6 @@ const LoginScreen = () => {
                     style={{ flex: 1 }}
                 >
                     <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-                        {/* Logo and Title */}
                         <View style={styles.header}>
                             <View style={[styles.logoContainer, { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
                                 <Image
@@ -88,19 +143,31 @@ const LoginScreen = () => {
                                 />
                             </View>
 
+                            {/* show error if any */}
+                            {error ? (
+                                <Text style={[styles.errorText, { color: '#ff4d4f', marginTop: 8 }]}>{error}</Text>
+                            ) : null}
+
                             {/* Login Button */}
                             <TouchableOpacity
-                                style={[styles.button, { backgroundColor: ACCENT_COLOR }]}
-                                onPress={() => console.log('Login pressed')}
+                                style={[styles.button, { backgroundColor: ACCENT_COLOR, opacity: loading ? 0.7 : 1 }]}
+                                onPress={handleRegister}
+                                disabled={loading}
                             >
-                                <MaterialIcons name="login" size={24} color={buttonTextColor} style={styles.buttonIcon} />
-                                <Text style={[styles.buttonText, { color: buttonTextColor }]}>Login</Text>
+                                {loading ? (
+                                    <ActivityIndicator size="small" color={buttonTextColor} style={styles.buttonIcon} />
+                                ) : (
+                                    <MaterialIcons name="login" size={24} color={buttonTextColor} style={styles.buttonIcon} />
+                                )}
+                                <Text style={[styles.buttonText, { color: buttonTextColor, marginLeft: 8 }]}>
+                                    {loading ? 'Signing in...' : 'Login'}
+                                </Text>
                             </TouchableOpacity>
 
                             {/* Secondary Actions */}
                             <View style={styles.footer}>
                                 <Text style={[styles.footerText, { color: placeholderColor }]}>Don't have an account?</Text>
-                                <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
+                                <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
                                     <Text style={[styles.footerLink, { color: ACCENT_COLOR }]}> Register</Text>
                                 </TouchableOpacity>
                             </View>
@@ -111,93 +178,5 @@ const LoginScreen = () => {
         </LinearGradient>
     );
 };
-
-const styles = StyleSheet.create({
-    gradient: {
-        flex: 1,
-    },
-    container: {
-        flex: 1,
-        paddingHorizontal: 30,
-    },
-    scrollContainer: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        paddingVertical: 50,
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 40,
-    },
-    logoContainer: {
-        padding: 30,
-        borderRadius: 100,
-        marginBottom: 20,
-    },
-    logo: {
-        width: 100,
-        height: 100,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: '700',
-        marginBottom: 6,
-        textAlign: 'center',
-    },
-    subtitle: {
-        fontSize: 16,
-        textAlign: 'center',
-    },
-    form: {
-        width: '100%',
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 15,
-        paddingVertical: 14,
-        borderRadius: 30,
-        marginVertical: 10,
-    },
-    inputIcon: {
-        marginRight: 10,
-    },
-    input: {
-        flex: 1,
-        fontSize: 16,
-    },
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 18,
-        borderRadius: 30,
-        marginVertical: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 6,
-        elevation: 4,
-    },
-    buttonIcon: {
-        marginRight: 12,
-    },
-    buttonText: {
-        fontSize: 18,
-        fontWeight: '600',
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 10,
-    },
-    footerText: {
-        fontSize: 14,
-    },
-    footerLink: {
-        fontSize: 14,
-        fontWeight: '600',
-    },
-});
 
 export default LoginScreen;
