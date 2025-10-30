@@ -10,6 +10,7 @@ import VehicleRegistration from './src/screens/vehicle/VehicleRegistrationScreen
 import SplashScreen from './src/screens/SplashScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import OtpScreen from './src/screens/login/OtpVerificationScreen';
 import DriverDashboard from './src/screens/driver/Dashboard';
 import CustomerDashboard from './src/screens/customer/CustomerDashboardScreen';
 
@@ -31,6 +32,7 @@ export default function App() {
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="driverWelcomeScreen" component={driverWelcomeScreen} />
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
+        <Stack.Screen name="OtpScreen" component={OtpScreen} />
         <Stack.Screen name="VehicleRegistration" component={VehicleRegistration} />
       </Stack.Navigator>
     </NavigationContainer>

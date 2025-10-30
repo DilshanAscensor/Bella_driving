@@ -22,6 +22,7 @@ import { registerVehicle } from '../../api/registration/auth';
 const VehicleRegistrationScreen = ({ route, navigation }) => {
     const [make, setMake] = useState('');
     const [model, setModel] = useState('');
+    const [vehicle_type, setType] = useState('');
     const [year, setYear] = useState(new Date());
     const [color, setColor] = useState('');
     const [license_plate, setLicensePlate] = useState('');
@@ -115,6 +116,7 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
     // 🔹 Validate form
     const validateInputs = () => {
         if (!make) return 'Vehicle Make is required';
+        if (!vehicle_type) return 'Vehicle Type is required';
         if (!model.trim()) return 'Vehicle Model is required';
         if (!color) return 'Vehicle Color is required';
         if (!year) return 'Vehicle Year is required';
@@ -144,6 +146,7 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
             const formData = new FormData();
             formData.append('user_id', driver.id);
             formData.append('make', make);
+            formData.append('vehicle_type', make);
             formData.append('model', model);
             formData.append('year', year.getFullYear().toString());
             formData.append('color', color);
@@ -267,6 +270,26 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                                         />
                                     ))}
                                 </Picker>
+                            </View>
+                        </View>
+
+                        {/* Type */}
+                        <View style={commonStyles.inputContainer}>
+                            <Text style={commonStyles.inputLabel}>Vehicle Type</Text>
+                            <View style={commonStyles.textInputContainer}>
+                                <MaterialIcons
+                                    name="directions-car"
+                                    size={20}
+                                    color="#1e3a8a"
+                                    style={commonStyles.inputIcon}
+                                />
+                                <TextInput
+                                    style={commonStyles.input}
+                                    placeholder="Enter Vehicle Type"
+                                    placeholderTextColor="#94a3b8"
+                                    value={vehicle_type}
+                                    onChangeText={setType}
+                                />
                             </View>
                         </View>
 

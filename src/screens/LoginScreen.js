@@ -21,7 +21,7 @@ import { useNavigation } from '@react-navigation/native';
 import { PRIMARY_COLOR, ACCENT_COLOR } from '../assets/theme/colors';
 import styles from '../assets/styles/login';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { userLogin } from '../api/registration/auth';
+import { userLogin, sendOtp } from '../api/registration/auth';
 
 const LoginScreen = ({ navigation }) => {
     const scheme = useColorScheme();
@@ -70,13 +70,13 @@ const LoginScreen = ({ navigation }) => {
                 console.log('Token saved:', response.token);
             }
 
-            Alert.alert('Success', response.message || 'Login successful.');
-
             if (response?.user) {
                 if (response.user.role === 'driver') {
-                    navigation.navigate('DriverDashboard', { driver: response.user });
+                    const otpResponse = await sendOtp({ email });
+                    navigation.navigate('OtpScreen', { email });
                 } else if (response.user.role === 'customer') {
-                    navigation.navigate('CustomerDashboard', { customer: response.user });
+                    const otpResponse = await sendOtp({ email });
+                    navigation.navigate('OtpScreen', { email });
                 }
             } else {
                 navigation.navigate('Home');
