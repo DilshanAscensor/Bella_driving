@@ -98,4 +98,8 @@ export default StyleSheet.create({
         borderLeftColor: '#ef4444',
     },
     errorText: { color: '#dc2626', fontSize: 14, marginLeft: 8, flex: 1 },
+
+    loginLinkContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 },
+    loginText: { fontSize: 16, color: '#64748b' },
+    loginLink: { fontSize: 16, color: '#f59e0b', fontWeight: '600' },
 });

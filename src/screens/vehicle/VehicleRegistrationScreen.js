@@ -146,7 +146,7 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
             const formData = new FormData();
             formData.append('user_id', driver.id);
             formData.append('make', make);
-            formData.append('vehicle_type', make);
+            formData.append('vehicle_type', vehicle_type);
             formData.append('model', model);
             formData.append('year', year.getFullYear().toString());
             formData.append('color', color);
@@ -165,7 +165,7 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
             Object.entries(files).forEach(([key, file]) => {
                 if (file) {
                     formData.append(key, {
-                        uri: Platform.OS === 'ios' ? file.uri.replace('file://', '') : file.uri,
+                        uri: file.uri,
                         type: file.type,
                         name: file.fileName,
                     });
@@ -520,13 +520,13 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                         )}
                     </TouchableOpacity>
 
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={commonStyles.loginLinkContainer}
                         onPress={() => navigation.goBack()}
                     >
                         <Text style={commonStyles.loginText}>Back to </Text>
                         <Text style={commonStyles.loginLink}>Driver Registration</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>

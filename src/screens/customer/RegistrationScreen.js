@@ -20,6 +20,7 @@ import { Picker } from '@react-native-picker/picker';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons'
 import { registerCustomer } from '../../api/registration/auth';
 import commonStyles from '../../assets/styles/customer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -118,10 +119,12 @@ const RegistrationScreen = ({ navigation }) => {
                     name: profile_pic.fileName || 'profile.jpg',
                 });
             }
-
-            // ✅ Call backend API
             const response = await registerCustomer(formData);
-            navigation.navigate('Welcome', { first_name });
+            if (response?.token) {
+                await AsyncStorage.setItem('auth_token', response.token);
+                console.log('Token saved:', response.token);
+            }
+            navigation.navigate('CustomerDashboard', { customer: response.user });
         } catch (err) {
             console.error('Registration error:', err);
             setError(err.message || 'Registration failed. Please try again.');
@@ -262,6 +265,12 @@ const RegistrationScreen = ({ navigation }) => {
                                 <Text style={commonStyles.buttonText}>Complete Registration</Text>
                             </>
                         )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={commonStyles.loginLinkContainer}
+                        onPress={() => navigation.navigate('LoginScreen')}>
+                        <Text style={commonStyles.loginText}>Already have an account? </Text>
+                        <Text style={commonStyles.loginLink}>Sign In</Text>
                     </TouchableOpacity>
                 </ScrollView>
             </KeyboardAvoidingView>

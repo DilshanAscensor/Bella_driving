@@ -64,25 +64,32 @@ const LoginScreen = ({ navigation }) => {
             formData.append('password', String(password));
 
             const response = await userLogin(formData);
+            if (response.status === true && response.token) {
+                if (response?.token) {
+                    await AsyncStorage.setItem('auth_token', response.token);
+                    console.log('Token saved:', response.token);
+                }
 
-            if (response?.token) {
-                await AsyncStorage.setItem('auth_token', response.token);
-                console.log('Token saved:', response.token);
-            }
-
-            if (response?.user) {
-                if (response.user.role === 'driver') {
-                    const otpResponse = await sendOtp({ email });
-                    navigation.navigate('OtpScreen', { email });
-                } else if (response.user.role === 'customer') {
-                    const otpResponse = await sendOtp({ email });
-                    navigation.navigate('OtpScreen', { email });
+                if (response.user) {
+                    if (response.user.role === 'driver') {
+                        const otpResponse = await sendOtp({ email });
+                        if (otpResponse.status === true) {
+                            navigation.navigate('OtpScreen', { email });
+                        }
+                    } else if (response.user.role === 'customer') {
+                        const otpResponse = await sendOtp({ email });
+                        if (otpResponse.status === true) {
+                            navigation.navigate('OtpScreen', { email });
+                        }
+                    }
+                } else {
+                    navigation.navigate('HomeHomeScreen');
                 }
             } else {
-                navigation.navigate('Home');
+                navigation.navigate('HomeHomeScreen');
             }
         } catch (err) {
-            setError(err?.message || String(err));
+            setError(err?.message || String(err) + ' - Login failed. Please try again.');
         } finally {
             setLoading(false);
         }

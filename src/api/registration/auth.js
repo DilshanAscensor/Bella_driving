@@ -109,7 +109,7 @@ export const registerVehicle = async (formData) => {
             const errorDetail = typeof data === 'object' && data !== null ? JSON.stringify(data) : data || 'No additional details';
             throw new Error(`Server error (${error.response.status}): ${errorDetail}`);
         } else if (error.request) {
-            throw new Error(error);
+            throw new Error(error + 'aaaa');
         } else {
             throw new Error('Unexpected error: ' + error.message);
         }

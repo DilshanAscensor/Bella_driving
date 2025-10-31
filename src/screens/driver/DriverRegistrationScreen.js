@@ -17,6 +17,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import commonStyles from '../../assets/styles/driver';
 import { registerDriver } from '../../api/registration/auth';
@@ -158,6 +159,10 @@ const DriverRegistrationScreen = ({ navigation }) => {
 
       const response = await registerDriver(formData);
       Alert.alert('Success', 'Driver registration completed successfully!');
+      if (response?.token) {
+        await AsyncStorage.setItem('auth_token', response.token);
+        console.log('Token saved:', response.token);
+      }
       setTimeout(() => {
         navigation.navigate('DriverDashboard', { driver: response.user });
       }, 2000);
@@ -478,7 +483,8 @@ const DriverRegistrationScreen = ({ navigation }) => {
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity style={commonStyles.loginLinkContainer}>
+          <TouchableOpacity style={commonStyles.loginLinkContainer}
+            onPress={() => navigation.navigate('LoginScreen')}>
             <Text style={commonStyles.loginText}>Already have an account? </Text>
             <Text style={commonStyles.loginLink}>Sign In</Text>
           </TouchableOpacity>
