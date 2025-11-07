@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 export default StyleSheet.create({
     gradient: {
@@ -8,12 +9,12 @@ export default StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 30,
+        paddingHorizontal: scale(25),
     },
     logoCircle: {
-        padding: 40,
-        borderRadius: 120,
-        marginBottom: 30,
+        padding: scale(35),
+        borderRadius: scale(120),
+        marginBottom: verticalScale(25),
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.15,
@@ -21,20 +22,20 @@ export default StyleSheet.create({
         elevation: 6,
     },
     logo: {
-        width: 120,
-        height: 120,
+        width: scale(110),
+        height: scale(110),
     },
     title: {
-        fontSize: 28,
+        fontSize: moderateScale(26),
         fontWeight: '700',
         letterSpacing: 0.5,
         textAlign: 'center',
-        marginBottom: 8,
+        marginBottom: verticalScale(6),
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: moderateScale(15),
         textAlign: 'center',
         opacity: 0.85,
-        lineHeight: 22,
+        lineHeight: verticalScale(20),
     },
 });

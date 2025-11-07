@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 export default StyleSheet.create({
     gradient: {
@@ -6,34 +7,34 @@ export default StyleSheet.create({
     },
     container: {
         flex: 1,
-        paddingHorizontal: 30,
+        paddingHorizontal: scale(20),
     },
     scrollContainer: {
         flexGrow: 1,
         justifyContent: 'center',
-        paddingVertical: 50,
+        paddingVertical: verticalScale(40),
     },
     header: {
         alignItems: 'center',
-        marginBottom: 40,
+        marginBottom: verticalScale(30),
     },
     logoContainer: {
-        padding: 30,
-        borderRadius: 100,
-        marginBottom: 20,
+        padding: scale(25),
+        borderRadius: scale(100),
+        marginBottom: verticalScale(15),
     },
     logo: {
-        width: 100,
-        height: 100,
+        width: scale(90),
+        height: scale(90),
     },
     title: {
-        fontSize: 28,
+        fontSize: moderateScale(26),
         fontWeight: '700',
-        marginBottom: 6,
+        marginBottom: verticalScale(6),
         textAlign: 'center',
     },
     subtitle: {
-        fontSize: 16,
+        fontSize: moderateScale(15),
         textAlign: 'center',
     },
     form: {
@@ -42,25 +43,25 @@ export default StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 15,
-        paddingVertical: 14,
-        borderRadius: 30,
-        marginVertical: 10,
+        paddingHorizontal: scale(15),
+        paddingVertical: verticalScale(8),
+        borderRadius: scale(30),
+        marginVertical: verticalScale(8),
     },
     inputIcon: {
-        marginRight: 10,
+        marginRight: scale(10),
     },
     input: {
         flex: 1,
-        fontSize: 16,
+        fontSize: moderateScale(12),
     },
     button: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 18,
-        borderRadius: 30,
-        marginVertical: 20,
+        paddingVertical: verticalScale(10),
+        borderRadius: scale(30),
+        marginVertical: verticalScale(18),
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.15,
@@ -68,22 +69,22 @@ export default StyleSheet.create({
         elevation: 4,
     },
     buttonIcon: {
-        marginRight: 12,
+        marginRight: scale(8),
     },
     buttonText: {
-        fontSize: 18,
+        fontSize: moderateScale(17),
         fontWeight: '600',
     },
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 10,
+        marginTop: verticalScale(8),
     },
     footerText: {
-        fontSize: 14,
+        fontSize: moderateScale(13),
     },
     footerLink: {
-        fontSize: 14,
+        fontSize: moderateScale(13),
         fontWeight: '600',
     },
 });

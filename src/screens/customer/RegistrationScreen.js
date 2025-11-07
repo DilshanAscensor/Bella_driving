@@ -18,7 +18,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Picker } from '@react-native-picker/picker';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons'
-import { registerCustomer } from '../../api/registration/auth';
+import { registerCustomer } from '../../api/registrationApi';
 import commonStyles from '../../assets/styles/customer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

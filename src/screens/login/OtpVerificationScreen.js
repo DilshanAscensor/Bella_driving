@@ -20,7 +20,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { ACCENT_COLOR, PRIMARY_COLOR } from '../../assets/theme/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../../assets/styles/login';
-import { verifyOtp, sendOtp } from '../../api/registration/auth';
+import { verifyOtp, sendOtp } from '../../api/authApi';
 
 const OtpVerificationScreen = ({ navigation, route }) => {
     const { email } = route.params || {}; // ✅ email passed from login screen
@@ -83,44 +83,57 @@ const OtpVerificationScreen = ({ navigation, route }) => {
 
         try {
             const response = await verifyOtp({ email, otp: enteredOtp });
+
             console.log('✅ OTP verification response:', response);
 
-            // Match backend structure correctly
             const success = response?.status === true;
-            const message = response?.message || 'OTP verified successfully!';
+            const message = response?.message || 'OTP verified!';
             const user = response?.user || null;
 
-            if (success) {
-                if (user) {
-                    await AsyncStorage.setItem('user_data', JSON.stringify(user));
+            if (!success) {
+                setError(message || 'OTP verification failed.');
+                return;
+            }
 
-                    const role = String(user.role || '').toLowerCase();
+            // ✅ Save token if backend returns it
+            if (response?.token) {
+                await AsyncStorage.setItem('auth_token', response.token);
+                console.log("✅ Token Saved");
+            }
 
-                    if (role === 'driver') {
-                        navigation.replace('DriverDashboard', { driver: user });
-                        return;
-                    }
+            // ✅ Save user data
+            if (user) {
+                await AsyncStorage.setItem('user_data', JSON.stringify(user));
+                console.log("✅ User Saved:", user);
 
-                    if (role === 'customer') {
-                        navigation.replace('CustomerDashboard', { customer: user });
-                        return;
-                    }
+                const role = String(user.role || '').toLowerCase();
 
-                    Alert.alert('Success', 'OTP verified, but user role not recognized.');
+                console.log("✅ Detected Role:", role);
+
+                if (role === 'driver') {
+                    navigation.replace('DriverDashboard', { driver: user });
                     return;
                 }
 
-                Alert.alert('Success', message);
-            } else {
-                setError(message || 'OTP verification failed.');
+                if (role === 'customer') {
+                    navigation.replace('CustomerDashboard', { customer: user });
+                    return;
+                }
+
+                Alert.alert('Success', 'OTP verified but unknown role.');
+                return;
             }
+
+            Alert.alert('Success', message);
+
         } catch (err) {
-            console.log('❌ OTP verification error:', err);
-            setError(err?.message || 'Network error. Please try again.');
+            console.log('❌ OTP Error:', err);
+            setError(err?.message || 'Network error. Try again.');
         } finally {
             setLoading(false);
         }
     };
+
 
 
 

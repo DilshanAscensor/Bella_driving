@@ -16,12 +16,13 @@ import {
     Alert,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { PRIMARY_COLOR, ACCENT_COLOR } from '../assets/theme/colors';
 import styles from '../assets/styles/login';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { userLogin, sendOtp } from '../api/registration/auth';
+import { userLogin, sendOtp } from '../api/authApi';
 
 const LoginScreen = ({ navigation }) => {
     const scheme = useColorScheme();

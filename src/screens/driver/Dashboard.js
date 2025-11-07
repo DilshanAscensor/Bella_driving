@@ -15,14 +15,15 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PRIMARY_COLOR, ACCENT_COLOR } from '../../assets/theme/colors';
 import { BASE_URL } from '../../config/api';
-import { userLogout } from '../../api/registration/auth';
+import { getVehicleByDriver } from '../../api/vehicleApi';
+import { userLogout } from '../../api/authApi';
 
 const DriverDashboardScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
 
     const [loading, setLoading] = useState(true);
-    const [hasVehicle, setHasVehicle] = useState(false);
+    const [hasVehicle, setHasVehicle] = useState(null);
     const [loggingOut, setLoggingOut] = useState(false);
 
     const { driver } = route.params || {};
@@ -30,26 +31,22 @@ const DriverDashboardScreen = () => {
     useEffect(() => {
         if (!driver) return;
 
-        const fetchVehicleStatus = async () => {
+        const loadVehicle = async () => {
             try {
-                const token = await AsyncStorage.getItem('auth_token');
-                if (!token) throw new Error('No auth token found');
+                const res = await getVehicleByDriver(driver.id);
 
-                const response = await axios.get(`${BASE_URL}/api/vehicle/${driver.id}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
-                if (response.data?.vehicle) setHasVehicle(true);
-                else setHasVehicle(false);
-            } catch (error) {
-                console.log('Vehicle fetch error:', error.response?.data || error.message);
+                if (res.status === true && res.data) {
+                    setHasVehicle(true);
+                } else {
+                    setHasVehicle(false);
+                }
+            } catch (err) {
                 setHasVehicle(false);
-            } finally {
-                setLoading(false);
             }
+            setLoading(false);
         };
 
-        fetchVehicleStatus();
+        loadVehicle();
     }, [driver]);
 
     // ================= Logout Function =================
@@ -78,13 +75,13 @@ const DriverDashboardScreen = () => {
 
             await AsyncStorage.removeItem('auth_token');
 
+            Alert.alert('Success', response.message || 'Logged out successfully.');
+
             navigation.reset({
                 index: 0,
-                routes: [{ name: 'Login' }],
+                routes: [{ name: 'HomeScreen' }],
             });
 
-            Alert.alert('Success', response.message || 'Logged out successfully.');
-            navigation.navigate('HomeScreen', { driver });
         } catch (error) {
             Alert.alert('Logout Error', error.message);
         } finally {
@@ -137,8 +134,7 @@ const DriverDashboardScreen = () => {
                     <MaterialIcons name="account-balance-wallet" size={28} color={ACCENT_COLOR} />
                     <Text style={styles.cardText}>Earnings</Text>
                 </TouchableOpacity> */}
-
-                {!loading && !hasVehicle && (
+                {hasVehicle === false && (
                     <TouchableOpacity
                         style={styles.card}
                         onPress={() => navigation.navigate('VehicleRegistration', { driver })}
@@ -148,10 +144,19 @@ const DriverDashboardScreen = () => {
                     </TouchableOpacity>
                 )}
 
+
                 {/* <TouchableOpacity style={styles.card}>
                     <MaterialIcons name="settings" size={28} color={ACCENT_COLOR} />
                     <Text style={styles.cardText}>Settings</Text>
                 </TouchableOpacity> */}
+
+                <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => navigation.navigate('MyVehicle')}
+                >
+                    <MaterialIcons name="directions-car" size={28} color={ACCENT_COLOR} />
+                    <Text style={styles.cardText}>My Vehicle</Text>
+                </TouchableOpacity>
 
                 {/* Logout Button */}
                 <TouchableOpacity

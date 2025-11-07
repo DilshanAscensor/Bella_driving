@@ -20,7 +20,7 @@ import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import commonStyles from '../../assets/styles/driver';
-import { registerDriver } from '../../api/registration/auth';
+import { registerDriver } from '../../api/registrationApi';
 
 const { width } = Dimensions.get('window');
 

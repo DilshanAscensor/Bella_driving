@@ -14,7 +14,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PRIMARY_COLOR, ACCENT_COLOR } from '../../assets/theme/colors';
 import { BASE_URL } from '../../config/api';
-import { userLogout } from '../../api/registration/auth';
+import { userLogout } from '../../api/authApi';
 
 const CustomerDashboardScreen = () => {
     const navigation = useNavigation();
@@ -49,19 +49,20 @@ const CustomerDashboardScreen = () => {
 
             await AsyncStorage.removeItem('auth_token');
 
+            Alert.alert('Success', response.message || 'Logged out successfully.');
+
             navigation.reset({
                 index: 0,
-                routes: [{ name: 'Login' }],
+                routes: [{ name: 'HomeScreen' }],
             });
 
-            Alert.alert('Success', response.message || 'Logged out successfully.');
-            navigation.navigate('HomeScreen', { customer });
         } catch (error) {
             Alert.alert('Logout Error', error.message);
         } finally {
             setLoggingOut(false);
         }
     };
+
     // ===================================================
 
     if (!customer) return null;

@@ -17,7 +17,7 @@ import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Picker } from '@react-native-picker/picker';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import commonStyles from '../../assets/styles/driver';
-import { registerVehicle } from '../../api/registration/auth';
+import { registerVehicle } from '../../api/vehicleApi';
 
 const VehicleRegistrationScreen = ({ route, navigation }) => {
     const [make, setMake] = useState('');
