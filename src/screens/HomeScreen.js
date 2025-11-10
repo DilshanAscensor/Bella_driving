@@ -14,12 +14,15 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { PRIMARY_COLOR, ACCENT_COLOR } from '../assets/theme/colors';
+import Styles from '../assets/styles/home';
 
 const HomeScreen = () => {
     const navigation = useNavigation();
     const scheme = useColorScheme(); // Detect light/dark mode
     const isDarkMode = scheme === 'dark';
     const fadeAnim = new Animated.Value(0);
+
+    const styles = Styles;
 
     useEffect(() => {
         Animated.timing(fadeAnim, {
@@ -98,74 +101,5 @@ const HomeScreen = () => {
         </LinearGradient>
     );
 };
-const styles = StyleSheet.create({
-    gradient: {
-        flex: 1,
-    },
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        paddingHorizontal: 30,
-        paddingVertical: 50,
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 50,
-    },
-    logoContainer: {
-        padding: 30,
-        borderRadius: 100,
-        marginBottom: 20,
-    },
-    logo: {
-        width: 120,
-        height: 120,
-    },
-    title: {
-        fontSize: 28,  // Slightly smaller for readability
-        fontWeight: '700',
-        letterSpacing: 0.5,
-        textAlign: 'center',
-    },
-    subtitle: {
-        fontSize: 16, // More readable
-        textAlign: 'center',
-        marginTop: 8,
-        lineHeight: 22,
-        opacity: 0.85,
-    },
-    buttonsContainer: {
-        width: '100%',
-    },
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 18, // Comfortable touch height
-        borderRadius: 30,
-        marginVertical: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    buttonIcon: {
-        marginRight: 12,
-    },
-    buttonText: {
-        fontSize: 18, // Slightly larger for readability
-        fontWeight: '600',
-        color: '#fff',
-    },
-    footer: {
-        alignItems: 'center',
-        marginTop: 30,
-    },
-    footerText: {
-        fontSize: 12,
-        opacity: 0.7,
-    },
-});
 
 export default HomeScreen;

@@ -158,6 +158,14 @@ const DriverDashboardScreen = () => {
                     <Text style={styles.cardText}>My Vehicle</Text>
                 </TouchableOpacity>
 
+                <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => navigation.navigate('DriverDeliveries', { driver: driver })}
+                >
+                    <MaterialIcons name="local-shipping" size={28} color={ACCENT_COLOR} />
+                    <Text style={styles.cardText}>Deliveries</Text>
+                </TouchableOpacity>
+
                 {/* Logout Button */}
                 <TouchableOpacity
                     style={styles.card}

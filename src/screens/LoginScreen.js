@@ -23,6 +23,7 @@ import { PRIMARY_COLOR, ACCENT_COLOR } from '../assets/theme/colors';
 import styles from '../assets/styles/login';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { userLogin, sendOtp } from '../api/authApi';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const LoginScreen = ({ navigation }) => {
     const scheme = useColorScheme();
@@ -32,6 +33,7 @@ const LoginScreen = ({ navigation }) => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [hidden, setHidden] = useState(true);
 
     const backgroundColors = isDarkMode ? ['#000', '#172554'] : [PRIMARY_COLOR, '#e0e7ff'];
     const textColor = isDarkMode ? '#fff' : '#000';
@@ -145,10 +147,18 @@ const LoginScreen = ({ navigation }) => {
                                     style={[styles.input, { color: textColor }]}
                                     placeholder="Password"
                                     placeholderTextColor={placeholderColor}
-                                    secureTextEntry
+                                    secureTextEntry={hidden}
                                     value={password}
                                     onChangeText={setPassword}
                                 />
+                                <TouchableOpacity onPress={() => setHidden(!hidden)}>
+                                    <MaterialIcons
+                                        name={hidden ? 'visibility-off' : 'visibility'}
+                                        size={22}
+                                        color={placeholderColor}
+                                    />
+                                    {/* <MaterialIcons name="visibility" size={24} color={placeholderColor} style={styles.inputIcon} /> */}
+                                </TouchableOpacity>
                             </View>
 
                             {/* show error if any */}

@@ -44,8 +44,8 @@ export default StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: scale(15),
-        paddingVertical: verticalScale(8),
-        borderRadius: scale(30),
+        paddingVertical: verticalScale(6),
+        borderRadius: scale(15),
         marginVertical: verticalScale(8),
     },
     inputIcon: {
@@ -60,7 +60,7 @@ export default StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: verticalScale(10),
-        borderRadius: scale(30),
+        borderRadius: moderateScale(15),
         marginVertical: verticalScale(18),
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
@@ -86,5 +86,34 @@ export default StyleSheet.create({
     footerLink: {
         fontSize: moderateScale(13),
         fontWeight: '600',
+    },
+
+
+    // OTP Screen 
+
+    otpContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: moderateScale(12), // better than space-between
+        flexWrap: 'wrap',       // prevents overflow on small devices
+        marginTop: verticalScale(30),
+        marginBottom: verticalScale(20),
+        alignSelf: 'center',
+    },
+
+    otpInput: {
+        width: moderateScale(55),
+        height: moderateScale(55),
+        borderRadius: moderateScale(12),
+        textAlign: 'center',
+        fontSize: moderateScale(22),
+        fontWeight: '700',
+        backgroundColor: '#fff2', // overridden by your dynamic colors
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        elevation: 3,
     },
 });

@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -19,7 +18,7 @@ import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import commonStyles from '../../assets/styles/driver';
+import Styles from '../../assets/styles/driver'
 import { registerDriver } from '../../api/registrationApi';
 
 const { width } = Dimensions.get('window');
@@ -42,6 +41,8 @@ const DriverRegistrationScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const styles = Styles;
 
   const districts = [
     { label: 'Select District', value: '' },
@@ -176,57 +177,57 @@ const DriverRegistrationScreen = ({ navigation }) => {
 
 
   const ImageUploadCard = ({ image, title, icon, type, setImage }) => (
-    <TouchableOpacity style={commonStyles.imageCard} onPress={() => pickImage(setImage, type)} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.imageCard} onPress={() => pickImage(setImage, type)} activeOpacity={0.7}>
       {image ? (
-        <View style={commonStyles.imageContainer}>
-          <Image source={{ uri: image.uri }} style={commonStyles.uploadedImage} />
-          <View style={commonStyles.changeImageOverlay}>
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: image.uri }} style={styles.uploadedImage} />
+          <View style={styles.changeImageOverlay}>
             <MaterialIcons name="edit" size={20} color="white" />
           </View>
         </View>
       ) : (
-        <View style={commonStyles.imagePlaceholder}>
-          <MaterialIcons name={icon} size={40} color={commonStyles.ACCENT_COLOR} />
-          <Text style={commonStyles.imagePlaceholderText}>{title}</Text>
-          <Text style={commonStyles.imageSubText}>Tap to upload</Text>
+        <View style={styles.imagePlaceholder}>
+          <MaterialIcons name={icon} size={40} color={styles.ACCENT_COLOR} />
+          <Text style={styles.imagePlaceholderText}>{title}</Text>
+          <Text style={styles.imageSubText}>Tap to upload</Text>
         </View>
       )}
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={commonStyles.safeArea}>
+    <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={commonStyles.container}
+        style={styles.container}
       >
         <ScrollView
-          contentContainerStyle={commonStyles.scrollContainer}
+          contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={commonStyles.header}>
-            <MaterialIcons name="directions-car" size={60} color={commonStyles.PRIMARY_COLOR} />
-            <Text style={commonStyles.title}>Driver Registration</Text>
-            <Text style={commonStyles.subtitle}>Complete your profile to start driving</Text>
+          <View style={styles.header}>
+            <MaterialIcons name="directions-car" size={60} color={styles.PRIMARY_COLOR} />
+            <Text style={styles.title}>Driver Registration</Text>
+            <Text style={styles.subtitle}>Complete your profile to start driving</Text>
           </View>
 
           {error ? (
-            <View style={commonStyles.errorContainer}>
+            <View style={styles.errorContainer}>
               <MaterialIcons name="error-outline" size={20} color="#ef4444" />
-              <Text style={commonStyles.errorText}>{error}</Text>
+              <Text style={styles.errorText}>{error}</Text>
             </View>
           ) : null}
 
-          <View style={commonStyles.card}>
-            <Text style={commonStyles.cardTitle}>Personal Information</Text>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Personal Information</Text>
             {/* First Name */}
-            <View style={commonStyles.inputContainer}>
-              <Text style={commonStyles.inputLabel}>First Name</Text>
-              <View style={commonStyles.textInputContainer}>
-                <MaterialIcons name="person" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>First Name</Text>
+              <View style={styles.textInputContainer}>
+                <MaterialIcons name="person" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
                 <TextInput
-                  style={commonStyles.input}
+                  style={styles.input}
                   placeholder="Enter First Name"
                   placeholderTextColor="#94a3b8"
                   value={first_name}
@@ -238,12 +239,12 @@ const DriverRegistrationScreen = ({ navigation }) => {
             </View>
 
             {/* Last Name */}
-            <View style={commonStyles.inputContainer}>
-              <Text style={commonStyles.inputLabel}>Last Name</Text>
-              <View style={commonStyles.textInputContainer}>
-                <MaterialIcons name="person" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Last Name</Text>
+              <View style={styles.textInputContainer}>
+                <MaterialIcons name="person" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
                 <TextInput
-                  style={commonStyles.input}
+                  style={styles.input}
                   placeholder="Enter Last Name"
                   placeholderTextColor="#94a3b8"
                   value={last_name}
@@ -255,12 +256,12 @@ const DriverRegistrationScreen = ({ navigation }) => {
             </View>
 
             {/* Email */}
-            <View style={commonStyles.inputContainer}>
-              <Text style={commonStyles.inputLabel}>Email Address</Text>
-              <View style={commonStyles.textInputContainer}>
-                <MaterialIcons name="email" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Email Address</Text>
+              <View style={styles.textInputContainer}>
+                <MaterialIcons name="email" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
                 <TextInput
-                  style={commonStyles.input}
+                  style={styles.input}
                   placeholder="Enter Email Address"
                   placeholderTextColor="#94a3b8"
                   keyboardType="email-address"
@@ -273,12 +274,12 @@ const DriverRegistrationScreen = ({ navigation }) => {
             </View>
 
             {/* Phone */}
-            <View style={commonStyles.inputContainer}>
-              <Text style={commonStyles.inputLabel}>Phone Number</Text>
-              <View style={commonStyles.textInputContainer}>
-                <MaterialIcons name="phone" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Phone Number</Text>
+              <View style={styles.textInputContainer}>
+                <MaterialIcons name="phone" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
                 <TextInput
-                  style={commonStyles.input}
+                  style={styles.input}
                   placeholder="Enter Phone Number"
                   placeholderTextColor="#94a3b8"
                   keyboardType="phone-pad"
@@ -290,12 +291,12 @@ const DriverRegistrationScreen = ({ navigation }) => {
             </View>
 
             {/* NIC */}
-            <View style={commonStyles.inputContainer}>
-              <Text style={commonStyles.inputLabel}>National ID (NIC)</Text>
-              <View style={commonStyles.textInputContainer}>
-                <MaterialIcons name="card-membership" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>National ID (NIC)</Text>
+              <View style={styles.textInputContainer}>
+                <MaterialIcons name="card-membership" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
                 <TextInput
-                  style={commonStyles.input}
+                  style={styles.input}
                   placeholder="Enter National ID (NIC)"
                   placeholderTextColor="#94a3b8"
                   value={nic}
@@ -306,15 +307,15 @@ const DriverRegistrationScreen = ({ navigation }) => {
             </View>
 
             {/* Gender */}
-            <View style={commonStyles.inputContainer}>
-              <Text style={commonStyles.inputLabel}>Gender</Text>
-              <View style={commonStyles.pickerContainer}>
-                <MaterialIcons name="wc" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Gender</Text>
+              <View style={styles.pickerContainer}>
+                <MaterialIcons name="wc" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
                 <Picker
                   selectedValue={gender}
                   onValueChange={(itemValue) => setGender(itemValue)}
-                  style={commonStyles.picker}
-                  dropdownIconColor={commonStyles.PRIMARY_COLOR}
+                  style={styles.picker}
+                  dropdownIconColor={styles.PRIMARY_COLOR}
                 >
                   <Picker.Item label="Select Gender" value="" color="#94a3b8" />
                   <Picker.Item label="Male" value="Male" />
@@ -325,15 +326,15 @@ const DriverRegistrationScreen = ({ navigation }) => {
             </View>
 
             {/* District */}
-            <View style={commonStyles.inputContainer}>
-              <Text style={commonStyles.inputLabel}>District</Text>
-              <View style={commonStyles.pickerContainer}>
-                <MaterialIcons name="location-on" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>District</Text>
+              <View style={styles.pickerContainer}>
+                <MaterialIcons name="location-on" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
                 <Picker
                   selectedValue={district}
                   onValueChange={(itemValue) => setDistrict(itemValue)}
-                  style={commonStyles.picker}
-                  dropdownIconColor={commonStyles.PRIMARY_COLOR}
+                  style={styles.picker}
+                  dropdownIconColor={styles.PRIMARY_COLOR}
                 >
                   {districts.map((d) => (
                     <Picker.Item
@@ -348,16 +349,16 @@ const DriverRegistrationScreen = ({ navigation }) => {
             </View>
 
             {/* DOB */}
-            <View style={commonStyles.inputContainer}>
-              <Text style={commonStyles.inputLabel}>Date of Birth</Text>
-              <View style={commonStyles.dateContainer}>
-                <MaterialIcons name="cake" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Date of Birth</Text>
+              <View style={styles.dateContainer}>
+                <MaterialIcons name="cake" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
                 <TouchableOpacity
-                  style={commonStyles.dateInput}
+                  style={styles.dateInput}
                   onPress={() => setShowDatePicker(true)}
                   activeOpacity={0.7}
                 >
-                  <Text style={[commonStyles.dateText, { color: dob ? '#1e293b' : '#94a3b8' }]}>
+                  <Text style={[styles.dateText, { color: dob ? '#1e293b' : '#94a3b8' }]}>
                     {dob ? dob.toDateString() : 'Select Date of Birth'}
                   </Text>
                 </TouchableOpacity>
@@ -378,16 +379,16 @@ const DriverRegistrationScreen = ({ navigation }) => {
           </View>
 
           {/* Documents Card */}
-          <View style={commonStyles.card}>
-            <Text style={commonStyles.cardTitle}>Documents</Text>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Documents</Text>
 
             {/* License Number */}
-            <View style={commonStyles.inputContainer}>
-              <Text style={commonStyles.inputLabel}>Driver’s License Number</Text>
-              <View style={commonStyles.textInputContainer}>
-                <MaterialIcons name="badge" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Driver’s License Number</Text>
+              <View style={styles.textInputContainer}>
+                <MaterialIcons name="badge" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
                 <TextInput
-                  style={commonStyles.input}
+                  style={styles.input}
                   placeholder="Enter Driver’s License Number"
                   placeholderTextColor="#94a3b8"
                   value={license_number}
@@ -398,16 +399,16 @@ const DriverRegistrationScreen = ({ navigation }) => {
             </View>
 
             {/* License Expiry */}
-            <View style={commonStyles.inputContainer}>
-              <Text style={commonStyles.inputLabel}>License Expiry Date</Text>
-              <View style={commonStyles.dateContainer}>
-                <MaterialIcons name="event" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>License Expiry Date</Text>
+              <View style={styles.dateContainer}>
+                <MaterialIcons name="event" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
                 <TouchableOpacity
-                  style={commonStyles.dateInput}
+                  style={styles.dateInput}
                   onPress={() => setShowExpiryPicker(true)}
                   activeOpacity={0.7}
                 >
-                  <Text style={[commonStyles.dateText, { color: license_expiry ? '#1e293b' : '#94a3b8' }]}>
+                  <Text style={[styles.dateText, { color: license_expiry ? '#1e293b' : '#94a3b8' }]}>
                     {license_expiry ? license_expiry.toDateString() : 'Select Expiry Date'}
                   </Text>
                 </TouchableOpacity>
@@ -444,14 +445,14 @@ const DriverRegistrationScreen = ({ navigation }) => {
           </View>
 
           {/* Security Card */}
-          <View style={commonStyles.card}>
-            <Text style={commonStyles.cardTitle}>Security</Text>
-            <View style={commonStyles.inputContainer}>
-              <Text style={commonStyles.inputLabel}>Password</Text>
-              <View style={commonStyles.textInputContainer}>
-                <MaterialIcons name="lock" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Security</Text>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Password</Text>
+              <View style={styles.textInputContainer}>
+                <MaterialIcons name="lock" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
                 <TextInput
-                  style={commonStyles.input}
+                  style={styles.input}
                   placeholder="Enter Password"
                   placeholderTextColor="#94a3b8"
                   secureTextEntry
@@ -465,28 +466,28 @@ const DriverRegistrationScreen = ({ navigation }) => {
 
           {/* Register Button */}
           <TouchableOpacity
-            style={[commonStyles.registerButton, loading && commonStyles.registerButtonDisabled]}
+            style={[styles.registerButton, loading && styles.registerButtonDisabled]}
             onPress={handleRegister}
             disabled={loading}
             activeOpacity={0.8}
           >
             {loading ? (
-              <View style={commonStyles.loadingContainer}>
+              <View style={styles.loadingContainer}>
                 <MaterialIcons name="autorenew" size={20} color="white" />
-                <Text style={commonStyles.buttonText}>Registering...</Text>
+                <Text style={styles.buttonText}>Registering...</Text>
               </View>
             ) : (
               <>
-                <MaterialIcons name="check" size={20} color="white" style={commonStyles.buttonIcon} />
-                <Text style={commonStyles.buttonText}>Complete Registration</Text>
+                <MaterialIcons name="check" size={20} color="white" style={styles.buttonIcon} />
+                <Text style={styles.buttonText}>Complete Registration</Text>
               </>
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity style={commonStyles.loginLinkContainer}
+          <TouchableOpacity style={styles.loginLinkContainer}
             onPress={() => navigation.navigate('LoginScreen')}>
-            <Text style={commonStyles.loginText}>Already have an account? </Text>
-            <Text style={commonStyles.loginLink}>Sign In</Text>
+            <Text style={styles.loginText}>Already have an account? </Text>
+            <Text style={styles.loginLink}>Sign In</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

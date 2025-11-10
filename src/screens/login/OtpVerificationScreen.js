@@ -143,10 +143,7 @@ const OtpVerificationScreen = ({ navigation, route }) => {
         setTimer(180);
 
         try {
-            const formData = new FormData();
-            formData.append('email', email);
-
-            const response = await sendOtp(formData);
+            const response = await sendOtp({ email }); // ✅ FIXED
             Alert.alert('OTP Sent', response?.message || 'A new OTP has been sent to your email.');
         } catch (err) {
             Alert.alert('Error', err?.message || 'Failed to resend OTP.');
@@ -190,13 +187,13 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                             </Text>
                         </View>
 
-                        <View style={localStyles.otpContainer}>
+                        <View style={styles.otpContainer}>
                             {otp.map((digit, index) => (
                                 <TextInput
                                     key={index}
                                     ref={(ref) => (inputs.current[index] = ref)}
                                     style={[
-                                        localStyles.otpInput,
+                                        styles.otpInput,
                                         { backgroundColor: inputBgColor, color: textColor },
                                     ]}
                                     keyboardType="number-pad"
@@ -279,26 +276,3 @@ const OtpVerificationScreen = ({ navigation, route }) => {
 
 export default OtpVerificationScreen;
 
-const localStyles = StyleSheet.create({
-    otpContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 30,
-        marginBottom: 20,
-        width: '80%',
-        alignSelf: 'center',
-    },
-    otpInput: {
-        width: 60,
-        height: 60,
-        borderRadius: 12,
-        textAlign: 'center',
-        fontSize: 24,
-        fontWeight: '700',
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowOffset: { width: 0, height: 3 },
-        shadowRadius: 4,
-        elevation: 3,
-    },
-});
