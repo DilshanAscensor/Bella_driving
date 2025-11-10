@@ -17,6 +17,7 @@ import { PRIMARY_COLOR, ACCENT_COLOR } from '../../assets/theme/colors';
 import { BASE_URL } from '../../config/api';
 import { getVehicleByDriver } from '../../api/vehicleApi';
 import { userLogout } from '../../api/authApi';
+import Footer from '../../components/Footer';
 
 const DriverDashboardScreen = () => {
     const navigation = useNavigation();
@@ -25,6 +26,7 @@ const DriverDashboardScreen = () => {
     const [loading, setLoading] = useState(true);
     const [hasVehicle, setHasVehicle] = useState(null);
     const [loggingOut, setLoggingOut] = useState(false);
+    const [active, setActive] = useState("home");
 
     const { driver } = route.params || {};
 
@@ -180,10 +182,8 @@ const DriverDashboardScreen = () => {
                 </TouchableOpacity>
             </View>
 
-            {/* Footer */}
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>© 2025 Belle Driving Belle</Text>
-            </View>
+
+            <Footer active={active} onPress={setActive} />
         </SafeAreaView>
     );
 };
@@ -206,8 +206,6 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     cardText: { marginLeft: 12, fontSize: 16, color: '#333' },
-    footer: { alignItems: 'center', padding: 16 },
-    footerText: { fontSize: 12, color: '#999' },
 });
 
 export default DriverDashboardScreen;
