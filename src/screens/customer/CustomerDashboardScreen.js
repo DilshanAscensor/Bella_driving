@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PRIMARY_COLOR, ACCENT_COLOR } from '../../assets/theme/colors';
 import { BASE_URL } from '../../config/api';
 import { userLogout } from '../../api/authApi';
+import { useSelector } from 'react-redux';
 
 const CustomerDashboardScreen = () => {
     const navigation = useNavigation();
@@ -22,7 +23,7 @@ const CustomerDashboardScreen = () => {
 
     const [loggingOut, setLoggingOut] = useState(false);
 
-    const { customer } = route.params || {};
+    const customer = useSelector(state => state.user.user) || {};
 
     // ================= Logout Function =================
     const handleLogout = () => {

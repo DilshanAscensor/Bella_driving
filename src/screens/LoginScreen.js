@@ -16,14 +16,11 @@ import {
     Alert,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
 import { PRIMARY_COLOR, ACCENT_COLOR } from '../assets/theme/colors';
 import styles from '../assets/styles/login';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { userLogin, sendOtp } from '../api/authApi';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const LoginScreen = ({ navigation }) => {
     const scheme = useColorScheme();
@@ -157,7 +154,6 @@ const LoginScreen = ({ navigation }) => {
                                         size={22}
                                         color={placeholderColor}
                                     />
-                                    {/* <MaterialIcons name="visibility" size={24} color={placeholderColor} style={styles.inputIcon} /> */}
                                 </TouchableOpacity>
                             </View>
 

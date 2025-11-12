@@ -1,6 +1,12 @@
 import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+// Redux imports
+import { Provider } from 'react-redux';
+import { store, persistor } from './src/redux/store';
+import { PersistGate } from 'redux-persist/integration/react';
+
 import RegistrationScreen from './src/screens/customer/RegistrationScreen';
 import DriverRegistration from './src/screens/driver/DriverRegistrationScreen';
 import MyVehicleScreen from './src/screens/driver/MyVehicleScreen';
@@ -16,29 +22,40 @@ import OtpScreen from './src/screens/login/OtpVerificationScreen';
 import DriverDashboard from './src/screens/driver/Dashboard';
 import DriverDeliveries from './src/screens/driver/DriverDeliveriesScreen';
 import CustomerDashboard from './src/screens/customer/CustomerDashboardScreen';
+import DriverProfile from './src/screens/driver/UserProfileScreen';
+import EditDriverProfile from './src/screens/driver/EditProfile';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="AuthLoadingScreen" screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="AuthLoadingScreen" component={AuthLoadingScreen} />
-        <Stack.Screen name="SplashScreen" component={SplashScreen} />
-        <Stack.Screen name="HomeScreen" component={HomeScreen} />
-        <Stack.Screen name="Registration" component={RegistrationScreen} />
-        <Stack.Screen name="CustomerDashboard" component={CustomerDashboard} />
-        <Stack.Screen name="DriverRegistration" component={DriverRegistration} />
-        <Stack.Screen name="DriverDashboard" component={DriverDashboard} />
-        <Stack.Screen name="DriverDeliveries" component={DriverDeliveries} />
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="driverWelcomeScreen" component={driverWelcomeScreen} />
-        <Stack.Screen name="LoginScreen" component={LoginScreen} />
-        <Stack.Screen name="OtpScreen" component={OtpScreen} />
-        <Stack.Screen name="VehicleRegistration" component={VehicleRegistration} />
-        <Stack.Screen name="MyVehicle" component={MyVehicleScreen} />
-        <Stack.Screen name="EditVehicle" component={EditVehicleScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="AuthLoadingScreen"
+            screenOptions={{ headerShown: false }}
+          >
+            <Stack.Screen name="AuthLoadingScreen" component={AuthLoadingScreen} />
+            <Stack.Screen name="SplashScreen" component={SplashScreen} />
+            <Stack.Screen name="HomeScreen" component={HomeScreen} />
+            <Stack.Screen name="Registration" component={RegistrationScreen} />
+            <Stack.Screen name="CustomerDashboard" component={CustomerDashboard} />
+            <Stack.Screen name="DriverRegistration" component={DriverRegistration} />
+            <Stack.Screen name="DriverDashboard" component={DriverDashboard} />
+            <Stack.Screen name="DriverDeliveries" component={DriverDeliveries} />
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="driverWelcomeScreen" component={driverWelcomeScreen} />
+            <Stack.Screen name="LoginScreen" component={LoginScreen} />
+            <Stack.Screen name="OtpScreen" component={OtpScreen} />
+            <Stack.Screen name="VehicleRegistration" component={VehicleRegistration} />
+            <Stack.Screen name="MyVehicle" component={MyVehicleScreen} />
+            <Stack.Screen name="EditVehicle" component={EditVehicleScreen} />
+            <Stack.Screen name="DriverProfile" component={DriverProfile} />
+            <Stack.Screen name="EditDriverProfile" component={EditDriverProfile} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PersistGate>
+    </Provider>
   );
 }

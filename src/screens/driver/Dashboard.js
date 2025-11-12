@@ -4,6 +4,7 @@ import {
     Text,
     StyleSheet,
     SafeAreaView,
+    ScrollView,
     StatusBar,
     Image,
     TouchableOpacity,
@@ -11,9 +12,8 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import axios from 'axios';
+import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PRIMARY_COLOR, ACCENT_COLOR } from '../../assets/theme/colors';
 import { BASE_URL } from '../../config/api';
 import { getVehicleByDriver } from '../../api/vehicleApi';
 import { userLogout } from '../../api/authApi';
@@ -28,7 +28,7 @@ const DriverDashboardScreen = () => {
     const [loggingOut, setLoggingOut] = useState(false);
     const [active, setActive] = useState("home");
 
-    const { driver } = route.params || {};
+    const driver = useSelector(state => state.user.user) || {};
 
     useEffect(() => {
         if (!driver) return;
@@ -103,92 +103,95 @@ const DriverDashboardScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-
             {/* Header */}
-            <View style={styles.header}>
-                <View style={styles.profileContainer}>
-                    {profilePic ? (
-                        <Image
-                            source={{ uri: profilePic }}
-                            style={styles.profileImage}
-                            resizeMode="cover"
-                        />
-                    ) : (
-                        <Image
-                            source={require('../../assets/images/taxi-app-logo.webp')}
-                            style={styles.profileImage}
-                            resizeMode="contain"
-                        />
-                    )}
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                <View style={styles.header}>
+                    <View style={styles.profileContainer}>
+                        {profilePic ? (
+                            <Image
+                                source={{ uri: profilePic }}
+                                style={styles.profileImage}
+                                resizeMode="cover"
+                            />
+                        ) : (
+                            <Image
+                                source={require('../../assets/images/taxi-app-logo.webp')}
+                                style={styles.profileImage}
+                                resizeMode="contain"
+                            />
+                        )}
+                    </View>
+                    <Text style={styles.welcomeText}>Welcome, {driverName} 👋</Text>
+                    <Text style={styles.subText}>Let’s get you on the road today!</Text>
                 </View>
-                <Text style={styles.welcomeText}>Welcome, {driverName} 👋</Text>
-                <Text style={styles.subText}>Let’s get you on the road today!</Text>
-            </View>
 
-            {/* Dashboard Actions */}
-            <View style={styles.cardContainer}>
-                {/* <TouchableOpacity style={styles.card}>
-                    <MaterialIcons name="directions-car" size={28} color={ACCENT_COLOR} />
-                    <Text style={styles.cardText}>My Rides</Text>
-                </TouchableOpacity>
+                {/* Dashboard Actions */}
+                <View style={styles.cardContainer}>
+                    {/* <TouchableOpacity style={styles.card}>
+                        <MaterialIcons name="directions-car" size={28} color={styles.ACCENT_COLOR} />
+                        <Text style={styles.cardText}>My Rides</Text>
+                    </TouchableOpacity> */}
 
-                <TouchableOpacity style={styles.card}>
-                    <MaterialIcons name="account-balance-wallet" size={28} color={ACCENT_COLOR} />
-                    <Text style={styles.cardText}>Earnings</Text>
-                </TouchableOpacity> */}
-                {hasVehicle === false && (
+                    {/* <TouchableOpacity style={styles.card}>
+                        <MaterialIcons name="account-balance-wallet" size={28} color={styles.ACCENT_COLOR} />
+                        <Text style={styles.cardText}>Earnings</Text>
+                    </TouchableOpacity> */}
+                    {hasVehicle === false && (
+                        <TouchableOpacity
+                            style={styles.card}
+                            onPress={() => navigation.navigate('VehicleRegistration', { driver })}
+                        >
+                            <MaterialIcons name="directions-car" size={28} color={styles.ACCENT_COLOR} />
+                            <Text style={styles.cardText}>Register Vehicle</Text>
+                        </TouchableOpacity>
+                    )}
+
+                    {/* 
+                    <TouchableOpacity style={styles.card}>
+                        <MaterialIcons name="settings" size={28} color={styles.ACCENT_COLOR} />
+                        <Text style={styles.cardText}>Settings</Text>
+                    </TouchableOpacity> */}
+
+                    {hasVehicle === true && (
+                        <TouchableOpacity
+                            style={styles.card}
+                            onPress={() => navigation.navigate('MyVehicle')}
+                        >
+                            <MaterialIcons name="directions-car" size={28} color={styles.ACCENT_COLOR} />
+                            <Text style={styles.cardText}>My Vehicle</Text>
+                        </TouchableOpacity>
+                    )}
+
                     <TouchableOpacity
                         style={styles.card}
-                        onPress={() => navigation.navigate('VehicleRegistration', { driver })}
+                        onPress={() => navigation.navigate('DriverDeliveries', { driver: driver })}
                     >
-                        <MaterialIcons name="directions-car" size={28} color={ACCENT_COLOR} />
-                        <Text style={styles.cardText}>Register Vehicle</Text>
+                        <MaterialIcons name="local-shipping" size={28} color={styles.ACCENT_COLOR} />
+                        <Text style={styles.cardText}>Deliveries</Text>
                     </TouchableOpacity>
-                )}
 
+                    {/* Logout Button */}
+                    <TouchableOpacity
+                        style={styles.card}
+                        onPress={handleLogout}
+                        disabled={loggingOut}
+                        activeOpacity={0.7}
+                    >
+                        <MaterialIcons name="logout" size={28} color={loggingOut ? '#ccc' : styles.ACCENT_COLOR} />
+                        <Text style={[styles.cardText, loggingOut && { color: '#ccc' }]}>
+                            {loggingOut ? 'Logging out...' : 'Logout'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
-                {/* <TouchableOpacity style={styles.card}>
-                    <MaterialIcons name="settings" size={28} color={ACCENT_COLOR} />
-                    <Text style={styles.cardText}>Settings</Text>
-                </TouchableOpacity> */}
-
-                <TouchableOpacity
-                    style={styles.card}
-                    onPress={() => navigation.navigate('MyVehicle')}
-                >
-                    <MaterialIcons name="directions-car" size={28} color={ACCENT_COLOR} />
-                    <Text style={styles.cardText}>My Vehicle</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.card}
-                    onPress={() => navigation.navigate('DriverDeliveries', { driver: driver })}
-                >
-                    <MaterialIcons name="local-shipping" size={28} color={ACCENT_COLOR} />
-                    <Text style={styles.cardText}>Deliveries</Text>
-                </TouchableOpacity>
-
-                {/* Logout Button */}
-                <TouchableOpacity
-                    style={styles.card}
-                    onPress={handleLogout}
-                    disabled={loggingOut}
-                    activeOpacity={0.7}
-                >
-                    <MaterialIcons name="logout" size={28} color={loggingOut ? '#ccc' : ACCENT_COLOR} />
-                    <Text style={[styles.cardText, loggingOut && { color: '#ccc' }]}>
-                        {loggingOut ? 'Logging out...' : 'Logout'}
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-
+            </ScrollView>
             <Footer active={active} onPress={setActive} />
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
+    ACCENT_COLOR: '#8DB600',
     container: { flex: 1, backgroundColor: '#fff' },
     header: { alignItems: 'center', padding: 16 },
     profileContainer: { width: 80, height: 80, borderRadius: 40, overflow: 'hidden', marginBottom: 12 },

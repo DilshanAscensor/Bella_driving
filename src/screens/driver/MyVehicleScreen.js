@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     value: { fontSize: 16, fontWeight: '600', color: '#333' },
     editButton: {
         flexDirection: 'row',
-        backgroundColor: '#007bff',
+        backgroundColor: '#1e3a8a',
         padding: 12,
         marginTop: 20,
         borderRadius: 6,

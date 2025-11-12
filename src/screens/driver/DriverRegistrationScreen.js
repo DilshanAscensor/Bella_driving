@@ -11,6 +11,7 @@ import {
   Alert,
   SafeAreaView,
   Dimensions,
+  useColorScheme,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -20,10 +21,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Styles from '../../assets/styles/driver'
 import { registerDriver } from '../../api/registrationApi';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../redux/slices/userSlice';
+import { PRIMARY_COLOR, ACCENT_COLOR } from '../../assets/theme/colors';
 
 const { width } = Dimensions.get('window');
 
 const DriverRegistrationScreen = ({ navigation }) => {
+  const scheme = useColorScheme();
+  const isDarkMode = scheme === 'dark';
+
   const [first_name, setFirstName] = useState('');
   const [last_name, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -37,12 +44,25 @@ const DriverRegistrationScreen = ({ navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showExpiryPicker, setShowExpiryPicker] = useState(false);
   const [profile_pic, setProfilePic] = useState(null);
-  const [license_pic, setLicensePic] = useState(null);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [hidden, setHidden] = useState(true);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [nic_front_pic, setNicFrontPic] = useState(null);
+  const [nic_back_pic, setNicBackPic] = useState(null);
+  const [license_front_pic, setLicenseFrontPic] = useState(null);
+  const [license_back_pic, setLicenseBackPic] = useState(null);
+
 
   const styles = Styles;
+
+  const backgroundColors = isDarkMode ? ['#000', '#172554'] : [PRIMARY_COLOR, '#e0e7ff'];
+  const textColor = isDarkMode ? '#fff' : '#000';
+  const inputBgColor = isDarkMode ? '#334155' : '#f1f5f9';
+  const placeholderColor = isDarkMode ? '#a5b4fc' : '#94a3b8';
+  const buttonTextColor = '#fff';
+
 
   const districts = [
     { label: 'Select District', value: '' },
@@ -114,8 +134,12 @@ const DriverRegistrationScreen = ({ navigation }) => {
     if (!district) return 'District is required';
     if (!license_number.trim()) return 'Driver’s License Number is required';
     if (!profile_pic) return 'Profile picture is required';
-    if (!license_pic) return 'Driver license is required';
     if (password.length < 6) return 'Password must be at least 6 characters';
+    if (confirmPassword !== password) return 'Passwords do not match';
+    if (!nic_front_pic) return 'NIC front image is required';
+    if (!nic_back_pic) return 'NIC back image is required';
+    if (!license_front_pic) return 'License front image is required';
+    if (!license_back_pic) return 'License back image is required';
     return '';
   };
 
@@ -125,6 +149,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
       setError(validationError);
       return;
     }
+
     setError('');
     setLoading(true);
 
@@ -137,7 +162,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
       formData.append('nic', nic);
       formData.append('gender', gender);
       formData.append('district', district);
-      formData.append('dob', dob.toISOString().split('T')[0]); // 'YYYY-MM-DD'
+      formData.append('dob', dob.toISOString().split('T')[0]);
       formData.append('license_expiry', license_expiry.toISOString().split('T')[0]);
       formData.append('license_number', license_number);
       formData.append('password', password);
@@ -150,23 +175,59 @@ const DriverRegistrationScreen = ({ navigation }) => {
         });
       }
 
-      if (license_pic) {
-        formData.append('license_pic', {
-          uri: license_pic.uri,
-          type: license_pic.type || 'image/jpeg',
-          name: license_pic.fileName || 'license.jpg',
+      if (nic_front_pic) {
+        formData.append('nic_front_pic', {
+          uri: nic_front_pic.uri,
+          type: nic_front_pic.type || 'image/jpeg',
+          name: nic_front_pic.fileName || 'nic_front.jpg',
+        });
+      }
+      if (nic_back_pic) {
+        formData.append('nic_back_pic', {
+          uri: nic_back_pic.uri,
+          type: nic_back_pic.type || 'image/jpeg',
+          name: nic_back_pic.fileName || 'nic_back.jpg',
         });
       }
 
+      if (license_front_pic) {
+        formData.append('license_front_pic', {
+          uri: license_front_pic.uri,
+          type: license_front_pic.type || 'image/jpeg',
+          name: license_front_pic.fileName || 'license_front.jpg',
+        });
+      }
+
+      if (license_back_pic) {
+        formData.append('license_back_pic', {
+          uri: license_back_pic.uri,
+          type: license_back_pic.type || 'image/jpeg',
+          name: license_back_pic.fileName || 'license_back.jpg',
+        });
+      }
+
+
       const response = await registerDriver(formData);
-      Alert.alert('Success', 'Driver registration completed successfully!');
+
       if (response?.token) {
         await AsyncStorage.setItem('auth_token', response.token);
-        console.log('Token saved:', response.token);
       }
+
+      if (response?.user) {
+        await AsyncStorage.setItem('user_data', JSON.stringify(response.user));
+      }
+
+      dispatch(setUser(response.user));
+
+      Alert.alert('Success', 'Driver registration completed successfully!');
+
       setTimeout(() => {
-        navigation.navigate('DriverDashboard', { driver: response.user });
-      }, 2000);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'DriverDashboard' }],
+        });
+      }, 1000);
+
     } catch (error) {
       console.error('Driver registration error:', error);
       setError(error.message || 'Registration failed. Please try again.');
@@ -427,6 +488,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
               />
             )}
 
+            <Text style={styles.inputLabel}>Profile Picture</Text>
             <ImageUploadCard
               image={profile_pic}
               title="Profile Picture"
@@ -435,13 +497,43 @@ const DriverRegistrationScreen = ({ navigation }) => {
               setImage={setProfilePic}
             />
 
+            <Text style={styles.inputLabel}>NIC Front</Text>
             <ImageUploadCard
-              image={license_pic}
-              title="Driver License"
-              icon="verified-user"
-              type="driver license"
-              setImage={setLicensePic}
+              image={nic_front_pic}
+              title="NIC Front"
+              icon="image"
+              type="NIC front"
+              setImage={setNicFrontPic}
             />
+
+            <Text style={styles.inputLabel}>NIC Back</Text>
+            <ImageUploadCard
+              image={nic_back_pic}
+              title="NIC Back"
+              icon="image"
+              type="NIC back"
+              setImage={setNicBackPic}
+            />
+
+            <Text style={styles.inputLabel}>License Front</Text>
+            <ImageUploadCard
+              image={license_front_pic}
+              title="License Front"
+              icon="verified-user"
+              type="license front"
+              setImage={setLicenseFrontPic}
+            />
+
+            <Text style={styles.inputLabel}>License Back</Text>
+            <ImageUploadCard
+              image={license_back_pic}
+              title="License Back"
+              icon="verified-user"
+              type="license back"
+              setImage={setLicenseBackPic}
+            />
+
+
           </View>
 
           {/* Security Card */}
@@ -455,13 +547,45 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   style={styles.input}
                   placeholder="Enter Password"
                   placeholderTextColor="#94a3b8"
-                  secureTextEntry
+                  secureTextEntry={hidden}
                   value={password}
                   onChangeText={setPassword}
                   returnKeyType="done"
                 />
+                <TouchableOpacity onPress={() => setHidden(!hidden)}>
+                  <MaterialIcons
+                    name={hidden ? 'visibility-off' : 'visibility'}
+                    size={22}
+                    color={placeholderColor}
+                  />
+                </TouchableOpacity>
               </View>
             </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Confirm Password</Text>
+              <View style={styles.textInputContainer}>
+                <MaterialIcons name="lock" size={20} color={styles.PRIMARY_COLOR} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Confirm Password"
+                  placeholderTextColor="#94a3b8"
+                  secureTextEntry={hidden}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  returnKeyType="done"
+                />
+                <TouchableOpacity onPress={() => setHidden(!hidden)}>
+                  <MaterialIcons
+                    name={hidden ? 'visibility-off' : 'visibility'}
+                    size={22}
+                    color={placeholderColor}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+
           </View>
 
           {/* Register Button */}

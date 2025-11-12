@@ -19,6 +19,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { ACCENT_COLOR, PRIMARY_COLOR } from '../../assets/theme/colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../redux/slices/userSlice';
 import styles from '../../assets/styles/login';
 import { verifyOtp, sendOtp } from '../../api/authApi';
 
@@ -33,6 +35,7 @@ const OtpVerificationScreen = ({ navigation, route }) => {
     const [timer, setTimer] = useState(180);
     const [resendVisible, setResendVisible] = useState(false);
 
+    const dispatch = useDispatch();
     const inputs = useRef([]);
 
     const backgroundColors = isDarkMode ? ['#000', '#172554'] : [PRIMARY_COLOR, '#e0e7ff'];
@@ -95,13 +98,11 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                 return;
             }
 
-            // ✅ Save token if backend returns it
             if (response?.token) {
                 await AsyncStorage.setItem('auth_token', response.token);
                 console.log("✅ Token Saved");
             }
 
-            // ✅ Save user data
             if (user) {
                 await AsyncStorage.setItem('user_data', JSON.stringify(user));
                 console.log("✅ User Saved:", user);
@@ -111,12 +112,20 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                 console.log("✅ Detected Role:", role);
 
                 if (role === 'driver') {
-                    navigation.replace('DriverDashboard', { driver: user });
+                    dispatch(setUser(user));
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'DriverDashboard' }],
+                    });
                     return;
                 }
 
                 if (role === 'customer') {
-                    navigation.replace('CustomerDashboard', { customer: user });
+                    dispatch(setUser(user));
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'CustomerDashboard' }],
+                    });
                     return;
                 }
 
@@ -137,13 +146,12 @@ const OtpVerificationScreen = ({ navigation, route }) => {
 
 
 
-    // ✅ Resend OTP API
     const handleResendOtp = async () => {
         setResendVisible(false);
         setTimer(180);
 
         try {
-            const response = await sendOtp({ email }); // ✅ FIXED
+            const response = await sendOtp({ email });
             Alert.alert('OTP Sent', response?.message || 'A new OTP has been sent to your email.');
         } catch (err) {
             Alert.alert('Error', err?.message || 'Failed to resend OTP.');

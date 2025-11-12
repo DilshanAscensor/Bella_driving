@@ -69,7 +69,7 @@ export default function Footer() {
                 <View style={[styles.col, { width: columnWidth }]} />
 
                 {/* Column 4 */}
-                <TouchableOpacity style={[styles.col, { width: columnWidth }]} onPress={() => go('ProfileScreen')}>
+                <TouchableOpacity style={[styles.col, { width: columnWidth }]} onPress={() => go('DriverProfile')}>
                     <MaterialIcons name="person-outline" color={ICON} size={normalIcon} />
                 </TouchableOpacity>
 
@@ -93,7 +93,7 @@ export default function Footer() {
                     activeOpacity={0.9}
                     onPress={() => {
                         animate();
-                        go('HomeScreen');
+                        go('DriverDashboard');
                     }}
                 >
                     <View

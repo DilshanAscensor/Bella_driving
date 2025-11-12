@@ -2,9 +2,12 @@ import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../redux/slices/userSlice';
 
 const AuthLoadingScreen = () => {
     const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -19,33 +22,22 @@ const AuthLoadingScreen = () => {
                 return;
             }
 
-            // ✅ Convert saved string back into object
             const user = JSON.parse(user_data);
             const role = user.role?.toLowerCase();
+
+            dispatch(setUser(user));
 
             if (role === 'driver') {
                 navigation.reset({
                     index: 0,
-                    routes: [
-                        {
-                            name: 'DriverDashboard',
-                            params: { driver: user }
-                        }
-                    ],
+                    routes: [{ name: 'DriverDashboard' }],
                 });
-            }
-            else if (role === 'customer') {
+            } else if (role === 'customer') {
                 navigation.reset({
                     index: 0,
-                    routes: [
-                        {
-                            name: 'CustomerDashboard',
-                            params: { customer: user }
-                        }
-                    ],
+                    routes: [{ name: 'CustomerDashboard' }],
                 });
-            }
-            else {
+            } else {
                 navigation.reset({
                     index: 0,
                     routes: [{ name: 'SplashScreen' }],
@@ -55,7 +47,6 @@ const AuthLoadingScreen = () => {
 
         checkAuth();
     }, []);
-
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
