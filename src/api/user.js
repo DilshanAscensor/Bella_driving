@@ -1,42 +1,65 @@
 
-import apiClient from "./apiClient";
+import axios from 'axios';
+import { BASE_URL } from '../config/api';
+
+const apiClient = axios.create({
+    baseURL: `${BASE_URL}/api`,
+    timeout: 30000,
+    headers: {
+        Accept: 'application/json',
+    },
+});
+
 
 export const getDriverDetails = async (driverId) => {
     const response = await apiClient.get(`/driver/${driverId}`);
     return response.data;
 };
 
-export const updateDriverDetails = async (driverId, data, files = {}) => {
+export const updateDriverDetails = async (driverId, data, files) => {
     try {
         const formData = new FormData();
 
-        Object.keys(data).forEach((key) => {
-            if (data[key] !== undefined && data[key] !== null) {
-                formData.append(key, data[key]);
+        // Append text fields
+        Object.entries(data).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                formData.append(key, String(value));
             }
         });
 
-        Object.keys(files).forEach((key) => {
-            const file = files[key];
+        // Append image files
+        Object.entries(files).forEach(([key, file]) => {
             if (file) {
+                const uri =
+                    Platform.OS === 'ios'
+                        ? file.uri.replace('file://', '')
+                        : file.uri;
+
                 formData.append(key, {
-                    uri: file.uri,
-                    type: file.type || "image/jpeg",
-                    name: file.name || `${key}.jpg`,
+                    uri,
+                    name: file.name || `${key}_${Date.now()}.jpg`,
+                    type: file.type || 'image/jpeg',
                 });
             }
         });
 
-        const response = await apiClient.put(`/driver/${driverId}`, formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
-        });
+        console.log('Uploading to:', `${BASE_URL}/api/driver/${driverId}`);
+        console.log('Sent fields:', data);
+        console.log('Sent files:', files);
+
+        const response = await apiClient.post(
+            `/driver/${driverId}`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
+        );
 
         return response.data;
-
     } catch (error) {
-        console.error("Update driver API error:", error.response || error.message);
+        console.error('Upload error:', error.response?.data || error.message);
         throw error;
     }
 };

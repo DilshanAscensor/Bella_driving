@@ -3,7 +3,6 @@ import {
     View,
     Text,
     StyleSheet,
-    SafeAreaView,
     ScrollView,
     StatusBar,
     Image,
@@ -18,6 +17,7 @@ import { BASE_URL } from '../../config/api';
 import { getVehicleByDriver } from '../../api/vehicleApi';
 import { userLogout } from '../../api/authApi';
 import Footer from '../../components/Footer';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DriverDashboardScreen = () => {
     const navigation = useNavigation();

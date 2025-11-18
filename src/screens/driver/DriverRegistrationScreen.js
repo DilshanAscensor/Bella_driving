@@ -30,6 +30,7 @@ const { width } = Dimensions.get('window');
 const DriverRegistrationScreen = ({ navigation }) => {
   const scheme = useColorScheme();
   const isDarkMode = scheme === 'dark';
+  const dispatch = useDispatch();
 
   const [first_name, setFirstName] = useState('');
   const [last_name, setLastName] = useState('');
@@ -53,7 +54,6 @@ const DriverRegistrationScreen = ({ navigation }) => {
   const [nic_back_pic, setNicBackPic] = useState(null);
   const [license_front_pic, setLicenseFrontPic] = useState(null);
   const [license_back_pic, setLicenseBackPic] = useState(null);
-
 
   const styles = Styles;
 

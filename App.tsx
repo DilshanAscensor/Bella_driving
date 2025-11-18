@@ -24,6 +24,7 @@ import DriverDeliveries from './src/screens/driver/DriverDeliveriesScreen';
 import CustomerDashboard from './src/screens/customer/CustomerDashboardScreen';
 import DriverProfile from './src/screens/driver/UserProfileScreen';
 import EditDriverProfile from './src/screens/driver/EditProfile';
+import AcceptDeliveryScreen from './src/screens/delivery/AcceptDeliveryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -53,6 +54,7 @@ export default function App() {
             <Stack.Screen name="EditVehicle" component={EditVehicleScreen} />
             <Stack.Screen name="DriverProfile" component={DriverProfile} />
             <Stack.Screen name="EditDriverProfile" component={EditDriverProfile} />
+            <Stack.Screen name="AcceptDeliveryScreen" component={AcceptDeliveryScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </PersistGate>

@@ -5,10 +5,10 @@ import {
     StyleSheet,
     TouchableOpacity,
     FlatList,
-    SafeAreaView,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { ACCENT_COLOR } from "../../assets/theme/colors";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const DriverDeliveriesScreen = () => {
     const [tab, setTab] = useState("ongoing");

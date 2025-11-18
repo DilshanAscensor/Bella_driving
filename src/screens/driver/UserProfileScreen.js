@@ -86,19 +86,17 @@ const UserProfileScreen = () => {
     }
 
     const profilePic = resolveFileUrl(d.profile_pic);
-    const licensePic = resolveFileUrl(d.license_pic);
+    const nic_front_pic = resolveFileUrl(d.nic_front_pic);
+    const nic_back_pic = resolveFileUrl(d.nic_back_pic);
+    const license_front_pic = resolveFileUrl(d.license_front_pic);
+    const license_back_pic = resolveFileUrl(d.license_back_pic);
 
-    // const nic_front_pic = resolveFileUrl(d.nic_front_pic);
-    // const nic_back_pic = resolveFileUrl(d.nic_back_pic);
-    // const license_front_pic = resolveFileUrl(d.license_front_pic);
-    // const license_back_pic = resolveFileUrl(d.license_back_pic);
-
-    // const documents = [
-    //     { uri: nic_front_pic, label: 'NIC Front' },
-    //     { uri: nic_back_pic, label: 'NIC Back' },
-    //     { uri: license_front_pic, label: 'License Front' },
-    //     { uri: license_back_pic, label: 'License Back' },
-    // ];
+    const documents = [
+        { uri: nic_front_pic, label: 'NIC Front' },
+        { uri: nic_back_pic, label: 'NIC Back' },
+        { uri: license_front_pic, label: 'License Front' },
+        { uri: license_back_pic, label: 'License Back' },
+    ];
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -160,10 +158,6 @@ const UserProfileScreen = () => {
                             License Expiry: {d.license_expiry}
                         </Text>
                     </View>
-
-                    {licensePic && (
-                        <Image source={{ uri: licensePic }} style={styles.docImage} />
-                    )}
                 </View>
 
                 {/* <View style={styles.card}>
