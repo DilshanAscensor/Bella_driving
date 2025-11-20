@@ -24,7 +24,13 @@ import DriverDeliveries from './src/screens/driver/DriverDeliveriesScreen';
 import CustomerDashboard from './src/screens/customer/CustomerDashboardScreen';
 import DriverProfile from './src/screens/driver/UserProfileScreen';
 import EditDriverProfile from './src/screens/driver/EditProfile';
-import AcceptDeliveryScreen from './src/screens/delivery/AcceptDeliveryScreen';
+import AcceptDeliveryScreen from './src/screens/driver/delivery/order/AcceptDeliveryScreen';
+import DeliveryMapScreen from './src/screens/driver/delivery/DeliveryMapScreen';
+import OrderDetailsScreen from './src/screens/driver/delivery/order/OrderDetailsScreen';
+import PickupPhotoUpload from './src/screens/driver/delivery/order/PickupPhotoUpload';
+import DeliveryConfirmationScreen from './src/screens/driver/delivery/order/DeliveryConfirmationScreen';
+import DeliveryCompletedScreen from './src/screens/driver/delivery/order/DeliveryCompletedScreen';
+import DeliveryPhotoUploadScreen from './src/screens/driver/delivery/order/DeliveryPhotoUploadScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -55,6 +61,12 @@ export default function App() {
             <Stack.Screen name="DriverProfile" component={DriverProfile} />
             <Stack.Screen name="EditDriverProfile" component={EditDriverProfile} />
             <Stack.Screen name="AcceptDeliveryScreen" component={AcceptDeliveryScreen} />
+            <Stack.Screen name="DeliveryMap" component={DeliveryMapScreen} />
+            <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
+            <Stack.Screen name="PickupPhotoUpload" component={PickupPhotoUpload} />
+            <Stack.Screen name="DeliveryConfirmationScreen" component={DeliveryConfirmationScreen} />
+            <Stack.Screen name="DeliveryCompletedScreen" component={DeliveryCompletedScreen} />
+            <Stack.Screen name="DeliveryPhotoUploadScreen" component={DeliveryPhotoUploadScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </PersistGate>

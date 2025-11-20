@@ -12,9 +12,14 @@ const TEXT_LIGHT = '#6b7280';
 export default function AcceptDeliveryScreen({ navigation }) {
 
     const acceptOrder = () => {
-        navigation.navigate("DeliveryInProgress");
+        navigation.navigate("DeliveryMap", {
+            dropoff: {
+                lat: 37.7749,
+                lng: -122.4194,
+                address: "12 Park Avenue, Apt 3"
+            }
+        });
     };
-
     const rejectOrder = () => {
         navigation.goBack();
     };

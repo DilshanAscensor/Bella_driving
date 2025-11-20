@@ -165,7 +165,7 @@ const EditDriverProfile = () => {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-            <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 120 }}>
+            <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 80 }}>
                 <Text style={{ fontSize: 24, fontWeight: '700', marginBottom: 20 }}>Edit Profile</Text>
 
                 {/* Profile Photo */}

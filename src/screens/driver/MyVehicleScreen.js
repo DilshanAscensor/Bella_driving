@@ -85,7 +85,7 @@ const MyVehicleScreen = () => {
         : null;
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: SCREEN_BG }}>
-            <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 130 }}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
 
                 {/* Header */}
                 <View style={styles.header}>

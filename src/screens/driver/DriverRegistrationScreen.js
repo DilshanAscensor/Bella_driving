@@ -9,7 +9,6 @@ import {
   Platform,
   Image,
   Alert,
-  SafeAreaView,
   Dimensions,
   useColorScheme,
 } from 'react-native';
@@ -24,6 +23,7 @@ import { registerDriver } from '../../api/registrationApi';
 import { useDispatch } from 'react-redux';
 import { setUser } from '../../redux/slices/userSlice';
 import { PRIMARY_COLOR, ACCENT_COLOR } from '../../assets/theme/colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 

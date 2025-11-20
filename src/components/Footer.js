@@ -10,6 +10,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import { scale, verticalScale, moderateScale } from "react-native-size-matters";
 
 const PRIMARY = '#1e3a8a';
 const ICON = '#666';
@@ -99,7 +100,7 @@ export default function Footer() {
                                 backgroundColor: PRIMARY,
                                 borderWidth: Math.round(FAB_SIZE * 0.08),
                                 borderColor: BG,
-                                marginTop: '20%'
+                                marginTop: scale(35),
                             },
                         ]}
                     >
