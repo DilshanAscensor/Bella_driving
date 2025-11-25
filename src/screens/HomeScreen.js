@@ -7,7 +7,7 @@ import {
     StyleSheet,
     StatusBar,
     SafeAreaView,
-    useColorScheme, // Added for system theme support
+    useColorScheme,
     Animated,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -18,7 +18,7 @@ import Styles from '../assets/styles/home';
 
 const HomeScreen = () => {
     const navigation = useNavigation();
-    const scheme = useColorScheme(); // Detect light/dark mode
+    const scheme = useColorScheme();
     const isDarkMode = scheme === 'dark';
     const fadeAnim = new Animated.Value(0);
 
@@ -32,7 +32,6 @@ const HomeScreen = () => {
         }).start();
     }, []);
 
-    // Adaptive colors based on mode
     const backgroundColors = isDarkMode ? ['#000', '#172554'] : [PRIMARY_COLOR, '#e0e7ff'];
     const textColor = isDarkMode ? '#fff' : '#000';
     const buttonSecondaryBg = isDarkMode ? '#334155' : '#f1f5f9';
@@ -42,13 +41,12 @@ const HomeScreen = () => {
         <LinearGradient
             colors={backgroundColors}
             start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }} // Vertical gradient for calmer feel
+            end={{ x: 0, y: 1 }}
             style={styles.gradient}
         >
             <SafeAreaView style={styles.container}>
                 <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
 
-                {/* Hero Section - Minimal and Centered */}
                 <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
                     <View style={[styles.logoContainer, { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
                         <Image
@@ -63,7 +61,6 @@ const HomeScreen = () => {
                     </Text>
                 </Animated.View>
 
-                {/* Buttons Section - Full-width, stacked for ease */}
                 <View style={styles.buttonsContainer}>
                     <TouchableOpacity
                         style={[styles.button, { backgroundColor: ACCENT_COLOR }]}

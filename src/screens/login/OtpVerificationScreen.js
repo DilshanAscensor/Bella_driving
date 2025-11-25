@@ -4,10 +4,8 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    StyleSheet,
     Image,
     StatusBar,
-    SafeAreaView,
     useColorScheme,
     KeyboardAvoidingView,
     Platform,
@@ -23,9 +21,10 @@ import { useDispatch } from 'react-redux';
 import { setUser } from '../../redux/slices/userSlice';
 import styles from '../../assets/styles/login';
 import { verifyOtp, sendOtp } from '../../api/authApi';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const OtpVerificationScreen = ({ navigation, route }) => {
-    const { email } = route.params || {}; // ✅ email passed from login screen
+    const { email } = route.params || {};
     const scheme = useColorScheme();
     const isDarkMode = scheme === 'dark';
 
@@ -44,7 +43,6 @@ const OtpVerificationScreen = ({ navigation, route }) => {
     const placeholderColor = isDarkMode ? '#a5b4fc' : '#94a3b8';
     const buttonTextColor = '#fff';
 
-    // ⏱ Start timer countdown
     useEffect(() => {
         let interval;
         if (timer > 0) {

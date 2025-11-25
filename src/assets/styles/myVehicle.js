@@ -1,55 +1,47 @@
 import { StyleSheet } from 'react-native';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import { ACCENT_COLOR, TEXT_DARK, CARD_BG, TEXT_LIGHT } from '../../assets/theme/colors';
 
 export default StyleSheet.create({
 
-    PRIMARY_COLOR: '#1e3a8a',
-    ACCENT_COLOR: '#8DB600',
-    TEXT_DARK: '#1F2937',
-    TEXT_LIGHT: '#6B7280',
-    CARD_BG: '#FFFFFF',
-    SCREEN_BG: '#F3F4F6',
-
     header: {
-        backgroundColor: PRIMARY_COLOR,
-        padding: scale(18),
-        borderRadius: scale(12),
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: verticalScale(20),
-        elevation: 5
+        flexDirection: "row",
+        alignItems: "center",
+        padding: moderateScale(16),
+        backgroundColor: "#fff",
+        elevation: 4,
+        marginBottom: verticalScale(10),
     },
-    headerText: {
-        textAlign: 'center',
-        color: '#fff',
-        fontSize: moderateScale(20),
-        fontWeight: '700',
-        marginLeft: scale(10)
+    headerTitle: {
+        flex: 1,
+        textAlign: "center",
+        fontSize: moderateScale(18),
+        fontWeight: "700",
+        color: "#333",
     },
 
     card: {
         backgroundColor: CARD_BG,
-        borderRadius: scale(16),
-        padding: scale(20),
+        borderRadius: moderateScale(16),
+        padding: moderateScale(20),
         elevation: 6,
         shadowColor: '#000',
         shadowOpacity: 0.12,
         shadowOffset: { width: 0, height: verticalScale(4) },
-        shadowRadius: scale(10)
+        shadowRadius: moderateScale(10)
     },
 
     imageContainer: {
         backgroundColor: '#E5E7EB',
-        padding: scale(10),
-        borderRadius: scale(14),
+        padding: moderateScale(10),
+        borderRadius: moderateScale(14),
         alignItems: 'center',
-        marginBottom: verticalScale(16)
+        marginBottom: verticalScale(16),
     },
     vehicleImage: {
         width: scale(180),
         height: verticalScale(180),
-        borderRadius: scale(14)
+        borderRadius: moderateScale(14)
     },
 
     infoRow: {
@@ -79,7 +71,7 @@ export default StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingVertical: verticalScale(14),
-        borderRadius: scale(10)
+        borderRadius: moderateScale(10)
     },
     editButtonText: {
         color: '#fff',
@@ -112,7 +104,7 @@ export default StyleSheet.create({
         flexDirection: 'row',
         paddingVertical: verticalScale(14),
         paddingHorizontal: scale(22),
-        borderRadius: scale(10)
+        borderRadius: moderateScale(10)
     },
     addButtonText: {
         color: '#fff',

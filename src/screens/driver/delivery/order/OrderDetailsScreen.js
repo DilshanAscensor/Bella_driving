@@ -160,14 +160,14 @@ export default function OrderDetailsScreen({ navigation, route }) {
             </ScrollView>
 
             {/* FIXED BUTTON */}
-            <View style={styles.fixedButtonContainer}>
+            {/* <View style={styles.fixedButtonContainer}>
                 <TouchableOpacity
                     style={styles.startBtn}
                     onPress={startPickup}
                 >
                     <Text style={styles.startText}>Start Pickup</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
             <Footer active={active} onPress={setActive} />
         </SafeAreaView>
     );

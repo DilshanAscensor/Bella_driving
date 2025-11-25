@@ -27,10 +27,13 @@ import EditDriverProfile from './src/screens/driver/EditProfile';
 import AcceptDeliveryScreen from './src/screens/driver/delivery/order/AcceptDeliveryScreen';
 import DeliveryMapScreen from './src/screens/driver/delivery/DeliveryMapScreen';
 import OrderDetailsScreen from './src/screens/driver/delivery/order/OrderDetailsScreen';
+import PickupConfirmScreen from './src/screens/driver/delivery/order/PickupConfirmScreen';
 import PickupPhotoUpload from './src/screens/driver/delivery/order/PickupPhotoUpload';
 import DeliveryConfirmationScreen from './src/screens/driver/delivery/order/DeliveryConfirmationScreen';
 import DeliveryCompletedScreen from './src/screens/driver/delivery/order/DeliveryCompletedScreen';
 import DeliveryPhotoUploadScreen from './src/screens/driver/delivery/order/DeliveryPhotoUploadScreen';
+import DocumentsAndLicensesScreen from './src/screens/driver/profile/DocumentsAndLicenses';
+import EarningsScreen from './src/screens/driver/EarningsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -67,6 +70,9 @@ export default function App() {
             <Stack.Screen name="DeliveryConfirmationScreen" component={DeliveryConfirmationScreen} />
             <Stack.Screen name="DeliveryCompletedScreen" component={DeliveryCompletedScreen} />
             <Stack.Screen name="DeliveryPhotoUploadScreen" component={DeliveryPhotoUploadScreen} />
+            <Stack.Screen name="DocumentsAndLicenses" component={DocumentsAndLicensesScreen} />
+            <Stack.Screen name="EarningsScreen" component={EarningsScreen} />
+            <Stack.Screen name="PickupConfirm" component={PickupConfirmScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </PersistGate>

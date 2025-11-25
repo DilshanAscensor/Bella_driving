@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
-    StyleSheet,
     ScrollView,
     StatusBar,
     Image,
@@ -18,6 +17,7 @@ import { getVehicleByDriver } from '../../api/vehicleApi';
 import { userLogout } from '../../api/authApi';
 import Footer from '../../components/Footer';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Styles from '../../assets/styles/driverDashboard';
 
 const DriverDashboardScreen = () => {
     const navigation = useNavigation();
@@ -27,9 +27,10 @@ const DriverDashboardScreen = () => {
     const [hasVehicle, setHasVehicle] = useState(null);
     const [loggingOut, setLoggingOut] = useState(false);
     const [active, setActive] = useState("home");
+    const [isOnline, setIsOnline] = useState(false);
 
     const driver = useSelector(state => state.user.user) || {};
-
+    const styles = Styles;
     useEffect(() => {
         if (!driver) return;
 
@@ -63,13 +64,12 @@ const DriverDashboardScreen = () => {
                 {
                     text: 'Logout',
                     style: 'destructive',
-                    onPress: () => performLogout() // call async function outside
+                    onPress: () => performLogout()
                 },
             ]
         );
     };
 
-    // Actual async logout logic
     const performLogout = async () => {
         setLoggingOut(true);
         try {
@@ -104,7 +104,7 @@ const DriverDashboardScreen = () => {
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#fff" />
             {/* Header */}
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 80 }}>
                 <View style={styles.header}>
                     <View style={styles.profileContainer}>
                         {profilePic ? (
@@ -125,90 +125,94 @@ const DriverDashboardScreen = () => {
                     <Text style={styles.subText}>Let’s get you on the road today!</Text>
                 </View>
 
-                {/* Dashboard Actions */}
-                <View style={styles.cardContainer}>
-                    {/* <TouchableOpacity style={styles.card}>
-                        <MaterialIcons name="directions-car" size={28} color={styles.ACCENT_COLOR} />
-                        <Text style={styles.cardText}>My Rides</Text>
-                    </TouchableOpacity> */}
+                <View style={styles.onlineCard}>
+                    <View style={styles.onlineStatusRow}>
+                        <Text style={styles.onlineLabel}>Status:</Text>
 
-                    {/* <TouchableOpacity style={styles.card}>
-                        <MaterialIcons name="account-balance-wallet" size={28} color={styles.ACCENT_COLOR} />
-                        <Text style={styles.cardText}>Earnings</Text>
-                    </TouchableOpacity> */}
-                    {hasVehicle === false && (
-                        <TouchableOpacity
-                            style={styles.card}
-                            onPress={() => navigation.navigate('VehicleRegistration', { driver })}
-                        >
-                            <MaterialIcons name="directions-car" size={28} color={styles.ACCENT_COLOR} />
-                            <Text style={styles.cardText}>Register Vehicle</Text>
-                        </TouchableOpacity>
-                    )}
+                        <View style={[
+                            styles.onlineDot,
+                            { backgroundColor: isOnline ? "#28a745" : "#d9534f" }
+                        ]} />
 
-                    {/* 
-                    <TouchableOpacity style={styles.card}>
-                        <MaterialIcons name="settings" size={28} color={styles.ACCENT_COLOR} />
-                        <Text style={styles.cardText}>Settings</Text>
-                    </TouchableOpacity> */}
+                        <Text style={styles.onlineStateText}>
+                            {isOnline ? "Online" : "Offline"}
+                        </Text>
+                    </View>
 
-                    {hasVehicle === true && (
-                        <TouchableOpacity
-                            style={styles.card}
-                            onPress={() => navigation.navigate('MyVehicle')}
-                        >
-                            <MaterialIcons name="directions-car" size={28} color={styles.ACCENT_COLOR} />
-                            <Text style={styles.cardText}>My Vehicle</Text>
-                        </TouchableOpacity>
-                    )}
+                    <Text style={styles.onlineDescription}>
+                        {isOnline
+                            ? "You are now receiving delivery requests."
+                            : "You are currently offline. Go online to activate your dashboard."
+                        }
+                    </Text>
 
                     <TouchableOpacity
-                        style={styles.card}
-                        onPress={() => navigation.navigate('DriverDeliveries', { driver: driver })}
+                        onPress={() => setIsOnline(!isOnline)}
+                        activeOpacity={0.9}
+                        style={[
+                            styles.onlineButton,
+                            { backgroundColor: isOnline ? "#d9534f" : "#8DB600" }
+                        ]}
                     >
-                        <MaterialIcons name="local-shipping" size={28} color={styles.ACCENT_COLOR} />
-                        <Text style={styles.cardText}>Deliveries</Text>
-                    </TouchableOpacity>
-
-                    {/* Logout Button */}
-                    <TouchableOpacity
-                        style={styles.card}
-                        onPress={handleLogout}
-                        disabled={loggingOut}
-                        activeOpacity={0.7}
-                    >
-                        <MaterialIcons name="logout" size={28} color={loggingOut ? '#ccc' : styles.ACCENT_COLOR} />
-                        <Text style={[styles.cardText, loggingOut && { color: '#ccc' }]}>
-                            {loggingOut ? 'Logging out...' : 'Logout'}
+                        <Text style={styles.onlineButtonText}>
+                            {isOnline ? "Go Offline" : "Go Online"}
                         </Text>
                     </TouchableOpacity>
                 </View>
+
+
+                {/* SHOW THESE ONLY IF ONLINE */}
+                {isOnline && (
+                    <View style={styles.cardContainer}>
+
+                        {hasVehicle === false && (
+                            <TouchableOpacity
+                                style={styles.card}
+                                onPress={() => navigation.navigate('VehicleRegistration', { driver })}
+                            >
+                                <MaterialIcons name="directions-car" size={28} color={styles.ACCENT_COLOR} />
+                                <Text style={styles.cardText}>Register Vehicle</Text>
+                            </TouchableOpacity>
+                        )}
+
+                        {hasVehicle === true && (
+                            <TouchableOpacity
+                                style={styles.card}
+                                onPress={() => navigation.navigate('MyVehicle')}
+                            >
+                                <MaterialIcons name="directions-car" size={28} color={styles.ACCENT_COLOR} />
+                                <Text style={styles.cardText}>My Vehicle</Text>
+                            </TouchableOpacity>
+                        )}
+
+                        <TouchableOpacity
+                            style={styles.card}
+                            onPress={() => navigation.navigate('DriverDeliveries', { driver })}
+                        >
+                            <MaterialIcons name="local-shipping" size={28} color={styles.ACCENT_COLOR} />
+                            <Text style={styles.cardText}>Deliveries</Text>
+                        </TouchableOpacity>
+
+                        {/* Logout */}
+                        <TouchableOpacity
+                            style={styles.card}
+                            onPress={handleLogout}
+                            disabled={loggingOut}
+                            activeOpacity={0.7}
+                        >
+                            <MaterialIcons name="logout" size={28} color={loggingOut ? '#ccc' : styles.ACCENT_COLOR} />
+                            <Text style={[styles.cardText, loggingOut && { color: '#ccc' }]}>
+                                {loggingOut ? 'Logging out...' : 'Logout'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
 
             </ScrollView>
             <Footer active={active} onPress={setActive} />
         </SafeAreaView>
     );
 };
-
-const styles = StyleSheet.create({
-    ACCENT_COLOR: '#8DB600',
-    container: { flex: 1, backgroundColor: '#fff' },
-    header: { alignItems: 'center', padding: 16 },
-    profileContainer: { width: 80, height: 80, borderRadius: 40, overflow: 'hidden', marginBottom: 12 },
-    profileImage: { width: '100%', height: '100%' },
-    welcomeText: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-    subText: { fontSize: 14, color: '#666' },
-    cardContainer: { paddingHorizontal: 16, marginTop: 20 },
-    card: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 12,
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        marginVertical: 8,
-        elevation: 2,
-    },
-    cardText: { marginLeft: 12, fontSize: 16, color: '#333' },
-});
 
 export default DriverDashboardScreen;

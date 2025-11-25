@@ -10,7 +10,6 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { scale, verticalScale, moderateScale } from "react-native-size-matters";
 
 const PRIMARY = '#1e3a8a';
 const ICON = '#666';
@@ -21,9 +20,8 @@ export default function Footer() {
     const insets = useSafeAreaInsets();
     const { width, height } = Dimensions.get('window');
 
-    // Responsive sizes
-    const BAR_HEIGHT = Math.round(height * 0.08); // 8% of screen height
-    const FAB_SIZE = Math.round(width * 0.18); // 18% of screen width
+    const BAR_HEIGHT = Math.round(height * 0.08);
+    const FAB_SIZE = Math.round(width * 0.18);
     const ICON_SIZE = Math.round(width * 0.065);
     const HOME_ICON_SIZE = Math.round(width * 0.09);
 
@@ -51,23 +49,28 @@ export default function Footer() {
         <View style={[styles.root, { paddingBottom: insets.bottom }]}>
             {/* Footer Bar */}
             <View style={[styles.bar, { height: BAR_HEIGHT }]}>
-                <TouchableOpacity style={styles.col} onPress={() => go('SearchScreen')} activeOpacity={0.7}>
-                    <MaterialIcons name="search" color={ICON} size={ICON_SIZE} />
+
+                {/* HOME */}
+                <TouchableOpacity style={styles.col} onPress={() => go('DriverDashboard')} activeOpacity={0.7}>
+                    <MaterialIcons name="settings" color={ICON} size={ICON_SIZE} />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.col} onPress={() => go('AcceptDeliveryScreen')} activeOpacity={0.7}>
-                    <MaterialIcons name="notifications-none" color={ICON} size={ICON_SIZE} />
+                {/* EARNINGS */}
+                <TouchableOpacity style={styles.col} onPress={() => go('EarningsScreen')} activeOpacity={0.7}>
+                    <MaterialIcons name="account-balance-wallet" color={ICON} size={ICON_SIZE} />
                 </TouchableOpacity>
 
-                {/* Empty space for FAB */}
+                {/* EMPTY CENTER */}
                 <View style={[styles.col, { width: FAB_SIZE }]} />
 
-                <TouchableOpacity style={styles.col} onPress={() => go('DriverProfile')} activeOpacity={0.7}>
-                    <MaterialIcons name="person-outline" color={ICON} size={ICON_SIZE} />
+                {/* SUPPORT */}
+                <TouchableOpacity style={styles.col} onPress={() => go('AcceptDeliveryScreen')} activeOpacity={0.7}>
+                    <MaterialIcons name="headset-mic" color={ICON} size={ICON_SIZE} />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.col} onPress={() => go('SettingsScreen')} activeOpacity={0.7}>
-                    <MaterialIcons name="settings" color={ICON} size={ICON_SIZE} />
+                {/* PROFILE */}
+                <TouchableOpacity style={styles.col} onPress={() => go('DriverProfile')} activeOpacity={0.7}>
+                    <MaterialIcons name="person-outline" color={ICON} size={ICON_SIZE} />
                 </TouchableOpacity>
             </View>
 
@@ -78,7 +81,7 @@ export default function Footer() {
                     {
                         width: FAB_SIZE,
                         height: FAB_SIZE,
-                        bottom: BAR_HEIGHT / 2,
+                        bottom: BAR_HEIGHT / 5,
                         transform: [{ scale: scaleAnim }],
                     },
                 ]}
@@ -100,7 +103,6 @@ export default function Footer() {
                                 backgroundColor: PRIMARY,
                                 borderWidth: Math.round(FAB_SIZE * 0.08),
                                 borderColor: BG,
-                                marginTop: scale(35),
                             },
                         ]}
                     >

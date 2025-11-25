@@ -68,7 +68,6 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
         { label: '8', value: '8' },
     ];
 
-    // 🔹 Request photo library permission
     const requestPermission = async (permission) => {
         try {
             let result = await check(permission);
@@ -82,10 +81,8 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
         }
     };
 
-    // 🔹 Image picker
     const pickImage = async (setImage, type) => {
         try {
-            // 🔹 Determine correct permission based on platform and Android version
             const permission = Platform.select({
                 ios: PERMISSIONS.IOS.PHOTO_LIBRARY,
                 android: Platform.Version >= 33
@@ -93,16 +90,13 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                     : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
             });
 
-            // 🔹 Check current permission status
             let result = await check(permission);
 
             if (result === RESULTS.DENIED) {
-                // Request permission if not yet granted
                 result = await request(permission);
             }
 
             if (result === RESULTS.BLOCKED) {
-                // Permission is permanently denied
                 Alert.alert(
                     'Permission Required',
                     `Please allow access to photos from Settings to upload your ${type}.`,
@@ -122,7 +116,6 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                 return;
             }
 
-            // 🔹 Launch image picker
             const pickerResult = await launchImageLibrary({
                 mediaType: 'photo',
                 quality: 0.8,
@@ -142,8 +135,6 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
         }
     };
 
-
-    // 🔹 Validate form
     const validateInputs = () => {
         if (!make) return 'Vehicle Make is required';
         if (!vehicle_type) return 'Vehicle Type is required';
@@ -161,7 +152,6 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
         return '';
     };
 
-    // 🔹 Handle vehicle registration
     const handleRegister = async () => {
         const validationError = validateInputs();
         if (validationError) {

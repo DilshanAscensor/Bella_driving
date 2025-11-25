@@ -4,13 +4,13 @@ import {
     Text,
     Image,
     ScrollView,
+    Alert,
     TouchableOpacity,
     ActivityIndicator,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BASE_URL } from '../../config/api';
 import { getDriverDetails } from '../../api/user';
@@ -18,6 +18,8 @@ import { setUser } from '../../redux/slices/userSlice';
 import Footer from '../../components/Footer';
 import Styles from '../../assets/styles/driverProfile';
 import { scale } from 'react-native-size-matters';
+import { userLogout } from '../../api/authApi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const resolveFileUrl = (path) => {
@@ -28,12 +30,14 @@ const resolveFileUrl = (path) => {
 const UserProfileScreen = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation();
-    const [active, setActive] = useState('home');
+    const [active, setActive] = useState('profile');
+    const [loggingOut, setLoggingOut] = useState(false);
     const user = useSelector((state) => state.user.user) || {};
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const styles = Styles;
+
     const fetchDriver = useCallback(async () => {
         if (!user?.id) {
             setError('User ID not found.');
@@ -58,6 +62,47 @@ const UserProfileScreen = () => {
     useEffect(() => {
         fetchDriver();
     }, [fetchDriver]);
+
+
+    // ================= Logout Function =================
+    const handleLogout = () => {
+        if (loggingOut) return;
+
+        Alert.alert(
+            'Confirm Logout',
+            'Are you sure you want to logout?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Logout',
+                    style: 'destructive',
+                    onPress: () => performLogout()
+                },
+            ]
+        );
+    };
+
+    const performLogout = async () => {
+        setLoggingOut(true);
+        try {
+            const response = await userLogout();
+
+            await AsyncStorage.removeItem('auth_token');
+
+            Alert.alert('Success', response.message || 'Logged out successfully.');
+
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'HomeScreen' }],
+            });
+
+        } catch (error) {
+            Alert.alert('Logout Error', error.message);
+        } finally {
+            setLoggingOut(false);
+        }
+    };
+
 
     const d = user.driver_details;
 
@@ -86,17 +131,6 @@ const UserProfileScreen = () => {
     }
 
     const profilePic = resolveFileUrl(d.profile_pic);
-    const nic_front_pic = resolveFileUrl(d.nic_front_pic);
-    const nic_back_pic = resolveFileUrl(d.nic_back_pic);
-    const license_front_pic = resolveFileUrl(d.license_front_pic);
-    const license_back_pic = resolveFileUrl(d.license_back_pic);
-
-    const documents = [
-        { uri: nic_front_pic, label: 'NIC Front' },
-        { uri: nic_back_pic, label: 'NIC Back' },
-        { uri: license_front_pic, label: 'License Front' },
-        { uri: license_back_pic, label: 'License Back' },
-    ];
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -104,39 +138,49 @@ const UserProfileScreen = () => {
                 style={styles.container}
                 contentContainerStyle={{ paddingBottom: scale(100) }}
             >
-                {/* Header with gradient background */}
-                <LinearGradient
-                    colors={['#1e3a8a', '#3b82f6']}
-                    style={styles.header}
-                >
-                    <View style={styles.avatarContainer}>
+                <View style={styles.profileCard}>
+                    <View style={styles.profileLeft}>
                         {profilePic ? (
-                            <Image source={{ uri: profilePic }} style={styles.avatar} />
+                            <Image source={{ uri: profilePic }} style={styles.profileAvatar} />
                         ) : (
-                            <MaterialIcons name="person" size={95} color="#fff" />
+                            <View style={styles.profileAvatarPlaceholder}>
+                                <MaterialIcons name="person" size={55} color="#8DB600" />
+                            </View>
                         )}
                     </View>
-                    <Text style={styles.nameText}>
-                        {user.first_name} {user.last_name}
-                    </Text>
-                    <Text style={styles.emailText}>{user.email}</Text>
-                </LinearGradient>
+
+                    <View style={styles.profileRight}>
+                        <Text style={styles.profileName}>
+                            {user.first_name} {user.last_name}
+                        </Text>
+                        <View style={styles.ratingContainer}>
+                            <MaterialIcons name="star" size={16} color="#FFD700" />
+                            <Text style={styles.ratingText}>
+                                {d.rating ? d.rating.toFixed(1) : '0.0'} Rating
+                            </Text>
+                        </View>
+                    </View>
+                </View>
 
                 {/* Personal Details */}
                 <View style={styles.card}>
                     <Text style={styles.sectionTitle}>Personal Details</Text>
+
                     <View style={styles.infoRow}>
                         <MaterialIcons name="badge" size={20} color="#1e3a8a" />
                         <Text style={styles.infoText}>NIC: {d.nic}</Text>
                     </View>
+
                     <View style={styles.infoRow}>
                         <MaterialIcons name="person" size={20} color="#1e3a8a" />
                         <Text style={styles.infoText}>Gender: {d.gender}</Text>
                     </View>
+
                     <View style={styles.infoRow}>
                         <MaterialIcons name="place" size={20} color="#1e3a8a" />
                         <Text style={styles.infoText}>District: {d.district}</Text>
                     </View>
+
                     <View style={styles.infoRow}>
                         <MaterialIcons name="calendar-today" size={20} color="#1e3a8a" />
                         <Text style={styles.infoText}>DOB: {d.dob}</Text>
@@ -146,12 +190,14 @@ const UserProfileScreen = () => {
                 {/* License Info */}
                 <View style={styles.card}>
                     <Text style={styles.sectionTitle}>License Information</Text>
+
                     <View style={styles.infoRow}>
                         <MaterialIcons name="credit-card" size={20} color="#1e3a8a" />
                         <Text style={styles.infoText}>
                             License Number: {d.license_number}
                         </Text>
                     </View>
+
                     <View style={styles.infoRow}>
                         <MaterialIcons name="event" size={20} color="#1e3a8a" />
                         <Text style={styles.infoText}>
@@ -160,19 +206,44 @@ const UserProfileScreen = () => {
                     </View>
                 </View>
 
-                {/* <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Documents</Text>
+                <View style={styles.actionButtonsContainer}>
+                    {/* Documents & Licenses */}
+                    <TouchableOpacity
+                        style={styles.actionButtonWhite}
+                        onPress={() => navigation.navigate('DocumentsAndLicenses')}
+                    >
+                        <View style={styles.actionTextContainer}>
+                            <Text style={styles.actionButtonTitle}>Documents & Licenses</Text>
+                            <Text style={styles.actionButtonSubtitle}>View all your documents</Text>
+                        </View>
+                        <MaterialIcons name="chevron-right" size={28} color="#8DB600" />
+                    </TouchableOpacity>
 
-                    {documents.map((doc, index) => (
-                        doc.uri ? <Image key={index} source={{ uri: doc.uri }} style={styles.docImage} /> : null
-                    ))}
+                    {/* Vehicle Information */}
+                    <TouchableOpacity
+                        style={styles.actionButtonWhite}
+                        onPress={() => navigation.navigate('MyVehicle')}
+                    >
+                        <View style={styles.actionTextContainer}>
+                            <Text style={styles.actionButtonTitle}>Vehicle Information</Text>
+                            <Text style={styles.actionButtonSubtitle}>View your vehicle details</Text>
+                        </View>
+                        <MaterialIcons name="chevron-right" size={28} color="#8DB600" />
+                    </TouchableOpacity>
 
-                    {documents.every(doc => !doc.uri) && (
-                        <Text style={{ color: '#666', fontStyle: 'italic', marginTop: 10 }}>
-                            No documents uploaded yet.
-                        </Text>
-                    )}
-                </View> */}
+                    {/* Log Out */}
+                    <TouchableOpacity
+                        style={[styles.actionButtonWhite, styles.logoutButtonWhite]}
+                        onPress={handleLogout}
+                    >
+                        <View style={styles.actionTextContainer}>
+                            <Text style={styles.logoutActionButtonTitle}>Log Out</Text>
+                            {/* <Text style={styles.actionButtonSubtitle}>Sign out from your account</Text> */}
+                        </View>
+                        <MaterialIcons name="logout" size={28} color="#ef4444" />
+                    </TouchableOpacity>
+                </View>
+
 
                 {/* Edit Button */}
                 <TouchableOpacity
