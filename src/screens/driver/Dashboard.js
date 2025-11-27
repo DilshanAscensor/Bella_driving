@@ -1,49 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    ScrollView,
-    StatusBar,
-    Image,
-    TouchableOpacity,
-    Alert,
-} from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { View, ScrollView, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import {
+    Avatar,
+    Text,
+    Button,
+    Card,
+    Surface,
+} from 'react-native-paper';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { scale } from 'react-native-size-matters';
+
 import { BASE_URL } from '../../config/api';
 import { getVehicleByDriver } from '../../api/vehicleApi';
 import { userLogout } from '../../api/authApi';
+import styles from '../../assets/styles/driverDashboard';
+
 import Footer from '../../components/Footer';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Styles from '../../assets/styles/driverDashboard';
 
 const DriverDashboardScreen = () => {
     const navigation = useNavigation();
-    const route = useRoute();
+    const driver = useSelector(state => state.user.user) || {};
 
     const [loading, setLoading] = useState(true);
     const [hasVehicle, setHasVehicle] = useState(null);
     const [loggingOut, setLoggingOut] = useState(false);
-    const [active, setActive] = useState("home");
     const [isOnline, setIsOnline] = useState(false);
+    const [active, setActive] = useState('home');
 
-    const driver = useSelector(state => state.user.user) || {};
-    const styles = Styles;
+    // Extra Stats
+    const [completedRides, setCompletedRides] = useState(18);
+    const [todaysEarnings, setTodaysEarnings] = useState(2450);
+    const [weeklyEarnings, setWeeklyEarnings] = useState(9230);
+
     useEffect(() => {
         if (!driver) return;
 
         const loadVehicle = async () => {
             try {
                 const res = await getVehicleByDriver(driver.id);
-
-                if (res.status === true && res.data) {
-                    setHasVehicle(true);
-                } else {
-                    setHasVehicle(false);
-                }
-            } catch (err) {
+                setHasVehicle(res.status === true && res.data ? true : false);
+            } catch {
                 setHasVehicle(false);
             }
             setLoading(false);
@@ -52,164 +53,174 @@ const DriverDashboardScreen = () => {
         loadVehicle();
     }, [driver]);
 
-    // ================= Logout Function =================
     const handleLogout = () => {
-        if (loggingOut) return;
-
         Alert.alert(
-            'Confirm Logout',
-            'Are you sure you want to logout?',
+            "Confirm Logout",
+            "Are you sure you want to logout?",
             [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Logout',
-                    style: 'destructive',
-                    onPress: () => performLogout()
-                },
+                { text: "Cancel", style: "cancel" },
+                { text: "Logout", style: "destructive", onPress: performLogout }
             ]
         );
     };
 
     const performLogout = async () => {
+        if (loggingOut) return;
         setLoggingOut(true);
+
         try {
             const response = await userLogout();
+            await AsyncStorage.removeItem("auth_token");
 
-            await AsyncStorage.removeItem('auth_token');
-
-            Alert.alert('Success', response.message || 'Logged out successfully.');
+            Alert.alert("Success", response.message || "Logged out successfully.");
 
             navigation.reset({
                 index: 0,
-                routes: [{ name: 'HomeScreen' }],
+                routes: [{ name: "HomeScreen" }]
             });
 
         } catch (error) {
-            Alert.alert('Logout Error', error.message);
+            Alert.alert("Logout Error", error.message);
         } finally {
             setLoggingOut(false);
         }
     };
 
-    // ===================================================
-
     if (!driver) return null;
 
-    const driverName = driver?.first_name || 'Driver';
+    const driverName = driver?.first_name || "Driver";
     const profilePic = driver?.driver_details?.profile_pic
         ? `${BASE_URL}/storage/${driver.driver_details.profile_pic}`
         : null;
 
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-            {/* Header */}
-            <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 80 }}>
-                <View style={styles.header}>
-                    <View style={styles.profileContainer}>
+            <ScrollView contentContainerStyle={styles.scroll}>
+
+                {/* HEADER */}
+                <Card style={styles.headerCard}>
+                    <View style={styles.headerContent}>
                         {profilePic ? (
-                            <Image
-                                source={{ uri: profilePic }}
-                                style={styles.profileImage}
-                                resizeMode="cover"
-                            />
+                            <Avatar.Image size={scale(90)} source={{ uri: profilePic }} />
                         ) : (
-                            <Image
-                                source={require('../../assets/images/taxi-app-logo.webp')}
-                                style={styles.profileImage}
-                                resizeMode="contain"
-                            />
+                            <Avatar.Icon size={scale(90)} icon="account" />
                         )}
+
+                        <Text variant="headlineSmall" style={styles.welcomeText}>
+                            Welcome, {driverName} 👋
+                        </Text>
+
+                        <Text variant="bodyMedium" style={styles.subText}>
+                            Ready for another productive day?
+                        </Text>
                     </View>
-                    <Text style={styles.welcomeText}>Welcome, {driverName} 👋</Text>
-                    <Text style={styles.subText}>Let’s get you on the road today!</Text>
+                </Card>
+
+                {/* STATISTICS ROW */}
+                <View style={styles.statsRow}>
+                    <Card style={styles.statsCard}>
+                        <Card.Content>
+                            <Text style={styles.statsValue}>{completedRides}</Text>
+                            <Text style={styles.statsLabel}>Completed Rides</Text>
+                        </Card.Content>
+                    </Card>
+
+                    <Card style={styles.statsCard}>
+                        <Card.Content>
+                            <Text style={styles.statsValue}>₱{todaysEarnings}</Text>
+                            <Text style={styles.statsLabel}>Today's Earnings</Text>
+                        </Card.Content>
+                    </Card>
                 </View>
 
-                <View style={styles.onlineCard}>
-                    <View style={styles.onlineStatusRow}>
-                        <Text style={styles.onlineLabel}>Status:</Text>
+                <View style={styles.statsRow}>
+                    <Card style={styles.statsCardLarge}>
+                        <Card.Content>
+                            <Text style={styles.statsValue}>₱{weeklyEarnings}</Text>
+                            <Text style={styles.statsLabel}>Weekly Earnings</Text>
+                        </Card.Content>
+                    </Card>
+                </View>
 
-                        <View style={[
-                            styles.onlineDot,
-                            { backgroundColor: isOnline ? "#28a745" : "#d9534f" }
-                        ]} />
-
-                        <Text style={styles.onlineStateText}>
-                            {isOnline ? "Online" : "Offline"}
-                        </Text>
+                {/* ONLINE STATUS */}
+                <Surface style={styles.onlineCard}>
+                    <View style={styles.onlineRow}>
+                        <Text style={styles.statusLabel}>Status:</Text>
+                        <View
+                            style={[styles.onlineDot, { backgroundColor: isOnline ? '#28a745' : '#d9534f' }]}
+                        />
+                        <Text style={styles.statusState}>{isOnline ? 'Online' : 'Offline'}</Text>
                     </View>
 
                     <Text style={styles.onlineDescription}>
                         {isOnline
-                            ? "You are now receiving delivery requests."
-                            : "You are currently offline. Go online to activate your dashboard."
-                        }
+                            ? 'You are available for delivery requests.'
+                            : 'Switch to online to start receiving deliveries.'}
                     </Text>
 
-                    <TouchableOpacity
+                    <Button
+                        mode="contained"
                         onPress={() => setIsOnline(!isOnline)}
-                        activeOpacity={0.9}
-                        style={[
-                            styles.onlineButton,
-                            { backgroundColor: isOnline ? "#d9534f" : "#8DB600" }
-                        ]}
+                        style={styles.onlineButton}
+                        buttonColor={isOnline ? '#d9534f' : '#8DB600'}
                     >
-                        <Text style={styles.onlineButtonText}>
-                            {isOnline ? "Go Offline" : "Go Online"}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                        {isOnline ? 'Go Offline' : 'Go Online'}
+                    </Button>
+                </Surface>
 
-
-                {/* SHOW THESE ONLY IF ONLINE */}
+                {/* MENU */}
                 {isOnline && (
-                    <View style={styles.cardContainer}>
-
-                        {hasVehicle === false && (
-                            <TouchableOpacity
-                                style={styles.card}
-                                onPress={() => navigation.navigate('VehicleRegistration', { driver })}
+                    <View style={styles.cardList}>
+                        {hasVehicle !== null && (
+                            <Card
+                                style={styles.itemCard}
+                                onPress={() =>
+                                    hasVehicle
+                                        ? navigation.navigate('MyVehicle')
+                                        : navigation.navigate('VehicleRegistration', { driver })
+                                }
                             >
-                                <MaterialIcons name="directions-car" size={28} color={styles.ACCENT_COLOR} />
-                                <Text style={styles.cardText}>Register Vehicle</Text>
-                            </TouchableOpacity>
+                                <Card.Title
+                                    title={hasVehicle ? 'My Vehicle' : 'Register Vehicle'}
+                                    titleStyle={styles.cardTitle}
+                                    left={(props) => (
+                                        <Avatar.Icon {...props} icon="car" backgroundColor="#8DB600" />
+                                    )}
+                                />
+                            </Card>
                         )}
 
-                        {hasVehicle === true && (
-                            <TouchableOpacity
-                                style={styles.card}
-                                onPress={() => navigation.navigate('MyVehicle')}
-                            >
-                                <MaterialIcons name="directions-car" size={28} color={styles.ACCENT_COLOR} />
-                                <Text style={styles.cardText}>My Vehicle</Text>
-                            </TouchableOpacity>
-                        )}
-
-                        <TouchableOpacity
-                            style={styles.card}
+                        <Card
+                            style={styles.itemCard}
                             onPress={() => navigation.navigate('DriverDeliveries', { driver })}
                         >
-                            <MaterialIcons name="local-shipping" size={28} color={styles.ACCENT_COLOR} />
-                            <Text style={styles.cardText}>Deliveries</Text>
-                        </TouchableOpacity>
+                            <Card.Title
+                                title="Deliveries"
+                                titleStyle={styles.cardTitle}
+                                left={(props) => (
+                                    <Avatar.Icon {...props} icon="truck-delivery" backgroundColor="#8DB600" />
+                                )}
+                            />
+                        </Card>
 
-                        {/* Logout */}
-                        <TouchableOpacity
-                            style={styles.card}
-                            onPress={handleLogout}
-                            disabled={loggingOut}
-                            activeOpacity={0.7}
-                        >
-                            <MaterialIcons name="logout" size={28} color={loggingOut ? '#ccc' : styles.ACCENT_COLOR} />
-                            <Text style={[styles.cardText, loggingOut && { color: '#ccc' }]}>
-                                {loggingOut ? 'Logging out...' : 'Logout'}
-                            </Text>
-                        </TouchableOpacity>
+                        <Card style={styles.itemCard} onPress={handleLogout}>
+                            <Card.Title
+                                title={loggingOut ? 'Logging out...' : 'Logout'}
+                                titleStyle={[styles.cardTitle, loggingOut && { color: '#bbb' }]}
+                                left={(props) => (
+                                    <Avatar.Icon
+                                        {...props}
+                                        icon="logout"
+                                        color={loggingOut ? '#bbb' : '#fff'}
+                                        backgroundColor="#8DB600"
+                                    />
+                                )}
+                            />
+                        </Card>
                     </View>
                 )}
-
-
             </ScrollView>
+
             <Footer active={active} onPress={setActive} />
         </SafeAreaView>
     );
