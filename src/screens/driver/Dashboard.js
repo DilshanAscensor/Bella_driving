@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
+import Pusher from "pusher-js/react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -38,7 +39,31 @@ const DriverDashboardScreen = () => {
     const [weeklyEarnings, setWeeklyEarnings] = useState(9230);
 
     useEffect(() => {
+
         if (!driver) return;
+
+        const pusher = new Pusher("knkbsqrf5zbbhiusneob", {
+            wsHost: "10.0.2.2",
+            wsPort: 8080,
+            forceTLS: false,
+            encrypted: false,
+            enabledTransports: ['ws'],
+            disableStats: true,
+            cluster: "mt1",
+        });
+
+        pusher.connection.bind('connected', () => {
+            console.log("WEBSOCKET CONNECTED ✔");
+        });
+
+        const channel = pusher.subscribe("driver-channel");
+
+        channel.bind("order.placed", (data) => {
+            Alert.alert(
+                "New Order",
+                `Pickup: ${data.order.pickup_location}\nDrop: ${data.order.drop_location}\nPrice: ${data.order.price}`
+            );
+        });
 
         const loadVehicle = async () => {
             try {
@@ -51,6 +76,7 @@ const DriverDashboardScreen = () => {
         };
 
         loadVehicle();
+        return () => pusher.disconnect();
     }, [driver]);
 
     const handleLogout = () => {
