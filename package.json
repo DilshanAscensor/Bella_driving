@@ -35,6 +35,7 @@
     "react-native-screens": "^4.18.0",
     "react-native-size-matters": "^0.4.2",
     "react-native-skeleton-placeholder": "^5.2.4",
+    "react-native-sound": "^0.13.0",
     "react-native-vector-icons": "^10.3.0",
     "react-redux": "^9.2.0",
     "redux-persist": "^6.0.0",

@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    user: null,         // driver info
-    isLoggedIn: false,  // useful flag
+    user: null,
+    isLoggedIn: false,
 };
 
 const userSlice = createSlice({

@@ -9,9 +9,13 @@ import {
 } from 'react-native';
 import { launchCamera } from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { onTheWay } from '../../../../api/order';
+import { useSelector } from "react-redux";
 
 const PickupPhotoScreen = ({ navigation }) => {
+
     const [pickupPhoto, setPickupPhoto] = useState(null);
+    const order = useSelector((state) => state.order.newOrder);
 
     const takePhoto = async () => {
         const result = await launchCamera({
@@ -29,10 +33,40 @@ const PickupPhotoScreen = ({ navigation }) => {
         }
 
         if (result.assets?.length > 0) {
-            // ✔ DO NOT modify the URI
             setPickupPhoto(result.assets[0]);
         }
     };
+
+    const pickedUpPhotoUploadFun = async () => {
+        if (!pickupPhoto) {
+            Alert.alert("Error", "Please take a photo first!");
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+
+            formData.append("picked_up_image", {
+                name: pickupPhoto.fileName || "pickup.jpg",
+                type: pickupPhoto.type,
+                uri: pickupPhoto.uri,
+            });
+
+            const response = await onTheWay(order.id, formData);
+
+            if (!response) {
+                Alert.alert("Failed", "Failed to upload");
+                return;
+            }
+
+            Alert.alert("Success", "Package picked up. Status changed to On The Way.");
+            navigation.navigate("DeliveryPhotoUploadScreen");
+
+        } catch (error) {
+            Alert.alert("Error", error.message);
+        }
+    };
+
 
     return (
         <View style={styles.container}>
@@ -60,7 +94,7 @@ const PickupPhotoScreen = ({ navigation }) => {
                     { backgroundColor: pickupPhoto ? '#1e3a8a' : '#9ca3af' },
                 ]}
                 disabled={!pickupPhoto}
-                onPress={() => navigation.navigate("DeliveryPhotoUploadScreen")}
+                onPress={pickedUpPhotoUploadFun}
             >
                 <Text style={styles.buttonText}>Continue</Text>
             </TouchableOpacity>

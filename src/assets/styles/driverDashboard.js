@@ -1,73 +1,180 @@
 import { StyleSheet } from 'react-native';
 import { scale } from 'react-native-size-matters';
+import {
+    PRIMARY_COLOR,
+    ACCENT_COLOR,
+    TEXT_DARK,
+    TEXT_LIGHT,
+    CARD_BG,
+    SCREEN_BG,
+} from '../../assets/theme/colors';
 
 export default StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#fff' },
-    scroll: { paddingBottom: scale(80) },
 
-    headerCard: {
-        margin: scale(15),
-        padding: scale(15),
-        borderRadius: 12,
-        elevation: 4,
+    container: {
+        flex: 1,
+        backgroundColor: SCREEN_BG,
     },
 
-    headerContent: { alignItems: 'center' },
-    welcomeText: { marginTop: scale(10), fontWeight: '700', fontSize: scale(18) },
-    subText: { marginTop: scale(3), color: '#666' },
+    scroll: {
+        paddingBottom: scale(100),
+    },
 
+    /* HEADER */
+    headerCard: {
+        margin: scale(18),
+        padding: scale(20),
+        borderRadius: 16,
+        elevation: 2,
+        backgroundColor: CARD_BG,
+    },
+
+    headerRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    headerInfo: {
+        marginLeft: scale(15),
+        flex: 1,
+    },
+
+    welcomeText: {
+        fontWeight: "700",
+        color: PRIMARY_COLOR,
+        fontSize: scale(20),
+    },
+
+    headerSubText: {
+        fontSize: scale(13),
+        marginTop: 4,
+        color: TEXT_LIGHT,
+    },
+
+    /* SECTION HEADER */
+    sectionHeaderWrap: {
+        marginTop: scale(12),
+        marginHorizontal: scale(18),
+    },
+
+    sectionHeader: {
+        fontSize: scale(16),
+        fontWeight: "700",
+        color: TEXT_DARK,
+    },
+
+    /* STATS */
     statsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginHorizontal: scale(15),
-        marginTop: scale(15),
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginHorizontal: scale(18),
+        marginTop: scale(14),
     },
 
     statsCard: {
-        flex: 1,
-        marginRight: scale(10),
-        padding: scale(10),
-        borderRadius: 12,
-        elevation: 3,
+        width: "48%",
+        borderRadius: 14,
+        elevation: 2,
+        paddingVertical: scale(6),
+        backgroundColor: CARD_BG,
     },
 
-    statsCardLarge: {
-        flex: 1,
-        padding: scale(15),
-        borderRadius: 12,
-        elevation: 3,
+    statsCardWide: {
+        marginTop: scale(14),
+        marginHorizontal: scale(18),
+        borderRadius: 14,
+        elevation: 2,
+        backgroundColor: CARD_BG,
     },
 
-    statsValue: { fontSize: scale(22), fontWeight: '700', color: '#8DB600' },
-    statsLabel: { fontSize: scale(13), color: '#444', marginTop: scale(5) },
+    statsValue: {
+        fontSize: scale(22),
+        fontWeight: "700",
+        color: ACCENT_COLOR,
+    },
 
+    statsLabel: {
+        fontSize: scale(13),
+        marginTop: 4,
+        color: TEXT_LIGHT,
+    },
+
+    /* ONLINE STATUS */
     onlineCard: {
-        margin: scale(15),
-        padding: scale(20),
-        borderRadius: 12,
-        elevation: 4,
+        marginTop: scale(20),
+        marginHorizontal: scale(18),
+        padding: scale(18),
+        borderRadius: 16,
+        backgroundColor: CARD_BG,
+        elevation: 2,
     },
 
-    onlineRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    onlineHeader: {
+        flexDirection: "row",
+        alignItems: "center",
     },
 
-    onlineDot: { width: scale(14), height: scale(14), borderRadius: 7, marginHorizontal: 8 },
-    statusLabel: { fontWeight: '600', fontSize: scale(15) },
-    statusState: { fontWeight: '700', fontSize: scale(15) },
-    onlineDescription: { marginTop: scale(10), color: '#555' },
+    statusLabel: {
+        fontSize: scale(15),
+        fontWeight: "600",
+        color: TEXT_DARK,
+        marginRight: 10,
+    },
 
-    onlineButton: { marginTop: scale(15), borderRadius: 40 },
+    statusDot: {
+        width: scale(12),
+        height: scale(12),
+        borderRadius: 6,
+        marginRight: 8,
+    },
 
-    cardList: { marginTop: scale(20), paddingHorizontal: scale(15) },
+    statusText: {
+        fontSize: scale(15),
+        fontWeight: "700",
+        color: PRIMARY_COLOR,
+    },
 
-    itemCard: {
+    statusSubText: {
+        color: TEXT_LIGHT,
+        fontSize: scale(13),
+        marginTop: 8,
+        marginBottom: 14,
+    },
+
+    statusButton: {
+        borderRadius: 10,
+        paddingVertical: 4,
+    },
+
+    /* MENU */
+    menuList: {
+        marginTop: scale(10),
+        paddingHorizontal: scale(18),
+    },
+
+    menuCard: {
+        borderRadius: 14,
         marginBottom: scale(15),
-        borderRadius: 12,
-        elevation: 3,
-        backgroundColor: '#fff',
+        elevation: 2,
+        backgroundColor: CARD_BG,
     },
 
-    cardTitle: { fontSize: scale(16), fontWeight: '600', color: '#333' },
+    menuTitle: {
+        fontSize: scale(15),
+        fontWeight: "600",
+        color: TEXT_DARK,
+    },
+
+    menuIcon: {
+        backgroundColor: PRIMARY_COLOR,
+    },
+    actionButtonWrapper: {
+        marginHorizontal: scale(18),
+        marginTop: scale(10),
+    },
+
+    actionButton: {
+        paddingVertical: scale(6),
+        borderRadius: 10,
+    },
 });

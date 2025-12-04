@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Alert } from 'react-native';
+import { View, ScrollView, Alert, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import Sound from 'react-native-sound';
 import {
     Avatar,
     Text,
     Button,
     Card,
     Surface,
+    Divider
 } from 'react-native-paper';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +19,8 @@ import { scale } from 'react-native-size-matters';
 import { BASE_URL } from '../../config/api';
 import { getVehicleByDriver } from '../../api/vehicleApi';
 import { userLogout } from '../../api/authApi';
+import { fetchNewOrders } from '../../api/order';
+import { setNewOrder } from '../../redux/slices/orderSlice';
 import styles from '../../assets/styles/driverDashboard';
 
 import Footer from '../../components/Footer';
@@ -31,14 +34,25 @@ const DriverDashboardScreen = () => {
     const [loggingOut, setLoggingOut] = useState(false);
     const [isOnline, setIsOnline] = useState(false);
     const [active, setActive] = useState('home');
+    const [loadingOrders, setLoadingOrders] = useState(false);
+    const [orderState, setOrderState] = useState([]);
 
-    // Extra Stats
-    const [completedRides, setCompletedRides] = useState(18);
-    const [todaysEarnings, setTodaysEarnings] = useState(2450);
-    const [weeklyEarnings, setWeeklyEarnings] = useState(9230);
+
+    // Stats (placeholder)
+    const [completedRides] = useState(18);
+    const [todaysEarnings] = useState(2450);
+    const [weeklyEarnings] = useState(9230);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         if (!driver) return;
+
+        const loadStatus = async () => {
+            const savedStatus = await AsyncStorage.getItem("driver_online_status");
+            if (savedStatus !== null) {
+                setIsOnline(JSON.parse(savedStatus));
+            }
+        };
 
         const loadVehicle = async () => {
             try {
@@ -49,7 +63,7 @@ const DriverDashboardScreen = () => {
             }
             setLoading(false);
         };
-
+        loadStatus();
         loadVehicle();
     }, [driver]);
 
@@ -71,7 +85,7 @@ const DriverDashboardScreen = () => {
         try {
             const response = await userLogout();
             await AsyncStorage.removeItem("auth_token");
-
+            await AsyncStorage.removeItem("driver_online_status");
             Alert.alert("Success", response.message || "Logged out successfully.");
 
             navigation.reset({
@@ -86,37 +100,128 @@ const DriverDashboardScreen = () => {
         }
     };
 
-    if (!driver) return null;
+
+    const playOrderSound = () => {
+        let sound;
+
+        if (Platform.OS === 'ios') {
+            // iOS uses require()
+            sound = new Sound(
+                require('../../assets/sounds/order_notification.mp3'),
+                (error) => {
+                    if (error) {
+                        console.log("Sound loading failed:", error);
+                        return;
+                    }
+                    sound.play();
+                }
+            );
+        } else {
+            // Android uses raw folder
+            sound = new Sound('order_notification.mp3', Sound.MAIN_BUNDLE, (error) => {
+                if (error) {
+                    console.log("Sound loading failed:", error);
+                    return;
+                }
+                sound.play();
+            });
+        }
+    };
+
+
+    const handleGetNewOrders = async () => {
+        try {
+            setLoadingOrders(true);
+
+            const order = await fetchNewOrders();
+
+            if (!order) {
+                Alert.alert("No Orders", "No new orders available right now.");
+                return;
+            }
+
+            dispatch(setNewOrder(order));
+            setOrderState(order);
+
+            // 🔥 PLAY TONE HERE
+            playOrderSound();
+
+            // 🔥 THEN NAVIGATE
+            navigation.navigate("AcceptDeliveryScreen");
+
+        } catch (error) {
+            Alert.alert("Error", "Failed to fetch orders.");
+        } finally {
+            setLoadingOrders(false);
+        }
+    };
+
+    const toggleOnlineStatus = async () => {
+        const newStatus = !isOnline;
+        setIsOnline(newStatus);
+        await AsyncStorage.setItem("driver_online_status", JSON.stringify(newStatus));
+    };
 
     const driverName = driver?.first_name || "Driver";
     const profilePic = driver?.driver_details?.profile_pic
         ? `${BASE_URL}/storage/${driver.driver_details.profile_pic}`
         : null;
 
+    const renderOrderItem = ({ item }) => (
+        <Card style={{ marginBottom: 10, padding: 10 }}>
+            <Text style={{ fontWeight: 'bold' }}>Order Code: {item.order_code}</Text>
+            <Text>Status: {item.status}</Text>
+            <Text>Total: ₱{item.total_amount}</Text>
+            <Text>Customer: {item.place?.delivery_name}</Text>
+            <Text>Pickup: {item.place?.pickup_name}</Text>
+        </Card>
+    );
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scroll}>
 
                 {/* HEADER */}
-                <Card style={styles.headerCard}>
-                    <View style={styles.headerContent}>
+                <Surface style={styles.headerCard}>
+                    <View style={styles.headerRow}>
                         {profilePic ? (
-                            <Avatar.Image size={scale(90)} source={{ uri: profilePic }} />
+                            <Avatar.Image size={scale(85)} source={{ uri: profilePic }} />
                         ) : (
-                            <Avatar.Icon size={scale(90)} icon="account" />
+                            <Avatar.Icon size={scale(85)} icon="account" />
                         )}
 
-                        <Text variant="headlineSmall" style={styles.welcomeText}>
-                            Welcome, {driverName} 👋
-                        </Text>
-
-                        <Text variant="bodyMedium" style={styles.subText}>
-                            Ready for another productive day?
-                        </Text>
+                        <View style={styles.headerInfo}>
+                            <Text variant="headlineMedium" style={styles.welcomeText}>
+                                Hello, {driverName}
+                            </Text>
+                            <Text style={styles.headerSubText}>
+                                Let's make today productive 🚀
+                            </Text>
+                        </View>
                     </View>
-                </Card>
+                </Surface>
 
-                {/* STATISTICS ROW */}
+                {isOnline && (
+                    <>
+                        <View style={{ flex: 1, padding: 15 }}>
+                            <Button
+                                mode="contained"
+                                onPress={handleGetNewOrders}
+                                loading={loadingOrders}
+                                disabled={loadingOrders}
+                                style={{ marginBottom: 15, borderRadius: 8 }}
+                                buttonColor={"#8DB600"}
+                            >
+                                {loadingOrders ? "Loading..." : "Get New Orders"}
+                            </Button>
+                        </View>
+                    </>
+                )}
+                {/* STATISTICS */}
+                <View style={styles.sectionHeaderWrap}>
+                    <Text style={styles.sectionHeader}>Your Stats</Text>
+                </View>
+
                 <View style={styles.statsRow}>
                     <Card style={styles.statsCard}>
                         <Card.Content>
@@ -127,98 +232,118 @@ const DriverDashboardScreen = () => {
 
                     <Card style={styles.statsCard}>
                         <Card.Content>
-                            <Text style={styles.statsValue}>₱{todaysEarnings}</Text>
-                            <Text style={styles.statsLabel}>Today's Earnings</Text>
+                            <Text style={styles.statsValue}>Rs. {todaysEarnings}</Text>
+                            <Text style={styles.statsLabel}>Today’s Earnings</Text>
                         </Card.Content>
                     </Card>
                 </View>
 
-                <View style={styles.statsRow}>
-                    <Card style={styles.statsCardLarge}>
-                        <Card.Content>
-                            <Text style={styles.statsValue}>₱{weeklyEarnings}</Text>
-                            <Text style={styles.statsLabel}>Weekly Earnings</Text>
-                        </Card.Content>
-                    </Card>
-                </View>
+                <Card style={styles.statsCardWide}>
+                    <Card.Content>
+                        <Text style={styles.statsValue}>Rs. {weeklyEarnings}</Text>
+                        <Text style={styles.statsLabel}>Weekly Earnings</Text>
+                    </Card.Content>
+                </Card>
+
 
                 {/* ONLINE STATUS */}
                 <Surface style={styles.onlineCard}>
-                    <View style={styles.onlineRow}>
-                        <Text style={styles.statusLabel}>Status:</Text>
+                    <View style={styles.onlineHeader}>
+                        <Text style={styles.statusLabel}>Driver Status</Text>
                         <View
-                            style={[styles.onlineDot, { backgroundColor: isOnline ? '#28a745' : '#d9534f' }]}
+                            style={[
+                                styles.statusDot,
+                                { backgroundColor: isOnline ? "#28C76F" : "#EA5455" }
+                            ]}
                         />
-                        <Text style={styles.statusState}>{isOnline ? 'Online' : 'Offline'}</Text>
+                        <Text style={styles.statusText}>
+                            {isOnline ? "Online" : "Offline"}
+                        </Text>
                     </View>
 
-                    <Text style={styles.onlineDescription}>
+                    <Divider style={{ marginVertical: 10 }} />
+
+                    <Text style={styles.statusSubText}>
                         {isOnline
-                            ? 'You are available for delivery requests.'
-                            : 'Switch to online to start receiving deliveries.'}
+                            ? "You are currently accepting delivery requests."
+                            : "Switch to Online to receive new delivery tasks."}
                     </Text>
 
                     <Button
                         mode="contained"
-                        onPress={() => setIsOnline(!isOnline)}
-                        style={styles.onlineButton}
-                        buttonColor={isOnline ? '#d9534f' : '#8DB600'}
+                        style={styles.statusButton}
+                        onPress={toggleOnlineStatus}
+                        buttonColor={isOnline ? "#EA5455" : "#28C76F"}
                     >
-                        {isOnline ? 'Go Offline' : 'Go Online'}
+                        {isOnline ? "Go Offline" : "Go Online"}
                     </Button>
                 </Surface>
 
+
                 {/* MENU */}
                 {isOnline && (
-                    <View style={styles.cardList}>
-                        {hasVehicle !== null && (
+                    <>
+                        <View style={styles.sectionHeaderWrap}>
+                            <Text style={styles.sectionHeader}>Menu</Text>
+                        </View>
+
+                        <View style={styles.menuList}>
+
+                            {/* VEHICLE */}
+                            {hasVehicle !== null && (
+                                <Card
+                                    style={styles.menuCard}
+                                    onPress={() =>
+                                        hasVehicle
+                                            ? navigation.navigate('MyVehicle')
+                                            : navigation.navigate('VehicleRegistration', { driver })
+                                    }
+                                >
+                                    <Card.Title
+                                        title={hasVehicle ? "My Vehicle" : "Register Vehicle"}
+                                        titleStyle={styles.menuTitle}
+                                        left={(props) => (
+                                            <Avatar.Icon {...props} icon="car" style={styles.menuIcon} />
+                                        )}
+                                    />
+                                </Card>
+                            )}
+
+                            {/* DELIVERIES */}
                             <Card
-                                style={styles.itemCard}
-                                onPress={() =>
-                                    hasVehicle
-                                        ? navigation.navigate('MyVehicle')
-                                        : navigation.navigate('VehicleRegistration', { driver })
-                                }
+                                style={styles.menuCard}
+                                onPress={() => navigation.navigate('DriverDeliveries', { driver })}
                             >
                                 <Card.Title
-                                    title={hasVehicle ? 'My Vehicle' : 'Register Vehicle'}
-                                    titleStyle={styles.cardTitle}
+                                    title="Deliveries"
+                                    titleStyle={styles.menuTitle}
                                     left={(props) => (
-                                        <Avatar.Icon {...props} icon="car" backgroundColor="#8DB600" />
+                                        <Avatar.Icon {...props} icon="truck-delivery" style={styles.menuIcon} />
                                     )}
                                 />
                             </Card>
-                        )}
 
-                        <Card
-                            style={styles.itemCard}
-                            onPress={() => navigation.navigate('DriverDeliveries', { driver })}
-                        >
-                            <Card.Title
-                                title="Deliveries"
-                                titleStyle={styles.cardTitle}
-                                left={(props) => (
-                                    <Avatar.Icon {...props} icon="truck-delivery" backgroundColor="#8DB600" />
-                                )}
-                            />
-                        </Card>
-
-                        <Card style={styles.itemCard} onPress={handleLogout}>
-                            <Card.Title
-                                title={loggingOut ? 'Logging out...' : 'Logout'}
-                                titleStyle={[styles.cardTitle, loggingOut && { color: '#bbb' }]}
-                                left={(props) => (
-                                    <Avatar.Icon
-                                        {...props}
-                                        icon="logout"
-                                        color={loggingOut ? '#bbb' : '#fff'}
-                                        backgroundColor="#8DB600"
-                                    />
-                                )}
-                            />
-                        </Card>
-                    </View>
+                            {/* LOGOUT */}
+                            <Card style={styles.menuCard} onPress={handleLogout}>
+                                <Card.Title
+                                    title={loggingOut ? "Logging Out..." : "Logout"}
+                                    titleStyle={[
+                                        styles.menuTitle,
+                                        loggingOut && { color: "#aaa" }
+                                    ]}
+                                    left={(props) => (
+                                        <Avatar.Icon
+                                            {...props}
+                                            icon="logout"
+                                            style={styles.menuIcon}
+                                        />
+                                    )}
+                                />
+                            </Card>
+                        </View>
+                    </>
                 )}
+
             </ScrollView>
 
             <Footer active={active} onPress={setActive} />

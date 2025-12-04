@@ -22,7 +22,7 @@ import Footer from '../../components/Footer';
 import { BASE_URL } from "../../config/api";
 
 const { width } = Dimensions.get('window');
-const IMAGE_SIZE = (width - 60) / 2; // grid 2 columns with 15px spacing
+const IMAGE_SIZE = (width - 60) / 2;
 
 const EditDriverProfile = () => {
     const navigation = useNavigation();

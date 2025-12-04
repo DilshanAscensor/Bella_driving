@@ -1,19 +1,22 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
     View,
     Text,
-    StyleSheet,
     TouchableOpacity,
     Image,
+    StyleSheet,
     Alert,
-} from "react-native";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { launchCamera } from "react-native-image-picker";
+} from 'react-native';
+import { launchCamera } from 'react-native-image-picker';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { delivered } from '../../../../api/order';
+import { useSelector } from "react-redux";
 
-export default function DeliveryPhotoUploadScreen({ navigation, route }) {
-    const order = route?.params?.order;
+const DeliveryPhotoUploadScreen = ({ navigation }) => {
 
     const [deliveryPhoto, setDeliveryPhoto] = useState(null);
+    const order = useSelector((state) => state.order.newOrder);
+
 
     const takePhoto = async () => {
         const result = await launchCamera({
@@ -35,13 +38,36 @@ export default function DeliveryPhotoUploadScreen({ navigation, route }) {
         }
     };
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
+
         if (!deliveryPhoto) {
             Alert.alert("Photo Required", "Please capture the delivery photo.");
             return;
         }
 
-        navigation.navigate("DeliveryCompletedScreen", { order });
+        try {
+            const formData = new FormData();
+
+            formData.append("handover_image", {
+                name: deliveryPhoto.fileName || "deliveryPhoto.jpg",
+                type: deliveryPhoto.type,
+                uri: deliveryPhoto.uri,
+            });
+
+            const response = await delivered(order.id, formData);
+
+            if (!response) {
+                Alert.alert("Failed", "Failed to upload");
+                return;
+            }
+
+            Alert.alert("Success", "Package Delivered. Status changed to Delivered.");
+            navigation.navigate("DeliveryCompletedScreen");
+
+        } catch (error) {
+            Alert.alert("Error", error.message);
+        }
+
     };
 
     return (
@@ -68,6 +94,7 @@ export default function DeliveryPhotoUploadScreen({ navigation, route }) {
     );
 }
 
+export default DeliveryPhotoUploadScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
