@@ -65,7 +65,7 @@ export default function AcceptDeliveryScreen() {
                                 {order.place.distance_km || "1.2"} km away • {totalItems} items
                             </Text>
                         </View>
-                        <Text style={styles.earnings}>{order.total_amount}</Text>
+                        {/* <Text style={styles.earnings}>{order.total_amount}</Text> */}
                     </View>
 
                     {/* Pickup address */}
@@ -89,7 +89,7 @@ export default function AcceptDeliveryScreen() {
 
                     {/* Buttons */}
                     <View style={styles.btnRow}>
-                        <TouchableOpacity style={styles.declineBtn}>
+                        <TouchableOpacity style={styles.declineBtn} onPress={() => navigation.goBack()}>
                             <Text style={styles.declineText}>Decline</Text>
                         </TouchableOpacity>
 

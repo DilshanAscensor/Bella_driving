@@ -23,7 +23,6 @@ import AuthLoadingScreen from './src/screens/AuthLoadingScreen';
 import OtpScreen from './src/screens/login/OtpVerificationScreen';
 import DriverDashboard from './src/screens/driver/Dashboard';
 import DriverDeliveries from './src/screens/driver/DriverDeliveriesScreen';
-import CustomerDashboard from './src/screens/customer/CustomerDashboardScreen';
 import DriverProfile from './src/screens/driver/UserProfileScreen';
 import EditDriverProfile from './src/screens/driver/EditProfile';
 import AcceptDeliveryScreen from './src/screens/driver/delivery/order/AcceptDeliveryScreen';
@@ -31,11 +30,17 @@ import DeliveryMapScreen from './src/screens/driver/delivery/DeliveryMapScreen';
 import OrderDetailsScreen from './src/screens/driver/delivery/order/OrderDetailsScreen';
 import PickupConfirmScreen from './src/screens/driver/delivery/order/PickupConfirmScreen';
 import PickupPhotoUpload from './src/screens/driver/delivery/order/PickupPhotoUpload';
-import DeliveryConfirmationScreen from './src/screens/driver/delivery/order/DeliveryConfirmationScreen';
 import DeliveryCompletedScreen from './src/screens/driver/delivery/order/DeliveryCompletedScreen';
 import DeliveryPhotoUploadScreen from './src/screens/driver/delivery/order/DeliveryPhotoUploadScreen';
 import DocumentsAndLicensesScreen from './src/screens/driver/profile/DocumentsAndLicenses';
 import EarningsScreen from './src/screens/driver/EarningsScreen';
+
+import CustomerDashboard from './src/screens/customer/CustomerDashboardScreen';
+import OngoingOrdersScreen from './src/screens/customer/OngoingOrdersScreen';
+import OrderHistoryScreen from './src/screens/customer/OrderHistoryScreen';
+import CustomerOrderDetailsScreen from './src/screens/customer/OrderDetailsScreen';
+import CustomerProfileScreen from './src/screens/customer/profile/CustomerProfileScreen';
+import EditCustomerProfileScreen from './src/screens/customer/profile/EditCustomerProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,7 +59,6 @@ export default function App() {
               <Stack.Screen name="SplashScreen" component={SplashScreen} />
               <Stack.Screen name="HomeScreen" component={HomeScreen} />
               <Stack.Screen name="Registration" component={RegistrationScreen} />
-              <Stack.Screen name="CustomerDashboard" component={CustomerDashboard} />
               <Stack.Screen name="DriverRegistration" component={DriverRegistration} />
               <Stack.Screen name="DriverDashboard" component={DriverDashboard} />
               <Stack.Screen name="DriverDeliveries" component={DriverDeliveries} />
@@ -71,12 +75,18 @@ export default function App() {
               <Stack.Screen name="DeliveryMap" component={DeliveryMapScreen} />
               <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
               <Stack.Screen name="PickupPhotoUpload" component={PickupPhotoUpload} />
-              <Stack.Screen name="DeliveryConfirmationScreen" component={DeliveryConfirmationScreen} />
               <Stack.Screen name="DeliveryCompletedScreen" component={DeliveryCompletedScreen} />
               <Stack.Screen name="DeliveryPhotoUploadScreen" component={DeliveryPhotoUploadScreen} />
               <Stack.Screen name="DocumentsAndLicenses" component={DocumentsAndLicensesScreen} />
               <Stack.Screen name="EarningsScreen" component={EarningsScreen} />
               <Stack.Screen name="PickupConfirm" component={PickupConfirmScreen} />
+
+              <Stack.Screen name="CustomerDashboard" component={CustomerDashboard} />
+              <Stack.Screen name="OngoingOrders" component={OngoingOrdersScreen} />
+              <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
+              <Stack.Screen name="CustomerOrderDetails" component={CustomerOrderDetailsScreen} />
+              <Stack.Screen name="CustomerProfileScreen" component={CustomerProfileScreen} />
+              <Stack.Screen name="EditCustomerProfile" component={EditCustomerProfileScreen} />
             </Stack.Navigator>
           </NavigationContainer>
         </PaperProvider>

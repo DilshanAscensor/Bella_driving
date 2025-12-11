@@ -93,15 +93,15 @@ export default function PickupConfirmScreen() {
                                 <View key={item.id} style={styles.itemRow}>
                                     <Text style={styles.itemName}>{item.item_name}</Text>
                                     <Text style={styles.itemQuantity}>x{item.quantity}</Text>
-                                    <Text style={styles.itemPrice}>{item.total}</Text>
+                                    {/* <Text style={styles.itemPrice}>{item.total}</Text> */}
                                 </View>
                             ))}
 
                             {/* Total Amount */}
-                            <View style={styles.totalRow}>
+                            {/* <View style={styles.totalRow}>
                                 <Text style={styles.totalText}>Total</Text>
                                 <Text style={styles.totalAmount}>{order.total_amount}</Text>
-                            </View>
+                            </View> */}
                         </View>
 
                         {/* Buttons Row */}

@@ -1,117 +1,253 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import React, { useState } from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    Alert,
+    TouchableOpacity,
+    ScrollView
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useSelector } from "react-redux";
+import { Picker } from "@react-native-picker/picker";
+import { scale, verticalScale, moderateScale } from "react-native-size-matters";
+import { confirmDeliveryApi } from '../../../../api/order';
+import { useNavigation } from '@react-navigation/native';
 
-const DeliveryCompletedScreen = ({ navigation }) => {
+export default function DeliveryCompletedScreen() {
+
+    const navigation = useNavigation();
+    const order = useSelector((state) => state.order.newOrder);
+
+    const [paymentType, setPaymentType] = useState("cash");
+
+    const handleConfirmDelivery = async () => {
+        try {
+            const response = await confirmDeliveryApi(order.id, paymentType);
+
+            if (!response?.order) {
+                Alert.alert("Failed", "Unable to confirm delivery");
+                return;
+            }
+
+            Alert.alert("Success", "Delivery completed");
+            navigation.navigate("DriverDashboard");
+
+        } catch (error) {
+            Alert.alert("Error", error.response?.data?.message || error.message);
+        }
+    };
+
+
     return (
-        <View style={styles.container}>
-
-            <View style={styles.iconWrap}>
-                <MaterialIcons name="check-circle" size={110} color="#16a34a" />
-            </View>
-
-            <Text style={styles.title}>Delivery Completed!</Text>
-            <Text style={styles.subtitle}>
-                You have successfully delivered the order.
-            </Text>
-
-            <View style={styles.detailsBox}>
-                <Text style={styles.sectionTitle}>Order Summary</Text>
-
-                <View style={styles.row}>
-                    <Text style={styles.label}>Order ID:</Text>
-                    <Text style={styles.value}>#123456</Text>
-                </View>
-
-                <View style={styles.row}>
-                    <Text style={styles.label}>Delivered To:</Text>
-                    <Text style={styles.value}>John Doe</Text>
-                </View>
-
-                <View style={styles.row}>
-                    <Text style={styles.label}>Location:</Text>
-                    <Text style={styles.value}>Kandy</Text>
-                </View>
-            </View>
-
-            <TouchableOpacity
-                style={styles.homeButton}
-                onPress={() => navigation.reset({
-                    index: 0,
-                    routes: [{ name: "DriverDashboard" }],
-                })}
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#f1f5f9" }}>
+            <ScrollView
+                contentContainerStyle={{ paddingBottom: verticalScale(80) }}
+                style={styles.container}
+                showsVerticalScrollIndicator={false}
             >
-                <Text style={styles.homeText}>Go to Dashboard</Text>
-            </TouchableOpacity>
+                <Text style={styles.title}>Delivery Confirmation</Text>
+                <Text style={styles.subtitle}>
+                    Review all details before completing delivery
+                </Text>
 
-        </View>
+                {/* Order Details */}
+                <View style={styles.infoCard}>
+                    <Text style={styles.sectionTitle}>Order Details</Text>
+
+                    <DetailRow label="Order Code" value={order?.order_code} />
+                    <DetailRow label="Customer" value={order?.place?.delivery_name} />
+                    <DetailRow label="Pickup Location" value={order?.place?.pickup_address} />
+                    <DetailRow label="Delivery Location" value={order?.place?.delivery_address} />
+                    <DetailRow label="Distance" value={`${order?.distance} km`} />
+                    <DetailRow label="Estimated Time" value={`${order?.time} mins`} />
+                </View>
+
+                {/* Fees */}
+                <View style={styles.infoCard}>
+                    <Text style={styles.sectionTitle}>Charges</Text>
+                    {order.details.map((item) => (
+                        <View key={item.id} style={styles.itemRow}>
+                            <Text style={styles.itemName}>{item.item_name} X {item.quantity}</Text>
+                            <Text style={styles.itemPrice}>{item.total}</Text>
+                        </View>
+                    ))}
+
+                    <DetailRow label="Transport Fee" value={`${order?.delivery_fee}`} />
+
+                    <View style={styles.separator} />
+
+                    <DetailRow
+                        label="Total Payable"
+                        value={`${order?.total_amount}`}
+                        bold
+                    />
+                </View>
+
+                {/* Payment Type */}
+                <View style={styles.infoCard}>
+                    <Text style={styles.sectionTitle}>Payment Type</Text>
+
+                    <View style={styles.pickerWrapper}>
+                        <Picker
+                            selectedValue={paymentType}
+                            onValueChange={(itemValue) => setPaymentType(itemValue)}
+                        >
+                            <Picker.Item label="Cash" value="cash" />
+                            <Picker.Item label="Card" value="card" />
+                            <Picker.Item label="Online Payment" value="online" />
+                        </Picker>
+                    </View>
+                </View>
+
+                {/* Buttons */}
+                <TouchableOpacity
+                    style={styles.confirmButton}
+                    onPress={handleConfirmDelivery}
+                >
+                    <Text style={styles.confirmText}>Confirm Delivery</Text>
+                </TouchableOpacity>
+            </ScrollView>
+        </SafeAreaView>
     );
 };
 
-export default DeliveryCompletedScreen;
+const DetailRow = ({ label, value, bold }) => (
+    <View style={styles.rowWrap}>
+        <Text style={[styles.label, bold && { fontWeight: "700" }]}>{label}:</Text>
+
+        <Text
+            style={[
+                styles.valueWrap,
+                bold && { fontWeight: "700" }
+            ]}
+            numberOfLines={0}
+        >
+            {value}
+        </Text>
+    </View>
+);
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        padding: scale(10),
         backgroundColor: "#f8fafc",
-        paddingHorizontal: 20,
+    },
+    title: {
+        fontSize: moderateScale(22),
+        fontWeight: "700",
+        marginBottom: verticalScale(5),
+    },
+    subtitle: {
+        fontSize: moderateScale(14),
+        color: "#6b7280",
+        marginBottom: verticalScale(20),
+    },
+    card: {
+        backgroundColor: "#fff",
+        borderRadius: scale(12),
+        padding: scale(15),
+        marginBottom: verticalScale(20),
+        borderWidth: 1,
+        borderColor: "#e2e8f0",
+    },
+    cardTitle: {
+        fontSize: moderateScale(16),
+        fontWeight: "600",
+        marginBottom: verticalScale(10),
+    },
+    photo: {
+        width: "100%",
+        height: verticalScale(220),
+        borderRadius: scale(10),
+    },
+    noPhoto: {
+        height: verticalScale(150),
+        borderRadius: scale(10),
+        backgroundColor: "#f1f5f9",
         justifyContent: "center",
         alignItems: "center",
     },
-    iconWrap: {
-        marginBottom: 25,
+    noPhotoText: {
+        marginTop: verticalScale(8),
+        color: "#6b7280",
+        fontSize: moderateScale(13),
     },
-    title: {
-        fontSize: 28,
-        fontWeight: "700",
-        textAlign: "center",
-        color: "#0f172a",
-    },
-    subtitle: {
-        fontSize: 15,
-        textAlign: "center",
-        color: "#64748b",
-        marginBottom: 25,
-    },
-    detailsBox: {
-        width: "100%",
+    infoCard: {
         backgroundColor: "#fff",
-        padding: 18,
-        borderRadius: 12,
-        borderColor: "#e5e7eb",
+        borderRadius: scale(12),
+        padding: scale(15),
+        marginBottom: verticalScale(20),
         borderWidth: 1,
-        marginBottom: 30,
+        borderColor: "#e2e8f0",
     },
     sectionTitle: {
-        fontSize: 16,
+        fontSize: moderateScale(17),
         fontWeight: "700",
-        marginBottom: 10,
-        color: "#1e3a8a",
+        marginBottom: verticalScale(10),
     },
     row: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginVertical: 6,
+        marginVertical: verticalScale(6),
     },
     label: {
-        fontSize: 14,
-        color: "#475569",
         fontWeight: "600",
+        color: "#475569",
+        fontSize: moderateScale(14),
     },
     value: {
-        fontSize: 14,
-        color: "#111827",
         fontWeight: "500",
+        color: "#111827",
+        fontSize: moderateScale(14),
     },
-    homeButton: {
+    separator: {
+        height: verticalScale(1),
+        backgroundColor: "#e5e7eb",
+        marginVertical: verticalScale(10),
+    },
+    pickerWrapper: {
+        backgroundColor: "#f1f5f9",
+        borderRadius: scale(8),
+    },
+    confirmButton: {
+        marginTop: verticalScale(25),
         backgroundColor: "#1e3a8a",
-        paddingVertical: 14,
-        paddingHorizontal: 30,
-        borderRadius: 10,
+        padding: verticalScale(15),
+        borderRadius: scale(10),
+        alignItems: "center",
     },
-    homeText: {
+    confirmText: {
         color: "#fff",
-        fontSize: 17,
-        fontWeight: "700",
+        fontSize: moderateScale(18),
+        fontWeight: "600",
     },
+    backButton: {
+        marginTop: verticalScale(15),
+        padding: verticalScale(12),
+        alignItems: "center",
+    },
+    backText: {
+        fontSize: moderateScale(16),
+        color: "#475569",
+    },
+    rowWrap: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        marginVertical: verticalScale(6),
+    },
+
+    valueWrap: {
+        flex: 1,
+        marginLeft: scale(10),
+        fontSize: moderateScale(14),
+        fontWeight: "500",
+        color: "#111827",
+        flexWrap: "wrap",
+    },
+    itemRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: scale(6) },
+    itemName: { fontSize: scale(15), fontWeight: "500" },
+    itemQuantity: { fontSize: scale(15) },
+    itemPrice: { fontSize: scale(15), fontWeight: "600" },
 });
