@@ -6,16 +6,15 @@ import {
     TouchableOpacity,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { PRIMARY_COLOR, ACCENT_COLOR } from "../../assets/theme/colors";
-import { useDispatch } from "react-redux";
 import styles from "../../assets/styles/customer/orderDetails";
-import { useSelector } from "react-redux";
 
-export default function EditCustomerProfileScreen() {
-    const dispatch = useDispatch();
+export default function CustomerOrderDetailsScreen() {
     const navigation = useNavigation();
-    const order = useSelector((state) => state.order.newOrder);
+    const route = useRoute();
+
+    const order = route.params?.order;
 
     if (!order) {
         return (
@@ -25,14 +24,9 @@ export default function EditCustomerProfileScreen() {
         );
     }
 
-    // Dummy items — later replace with real API items
-    const dummyItems = [
-        { id: 1, name: "Small Parcel", qty: 1, price: "150" },
-        { id: 2, name: "Medium Box", qty: 2, price: "200" },
-    ];
-
     return (
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+
             {/* Header */}
             <View style={styles.headerRow}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -52,7 +46,7 @@ export default function EditCustomerProfileScreen() {
                     <View
                         style={[
                             styles.statusBadge,
-                            order.status === "completed"
+                            order.status === "delivered"
                                 ? styles.statusCompleted
                                 : order.status === "cancelled"
                                     ? styles.statusCancelled
@@ -63,38 +57,62 @@ export default function EditCustomerProfileScreen() {
                     </View>
                 </View>
 
-                <Text style={styles.date}>{order.date}</Text>
+                <Text style={styles.date}>
+                    {new Date(order.created_at).toLocaleString()}
+                </Text>
 
                 {/* Pickup */}
                 <View style={styles.locationRow}>
                     <MaterialIcons name="location-pin" size={20} color={PRIMARY_COLOR} />
-                    <Text style={styles.locationText}>{order.pickup_address}</Text>
+                    <Text style={styles.locationText}>
+                        {order.place?.pickup_address}
+                    </Text>
                 </View>
 
                 {/* Delivery */}
                 <View style={styles.locationRow}>
                     <MaterialIcons name="flag" size={20} color={ACCENT_COLOR} />
-                    <Text style={styles.locationText}>{order.delivery_address}</Text>
+                    <Text style={styles.locationText}>
+                        {order.place?.delivery_address}
+                    </Text>
                 </View>
 
                 {/* Items Section */}
                 <Text style={styles.sectionTitle}>Items</Text>
 
-                {dummyItems.map((item) => (
+                {order.details?.map((item) => (
                     <View key={item.id} style={styles.itemRow}>
                         <Text style={styles.itemName}>
-                            {item.name} × {item.qty}
+                            {item.item_name} × {item.quantity}
                         </Text>
-                        <Text style={styles.itemPrice}>₹{item.price}</Text>
+                        <Text style={styles.itemPrice}>{item.item_price}</Text>
                     </View>
                 ))}
+
+                <View style={styles.divider} />
+
+                {/* Summary */}
+                <View style={styles.rowBetween}>
+                    <Text style={styles.totalLabel}>Subtotal:</Text>
+                    <Text style={styles.totalValue}>{order.subtotal}</Text>
+                </View>
+
+                <View style={styles.rowBetween}>
+                    <Text style={styles.totalLabel}>Delivery Fee:</Text>
+                    <Text style={styles.totalValue}>{order.delivery_fee}</Text>
+                </View>
+
+                <View style={styles.rowBetween}>
+                    <Text style={styles.totalLabel}>Discount:</Text>
+                    <Text style={styles.totalValue}>{order.discount}</Text>
+                </View>
 
                 <View style={styles.divider} />
 
                 {/* Total */}
                 <View style={styles.rowBetween}>
                     <Text style={styles.totalLabel}>Total Amount:</Text>
-                    <Text style={styles.totalValue}>₹{order.total_price}</Text>
+                    <Text style={styles.totalAmount}>{order.total_amount}</Text>
                 </View>
             </View>
         </ScrollView>

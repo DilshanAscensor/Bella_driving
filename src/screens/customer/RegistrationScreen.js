@@ -14,13 +14,15 @@ import {
     Dimensions,
     ActivityIndicator,
 } from 'react-native';
+
 import { launchImageLibrary } from 'react-native-image-picker';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Picker } from '@react-native-picker/picker';
-import { MaterialIcons } from '@react-native-vector-icons/material-icons'
+import { MaterialIcons } from '@react-native-vector-icons/material-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { registerCustomer } from '../../api/registrationApi';
 import commonStyles from '../../assets/styles/customer';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -35,7 +37,15 @@ const RegistrationScreen = ({ navigation }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // ✅ Request permission for image picking
+    // ❗ NEW — Correct permission for all Android versions
+    const getAndroidImagePermission = () => {
+        if (Platform.Version >= 33) {
+            return PERMISSIONS.ANDROID.READ_MEDIA_IMAGES;
+        } else {
+            return PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+        }
+    };
+
     const requestPermission = async (permission) => {
         try {
             let result = await check(permission);
@@ -49,17 +59,24 @@ const RegistrationScreen = ({ navigation }) => {
         }
     };
 
-    // ✅ Handle image selection
+    // 📸 Handle image picking
     const pickImage = async (setImage) => {
         try {
-            const permission =
-                Platform.OS === 'ios'
-                    ? PERMISSIONS.IOS.PHOTO_LIBRARY
-                    : PERMISSIONS.ANDROID.READ_MEDIA_IMAGES || PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+            let permission;
+
+            if (Platform.OS === 'ios') {
+                permission = PERMISSIONS.IOS.PHOTO_LIBRARY;
+            } else {
+                permission = getAndroidImagePermission();
+            }
 
             const hasPermission = await requestPermission(permission);
+
             if (!hasPermission) {
-                Alert.alert('Permission Required', 'Please allow access to photos to upload a profile picture.');
+                Alert.alert(
+                    'Permission Required',
+                    'Please allow access to photos to upload a profile picture.'
+                );
                 return;
             }
 
@@ -80,7 +97,7 @@ const RegistrationScreen = ({ navigation }) => {
         }
     };
 
-    // ✅ Input validation
+    // Validate inputs
     const validateInputs = () => {
         if (!profile_pic) return 'Profile picture is required';
         if (!first_name.trim()) return 'First name is required';
@@ -92,8 +109,10 @@ const RegistrationScreen = ({ navigation }) => {
         return '';
     };
 
-    // ✅ Handle registration and call API
+    // Submit registration
     const handleRegister = async () => {
+
+        await AsyncStorage.removeItem('auth_token');
         const validationError = validateInputs();
         if (validationError) {
             setError(validationError);
@@ -119,12 +138,14 @@ const RegistrationScreen = ({ navigation }) => {
                     name: profile_pic.fileName || 'profile.jpg',
                 });
             }
+
             const response = await registerCustomer(formData);
+
             if (response?.token) {
                 await AsyncStorage.setItem('auth_token', response.token);
-                console.log('Token saved:', response.token);
             }
-            navigation.navigate('CustomerDashboard', { customer: response.user });
+
+            navigation.navigate('LoginScreen');
         } catch (err) {
             console.error('Registration error:', err);
             setError(err.message || 'Registration failed. Please try again.');
@@ -133,12 +154,9 @@ const RegistrationScreen = ({ navigation }) => {
         }
     };
 
+    // Upload card UI
     const ImageUploadCard = ({ image, onPress }) => (
-        <TouchableOpacity
-            style={commonStyles.imageCard}
-            onPress={onPress}
-            activeOpacity={0.7}
-        >
+        <TouchableOpacity style={commonStyles.imageCard} onPress={onPress} activeOpacity={0.7}>
             {image ? (
                 <View style={commonStyles.imageContainer}>
                     <Image source={{ uri: image.uri }} style={commonStyles.uploadedImage} />
@@ -167,7 +185,6 @@ const RegistrationScreen = ({ navigation }) => {
                     showsVerticalScrollIndicator={false}
                     keyboardShouldPersistTaps="handled"
                 >
-                    {/* Header */}
                     <View style={commonStyles.header}>
                         <MaterialIcons name="person-add" size={60} color={commonStyles.PRIMARY_COLOR} />
                         <Text style={commonStyles.title}>Customer Registration</Text>
@@ -181,42 +198,16 @@ const RegistrationScreen = ({ navigation }) => {
                         </View>
                     ) : null}
 
-                    {/* Personal Information */}
+                    {/* Personal Info */}
                     <View style={commonStyles.card}>
                         <Text style={commonStyles.cardTitle}>Personal Information</Text>
 
                         <ImageUploadCard image={profile_pic} onPress={() => pickImage(setProfilePic)} />
 
-                        <CustomInput
-                            label="First Name"
-                            icon="person"
-                            value={first_name}
-                            onChangeText={setFirstName}
-                            placeholder="Enter First Name"
-                        />
-                        <CustomInput
-                            label="Last Name"
-                            icon="person"
-                            value={last_name}
-                            onChangeText={setLastName}
-                            placeholder="Enter Last Name"
-                        />
-                        <CustomInput
-                            label="Email"
-                            icon="email"
-                            value={email}
-                            onChangeText={setEmail}
-                            placeholder="Enter Email Address"
-                            keyboardType="email-address"
-                        />
-                        <CustomInput
-                            label="Phone"
-                            icon="phone"
-                            value={phone}
-                            onChangeText={setPhone}
-                            placeholder="Enter Phone Number"
-                            keyboardType="phone-pad"
-                        />
+                        <CustomInput label="First Name" icon="person" value={first_name} onChangeText={setFirstName} placeholder="Enter First Name" />
+                        <CustomInput label="Last Name" icon="person" value={last_name} onChangeText={setLastName} placeholder="Enter Last Name" />
+                        <CustomInput label="Email" icon="email" value={email} onChangeText={setEmail} placeholder="Enter Email Address" keyboardType="email-address" />
+                        <CustomInput label="Phone" icon="phone" value={phone} onChangeText={setPhone} placeholder="Enter Phone Number" keyboardType="phone-pad" />
 
                         <View style={commonStyles.inputContainer}>
                             <Text style={commonStyles.inputLabel}>Gender</Text>
@@ -224,7 +215,7 @@ const RegistrationScreen = ({ navigation }) => {
                                 <MaterialIcons name="wc" size={20} color={commonStyles.PRIMARY_COLOR} style={commonStyles.inputIcon} />
                                 <Picker
                                     selectedValue={gender}
-                                    onValueChange={(itemValue) => setGender(itemValue)}
+                                    onValueChange={setGender}
                                     style={commonStyles.picker}
                                     dropdownIconColor={commonStyles.PRIMARY_COLOR}
                                 >
@@ -250,7 +241,7 @@ const RegistrationScreen = ({ navigation }) => {
                         />
                     </View>
 
-                    {/* Register Button */}
+                    {/* Register */}
                     <TouchableOpacity
                         style={[commonStyles.registerButton, loading && commonStyles.registerButtonDisabled]}
                         onPress={handleRegister}
@@ -267,8 +258,7 @@ const RegistrationScreen = ({ navigation }) => {
                         )}
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={commonStyles.loginLinkContainer}
-                        onPress={() => navigation.navigate('LoginScreen')}>
+                    <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} style={commonStyles.loginLinkContainer}>
                         <Text style={commonStyles.loginText}>Already have an account? </Text>
                         <Text style={commonStyles.loginLink}>Sign In</Text>
                     </TouchableOpacity>
@@ -278,7 +268,7 @@ const RegistrationScreen = ({ navigation }) => {
     );
 };
 
-// ✅ Reusable TextInput Component
+// Reusable TextInput
 const CustomInput = ({
     label,
     icon,
