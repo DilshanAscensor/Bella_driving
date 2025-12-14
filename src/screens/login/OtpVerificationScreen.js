@@ -182,7 +182,7 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                                 ]}
                             >
                                 <Image
-                                    source={require('../../assets/images/taxi-app-logo.webp')}
+                                    source={require('../../assets/images/mickaido-main-logo.png')}
                                     style={styles.logo}
                                     resizeMode="contain"
                                 />

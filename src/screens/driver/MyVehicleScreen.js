@@ -96,7 +96,7 @@ const MyVehicleScreen = () => {
                             source={
                                 imageUrl
                                     ? { uri: imageUrl }
-                                    : require('../../assets/images/taxi-app-logo.webp')
+                                    : require('../../assets/images/mickaido-main-logo.png')
                             }
                             style={styles.vehicleImage}
                         />

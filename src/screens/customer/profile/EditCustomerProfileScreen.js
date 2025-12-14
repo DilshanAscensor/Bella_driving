@@ -248,7 +248,7 @@ export default function EditCustomerProfileScreen({ route }) {
                                 source={
                                     profilePicUri
                                         ? { uri: profilePicUri }
-                                        : require('../../../assets/images/taxi-app-logo.webp')
+                                        : require('../../../assets/images/mickaido-main-logo.png')
                                 }
                                 style={styles.profilePic}
                             />

@@ -110,9 +110,9 @@ const LoginScreen = ({ navigation }) => {
                 >
                     <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
                         <View style={styles.header}>
-                            <View style={[styles.logoContainer, { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
+                            <View style={[styles.logoContainer]}>
                                 <Image
-                                    source={require('../assets/images/taxi-app-logo.webp')}
+                                    source={require('../assets/images/mickaido-main-logo.png')}
                                     style={styles.logo}
                                     resizeMode="contain"
                                 />

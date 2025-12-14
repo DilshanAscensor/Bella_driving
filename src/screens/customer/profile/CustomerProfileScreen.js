@@ -88,7 +88,7 @@ export default function CustomerProfileScreen() {
                             source={
                                 profilePic
                                     ? { uri: profilePic }
-                                    : require('../../../assets/images/taxi-app-logo.webp')
+                                    : require('../../../assets/images/mickaido-main-logo.png')
                             }
                             style={styles.profilePic}
                         />
