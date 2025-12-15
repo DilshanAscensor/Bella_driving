@@ -248,7 +248,7 @@ export default function EditCustomerProfileScreen({ route }) {
                                 source={
                                     profilePicUri
                                         ? { uri: profilePicUri }
-                                        : require('../../../assets/images/mickaido-main-logo.png')
+                                        : require('../../../assets/images/user.png')
                                 }
                                 style={styles.profilePic}
                             />

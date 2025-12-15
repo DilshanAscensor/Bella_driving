@@ -62,8 +62,8 @@ const CustomerDashboardScreen = () => {
     };
 
     const customerName = customer?.first_name || 'Customer';
-    const profilePic = customer?.profile_pic
-        ? `${BASE_URL}/storage/${customer.profile_pic}`
+    const profilePic = customer.customer_details?.profile_pic
+        ? `${BASE_URL}/storage/${customer.customer_details.profile_pic}`
         : null;
 
     return (
@@ -77,7 +77,7 @@ const CustomerDashboardScreen = () => {
                         source={
                             profilePic
                                 ? { uri: profilePic }
-                                : require('../../assets/images/mickaido-main-logo.png')
+                                : require('../../assets/images/user.png')
                         }
                         style={styles.profileImage}
                     />
