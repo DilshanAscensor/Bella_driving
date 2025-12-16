@@ -6,6 +6,7 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from '@react-navigation/native';
 import { acceptOrder } from '../../../../api/order';
 
+
 export default function AcceptDeliveryScreen() {
     const order = useSelector((state) => state.order.newOrder);
     const navigation = useNavigation();
@@ -27,7 +28,8 @@ export default function AcceptDeliveryScreen() {
                 Alert.alert("Failed", "Failed to accept");
                 return;
             }
-            navigation.navigate("PickupConfirm");
+
+            navigation.replace("PickupMap", { order: order.data ?? order });
         } catch (error) {
             Alert.alert("Error", error.message);
         }
@@ -38,6 +40,7 @@ export default function AcceptDeliveryScreen() {
     const totalItems = order.details.reduce((sum, item) => sum + Number(item.quantity), 0);
 
     return (
+
         <View style={styles.container}>
             <View style={styles.mapPlaceholder}>
                 <Text style={styles.mapText}>Map Placeholder</Text>

@@ -60,7 +60,7 @@ const PickupPhotoScreen = ({ navigation }) => {
             }
 
             Alert.alert("Success", "Package picked up. Status changed to On The Way.");
-            navigation.navigate("DeliveryPhotoUploadScreen");
+            navigation.navigate("DeliveryMap");
 
         } catch (error) {
             Alert.alert("Error", error.message);

@@ -26,7 +26,6 @@ import DriverDeliveries from './src/screens/driver/DriverDeliveriesScreen';
 import DriverProfile from './src/screens/driver/UserProfileScreen';
 import EditDriverProfile from './src/screens/driver/EditProfile';
 import AcceptDeliveryScreen from './src/screens/driver/delivery/order/AcceptDeliveryScreen';
-import DeliveryMapScreen from './src/screens/driver/delivery/DeliveryMapScreen';
 import OrderDetailsScreen from './src/screens/driver/delivery/order/OrderDetailsScreen';
 import PickupConfirmScreen from './src/screens/driver/delivery/order/PickupConfirmScreen';
 import PickupPhotoUpload from './src/screens/driver/delivery/order/PickupPhotoUpload';
@@ -34,6 +33,8 @@ import DeliveryCompletedScreen from './src/screens/driver/delivery/order/Deliver
 import DeliveryPhotoUploadScreen from './src/screens/driver/delivery/order/DeliveryPhotoUploadScreen';
 import DocumentsAndLicensesScreen from './src/screens/driver/profile/DocumentsAndLicenses';
 import EarningsScreen from './src/screens/driver/EarningsScreen';
+import PickupMapScreen from './src/screens/driver/delivery/order/PickupMapScreen';
+import DeliveryMapScreen from './src/screens/driver/delivery/order/DeliveryMap';
 
 import CustomerDashboard from './src/screens/customer/CustomerDashboardScreen';
 import OngoingOrdersScreen from './src/screens/customer/OngoingOrdersScreen';
@@ -80,6 +81,7 @@ export default function App() {
               <Stack.Screen name="DocumentsAndLicenses" component={DocumentsAndLicensesScreen} />
               <Stack.Screen name="EarningsScreen" component={EarningsScreen} />
               <Stack.Screen name="PickupConfirm" component={PickupConfirmScreen} />
+              <Stack.Screen name="PickupMap" component={PickupMapScreen} />
 
               <Stack.Screen name="CustomerDashboard" component={CustomerDashboard} />
               <Stack.Screen name="OngoingOrders" component={OngoingOrdersScreen} />
