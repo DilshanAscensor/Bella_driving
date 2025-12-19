@@ -114,21 +114,17 @@ export const delivered = async (order_id, formData) => {
     }
 };
 
-export const confirmDeliveryApi = async (order_id, payment_method) => {
+export const confirmDeliveryApi = async (order_id) => {
     try {
         const token = await AsyncStorage.getItem("auth_token");
 
-        let formData = new FormData();
-        formData.append("payment_method", payment_method);
-
         const response = await axios.post(
             `${BASE_URL}/api/drivers/orders/${order_id}/confirm-delivery`,
-            formData,
+            {},
             {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     Accept: "application/json",
-                    "Content-Type": "multipart/form-data",
                 },
             }
         );
@@ -140,6 +136,7 @@ export const confirmDeliveryApi = async (order_id, payment_method) => {
         throw error;
     }
 };
+
 
 export const getOrders = async (customer_id) => {
     try {

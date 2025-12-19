@@ -19,11 +19,9 @@ export default function DeliveryCompletedScreen() {
     const navigation = useNavigation();
     const order = useSelector((state) => state.order.newOrder);
 
-    const [paymentType, setPaymentType] = useState("cash");
-
     const handleConfirmDelivery = async () => {
         try {
-            const response = await confirmDeliveryApi(order.id, paymentType);
+            const response = await confirmDeliveryApi(order.id);
 
             if (!response?.order) {
                 Alert.alert("Failed", "Unable to confirm delivery");
@@ -34,10 +32,12 @@ export default function DeliveryCompletedScreen() {
             navigation.navigate("DriverDashboard");
 
         } catch (error) {
-            Alert.alert("Error", error.response?.data?.message || error.message);
+            Alert.alert(
+                "Error",
+                error.response?.data?.message || error.message
+            );
         }
     };
-
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#f1f5f9" }}>
@@ -61,6 +61,7 @@ export default function DeliveryCompletedScreen() {
                     <DetailRow label="Delivery Location" value={order?.place?.delivery_address} />
                     <DetailRow label="Distance" value={`${order?.distance} km`} />
                     <DetailRow label="Estimated Time" value={`${order?.time} mins`} />
+                    <DetailRow label="Payment Type" value={`${order?.payment_method}`} />
                 </View>
 
                 {/* Fees */}
@@ -82,22 +83,6 @@ export default function DeliveryCompletedScreen() {
                         value={`${order?.total_amount}`}
                         bold
                     />
-                </View>
-
-                {/* Payment Type */}
-                <View style={styles.infoCard}>
-                    <Text style={styles.sectionTitle}>Payment Type</Text>
-
-                    <View style={styles.pickerWrapper}>
-                        <Picker
-                            selectedValue={paymentType}
-                            onValueChange={(itemValue) => setPaymentType(itemValue)}
-                        >
-                            <Picker.Item label="Cash" value="cash" />
-                            <Picker.Item label="Card" value="card" />
-                            <Picker.Item label="Online Payment" value="online" />
-                        </Picker>
-                    </View>
                 </View>
 
                 {/* Buttons */}
