@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import messaging from '@react-native-firebase/messaging';
 
 // Redux
 import { Provider } from 'react-redux';
@@ -8,7 +9,10 @@ import { store, persistor } from './src/redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
 import { PaperProvider } from 'react-native-paper';
 
-// Screens
+// Navigation ref
+import { navigationRef, navigate } from './src/navigation/NavigationService';
+
+// Screens (UNCHANGED)
 import RegistrationScreen from './src/screens/customer/RegistrationScreen';
 import DriverRegistration from './src/screens/driver/DriverRegistrationScreen';
 import MyVehicleScreen from './src/screens/driver/MyVehicleScreen';
@@ -43,19 +47,68 @@ import CustomerOrderDetailsScreen from './src/screens/customer/OrderDetailsScree
 import CustomerProfileScreen from './src/screens/customer/profile/CustomerProfileScreen';
 import EditCustomerProfileScreen from './src/screens/customer/profile/EditCustomerProfileScreen';
 
+//FCM listeners
+import { playOrderSound } from './src/utils/notificationSound';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+
+  useEffect(() => {
+
+    // 🔹 App opened from killed state
+    messaging()
+      .getInitialNotification()
+      .then(remoteMessage => {
+        if (remoteMessage?.data?.type === 'new_order') {
+          playOrderSound();
+          navigate('AcceptDeliveryScreen', {
+            order_id: remoteMessage.data.order_id,
+          });
+        }
+      });
+
+    // 🔹 App opened from background
+    const unsubscribeBackground = messaging().onNotificationOpenedApp(
+      remoteMessage => {
+        if (remoteMessage?.data?.type === 'new_order') {
+          playOrderSound();
+          navigate('AcceptDeliveryScreen', {
+            order_id: remoteMessage.data.order_id,
+          });
+        }
+      }
+    );
+
+    // 🔹 Foreground notification
+    const unsubscribeForeground = messaging().onMessage(
+      async remoteMessage => {
+        if (remoteMessage?.data?.type === 'new_order') {
+          playOrderSound();
+          navigate('AcceptDeliveryScreen', {
+            order_id: remoteMessage.data.order_id,
+          });
+        }
+      }
+    );
+
+    return () => {
+      unsubscribeBackground();
+      unsubscribeForeground();
+    };
+
+  }, []);
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-
         <PaperProvider>
-          <NavigationContainer>
+          <NavigationContainer ref={navigationRef}>
             <Stack.Navigator
               initialRouteName="AuthLoadingScreen"
               screenOptions={{ headerShown: false }}
             >
+              {/* UNCHANGED SCREENS */}
               <Stack.Screen name="AuthLoadingScreen" component={AuthLoadingScreen} />
               <Stack.Screen name="SplashScreen" component={SplashScreen} />
               <Stack.Screen name="HomeScreen" component={HomeScreen} />
@@ -92,7 +145,6 @@ export default function App() {
             </Stack.Navigator>
           </NavigationContainer>
         </PaperProvider>
-
       </PersistGate>
     </Provider>
   );

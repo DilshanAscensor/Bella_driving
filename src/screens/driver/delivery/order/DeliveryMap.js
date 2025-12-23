@@ -1,21 +1,77 @@
-import React from "react";
-import { View, TouchableOpacity, Text, Dimensions } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  Dimensions,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+} from "react-native";
 import { WebView } from "react-native-webview";
+import { useRoute, useNavigation } from "@react-navigation/native";
+
+import { getOrderById } from "../../../../api/order";
 import OrderNavigation from "../../../../components/OrderNavigation";
 
 const { height } = Dimensions.get("window");
 
-const DeliveryMapScreen = ({ navigation }) => {
-  const driver = { lat: 6.854000, lng: 79.925000 };
-  const delivery = { lat: 6.860000, lng: 79.930000 };
+const DeliveryMapScreen = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { order_id } = route.params || {};
 
-  const order = {
-    code: "ORD12345",
-    pickup_name: "John Doe",
-    destination: "5 km",
-    estimate_time: "12 mins",
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // ---------------- LOAD ORDER ----------------
+  useEffect(() => {
+    if (!order_id) {
+      Alert.alert("Error", "Order ID missing");
+      navigation.goBack();
+      return;
+    }
+
+    fetchOrder();
+  }, [order_id]);
+
+  const fetchOrder = async () => {
+    try {
+      const response = await getOrderById(order_id);
+      const orderData = response.data ?? response;
+      setOrder(orderData);
+    } catch (e) {
+      Alert.alert("Error", "Failed to load order");
+      navigation.goBack();
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // ---------------- LOADING ----------------
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+        <Text>Loading delivery…</Text>
+      </View>
+    );
+  }
+
+  if (!order) return null;
+
+  // ---------------- COORDINATES ----------------
+  const driver = {
+    lat: order.place.pickup_lat,
+    lng: order.place.pickup_lng,
+  };
+
+  const delivery = {
+    lat: order.place.delivery_lat,
+    lng: order.place.delivery_lng,
+  };
+
+  // ---------------- MAP HTML ----------------
   const html = `
   <!DOCTYPE html>
   <html>
@@ -40,11 +96,11 @@ const DeliveryMapScreen = ({ navigation }) => {
 
       var driverMarker = L.marker([${driver.lat}, ${driver.lng}])
         .addTo(map)
-        .bindPopup('Driver');
+        .bindPopup('Pickup');
 
       var deliveryMarker = L.marker([${delivery.lat}, ${delivery.lng}])
         .addTo(map)
-        .bindPopup('Delivery Location');
+        .bindPopup('Delivery');
 
       var group = new L.featureGroup([driverMarker, deliveryMarker]);
       map.fitBounds(group.getBounds().pad(0.2));
@@ -54,64 +110,47 @@ const DeliveryMapScreen = ({ navigation }) => {
   `;
 
   return (
-    // <View style={{ flex: 1 }}>
-    //   {/* MAP */}
-    //   <View style={{ height: height * 0.75 }}>
-    //     <WebView source={{ html }} style={{ flex: 1 }} />
-    //   </View>
-
-    //   {/* FOOTER */}
-    //   <View
-    //     style={{
-    //       flex: 1,
-    //       backgroundColor: "#fff",
-    //       paddingBottom: 10,
-
-    //     }}
-    //   >
-    //     <OrderNavigation order={order} />
-
-    //     <TouchableOpacity
-    //       style={{
-    //         backgroundColor: "#28a745",
-    //         marginHorizontal: 16,
-    //         marginTop: 10,
-    //         paddingVertical: 16,
-    //         borderRadius: 12,
-    //         alignItems: "center",
-    //       }}
-    //       onPress={() => navigation.navigate("DeliveryPhotoUploadScreen")}
-    //     >
-    //       <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
-    //         Complete Order
-    //       </Text>
-    //     </TouchableOpacity>
-    //   </View>
-    // </View>
     <View style={{ flex: 1 }}>
-      {/* Map */}
-      <WebView source={{ html }} style={{ height: height * 0.75 }} />
+      {/* MAP */}
+      <WebView source={{ html }} style={{ height: height * 0.72 }} />
 
-      {/* Footer */}
+      {/* ORDER INFO */}
       <OrderNavigation order={order} />
 
-      {/* Button */}
+      {/* COMPLETE BUTTON */}
       <TouchableOpacity
-        style={{
-          backgroundColor: "#8DB600",
-          margin: 16,
-          padding: 16,
-          borderRadius: 10,
-          alignItems: "center",
-        }}
-        onPress={() => navigation.navigate("DeliveryPhotoUploadScreen")}
+        style={styles.button}
+        onPress={() =>
+          navigation.navigate("DeliveryPhotoUploadScreen", {
+            order_id: order.id,
+          })
+        }
       >
-        <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
-          Complete Order
-        </Text>
+        <Text style={styles.buttonText}>Complete Order</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 export default DeliveryMapScreen;
+
+// ---------------- STYLES ----------------
+const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  button: {
+    backgroundColor: "#8DB600",
+    margin: 16,
+    padding: 16,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});

@@ -1,43 +1,92 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Text,
     StyleSheet,
     Alert,
     TouchableOpacity,
-    ScrollView
+    ScrollView,
+    ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSelector } from "react-redux";
-import { Picker } from "@react-native-picker/picker";
 import { scale, verticalScale, moderateScale } from "react-native-size-matters";
-import { confirmDeliveryApi } from '../../../../api/order';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from "@react-navigation/native";
+
+import { getOrderById, confirmDeliveryApi } from "../../../../api/order";
 
 export default function DeliveryCompletedScreen() {
-
     const navigation = useNavigation();
-    const order = useSelector((state) => state.order.newOrder);
+    const route = useRoute();
+    const { order_id } = route.params || {};
 
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState(false);
+
+    // ---------------- LOAD ORDER ----------------
+    useEffect(() => {
+        if (!order_id) {
+            Alert.alert("Error", "Order ID missing");
+            navigation.goBack();
+            return;
+        }
+
+        fetchOrder();
+    }, [order_id]);
+
+    const fetchOrder = async () => {
+        try {
+            const response = await getOrderById(order_id);
+            const orderData = response.data ?? response;
+            setOrder(orderData);
+        } catch (error) {
+            Alert.alert("Error", "Failed to load order");
+            navigation.goBack();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ---------------- CONFIRM DELIVERY ----------------
     const handleConfirmDelivery = async () => {
         try {
+            setProcessing(true);
+
             const response = await confirmDeliveryApi(order.id);
 
-            if (!response?.order) {
+            if (!response) {
                 Alert.alert("Failed", "Unable to confirm delivery");
                 return;
             }
 
             Alert.alert("Success", "Delivery completed");
-            navigation.navigate("DriverDashboard");
+
+            navigation.reset({
+                index: 0,
+                routes: [{ name: "DriverDashboard" }],
+            });
 
         } catch (error) {
             Alert.alert(
                 "Error",
                 error.response?.data?.message || error.message
             );
+        } finally {
+            setProcessing(false);
         }
     };
+
+    // ---------------- LOADING ----------------
+    if (loading) {
+        return (
+            <SafeAreaView style={styles.center}>
+                <ActivityIndicator size="large" />
+                <Text>Loading order…</Text>
+            </SafeAreaView>
+        );
+    }
+
+    if (!order) return null;
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#f1f5f9" }}>
@@ -51,73 +100,101 @@ export default function DeliveryCompletedScreen() {
                     Review all details before completing delivery
                 </Text>
 
-                {/* Order Details */}
+                {/* ORDER DETAILS */}
                 <View style={styles.infoCard}>
                     <Text style={styles.sectionTitle}>Order Details</Text>
 
-                    <DetailRow label="Order Code" value={order?.order_code} />
-                    <DetailRow label="Customer" value={order?.place?.delivery_name} />
-                    <DetailRow label="Pickup Location" value={order?.place?.pickup_address} />
-                    <DetailRow label="Delivery Location" value={order?.place?.delivery_address} />
-                    <DetailRow label="Distance" value={`${order?.distance} km`} />
-                    <DetailRow label="Estimated Time" value={`${order?.time} mins`} />
-                    <DetailRow label="Payment Type" value={`${order?.payment_method}`} />
+                    <DetailRow label="Order Code" value={order.order_code} />
+                    <DetailRow
+                        label="Customer"
+                        value={order?.place?.delivery_name}
+                    />
+                    <DetailRow
+                        label="Pickup Location"
+                        value={order?.place?.pickup_address}
+                    />
+                    <DetailRow
+                        label="Delivery Location"
+                        value={order?.place?.delivery_address}
+                    />
+                    <DetailRow
+                        label="Payment Type"
+                        value={order.payment_method}
+                    />
                 </View>
 
-                {/* Fees */}
+                {/* CHARGES */}
                 <View style={styles.infoCard}>
                     <Text style={styles.sectionTitle}>Charges</Text>
+
                     {order.details.map((item) => (
                         <View key={item.id} style={styles.itemRow}>
-                            <Text style={styles.itemName}>{item.item_name} X {item.quantity}</Text>
-                            <Text style={styles.itemPrice}>{item.total}</Text>
+                            <Text style={styles.itemName}>
+                                {item.item_name} × {item.quantity}
+                            </Text>
+                            <Text style={styles.itemPrice}>
+                                Rs. {item.total}
+                            </Text>
                         </View>
                     ))}
 
-                    <DetailRow label="Transport Fee" value={`${order?.delivery_fee}`} />
+                    <DetailRow
+                        label="Delivery Fee"
+                        value={`Rs. ${order.delivery_fee}`}
+                    />
 
                     <View style={styles.separator} />
 
                     <DetailRow
                         label="Total Payable"
-                        value={`${order?.total_amount}`}
+                        value={`Rs. ${order.total_amount}`}
                         bold
                     />
                 </View>
 
-                {/* Buttons */}
+                {/* CONFIRM BUTTON */}
                 <TouchableOpacity
                     style={styles.confirmButton}
                     onPress={handleConfirmDelivery}
+                    disabled={processing}
                 >
-                    <Text style={styles.confirmText}>Confirm Delivery</Text>
+                    <Text style={styles.confirmText}>
+                        {processing ? "Confirming..." : "Confirm Delivery"}
+                    </Text>
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
     );
-};
+}
 
+// ---------------- DETAIL ROW ----------------
 const DetailRow = ({ label, value, bold }) => (
     <View style={styles.rowWrap}>
-        <Text style={[styles.label, bold && { fontWeight: "700" }]}>{label}:</Text>
-
+        <Text style={[styles.label, bold && { fontWeight: "700" }]}>
+            {label}:
+        </Text>
         <Text
             style={[
                 styles.valueWrap,
-                bold && { fontWeight: "700" }
+                bold && { fontWeight: "700" },
             ]}
-            numberOfLines={0}
         >
             {value}
         </Text>
     </View>
 );
 
+// ---------------- STYLES ----------------
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: scale(10),
         backgroundColor: "#f8fafc",
+    },
+    center: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
     },
     title: {
         fontSize: moderateScale(22),
@@ -128,36 +205,6 @@ const styles = StyleSheet.create({
         fontSize: moderateScale(14),
         color: "#6b7280",
         marginBottom: verticalScale(20),
-    },
-    card: {
-        backgroundColor: "#fff",
-        borderRadius: scale(12),
-        padding: scale(15),
-        marginBottom: verticalScale(20),
-        borderWidth: 1,
-        borderColor: "#e2e8f0",
-    },
-    cardTitle: {
-        fontSize: moderateScale(16),
-        fontWeight: "600",
-        marginBottom: verticalScale(10),
-    },
-    photo: {
-        width: "100%",
-        height: verticalScale(220),
-        borderRadius: scale(10),
-    },
-    noPhoto: {
-        height: verticalScale(150),
-        borderRadius: scale(10),
-        backgroundColor: "#f1f5f9",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    noPhotoText: {
-        marginTop: verticalScale(8),
-        color: "#6b7280",
-        fontSize: moderateScale(13),
     },
     infoCard: {
         backgroundColor: "#fff",
@@ -172,9 +219,9 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         marginBottom: verticalScale(10),
     },
-    row: {
+    rowWrap: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        alignItems: "flex-start",
         marginVertical: verticalScale(6),
     },
     label: {
@@ -182,19 +229,31 @@ const styles = StyleSheet.create({
         color: "#475569",
         fontSize: moderateScale(14),
     },
-    value: {
+    valueWrap: {
+        flex: 1,
+        marginLeft: scale(10),
+        fontSize: moderateScale(14),
         fontWeight: "500",
         color: "#111827",
-        fontSize: moderateScale(14),
+        flexWrap: "wrap",
+    },
+    itemRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: scale(6),
+    },
+    itemName: {
+        fontSize: scale(15),
+        fontWeight: "500",
+    },
+    itemPrice: {
+        fontSize: scale(15),
+        fontWeight: "600",
     },
     separator: {
         height: verticalScale(1),
         backgroundColor: "#e5e7eb",
         marginVertical: verticalScale(10),
-    },
-    pickerWrapper: {
-        backgroundColor: "#f1f5f9",
-        borderRadius: scale(8),
     },
     confirmButton: {
         marginTop: verticalScale(25),
@@ -208,31 +267,4 @@ const styles = StyleSheet.create({
         fontSize: moderateScale(18),
         fontWeight: "600",
     },
-    backButton: {
-        marginTop: verticalScale(15),
-        padding: verticalScale(12),
-        alignItems: "center",
-    },
-    backText: {
-        fontSize: moderateScale(16),
-        color: "#475569",
-    },
-    rowWrap: {
-        flexDirection: "row",
-        alignItems: "flex-start",
-        marginVertical: verticalScale(6),
-    },
-
-    valueWrap: {
-        flex: 1,
-        marginLeft: scale(10),
-        fontSize: moderateScale(14),
-        fontWeight: "500",
-        color: "#111827",
-        flexWrap: "wrap",
-    },
-    itemRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: scale(6) },
-    itemName: { fontSize: scale(15), fontWeight: "500" },
-    itemQuantity: { fontSize: scale(15) },
-    itemPrice: { fontSize: scale(15), fontWeight: "600" },
 });

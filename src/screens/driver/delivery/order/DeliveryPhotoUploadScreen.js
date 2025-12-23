@@ -9,27 +9,32 @@ import {
 } from 'react-native';
 import { launchCamera } from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { delivered } from '../../../../api/order';
-import { useSelector } from "react-redux";
+import { useNavigation, useRoute } from '@react-navigation/native';
 
-const DeliveryPhotoUploadScreen = ({ navigation }) => {
+import { delivered } from '../../../../api/order';
+
+const DeliveryPhotoUploadScreen = () => {
+    const navigation = useNavigation();
+    const route = useRoute();
+    const { order_id } = route.params || {};
 
     const [deliveryPhoto, setDeliveryPhoto] = useState(null);
-    const order = useSelector((state) => state.order.newOrder);
 
-
+    // ---------------- TAKE PHOTO ----------------
     const takePhoto = async () => {
         const result = await launchCamera({
             mediaType: "photo",
             cameraType: "back",
             quality: 0.8,
-            includeBase64: false,
         });
 
         if (result.didCancel) return;
 
         if (result.errorCode) {
-            Alert.alert("Camera Error", result.errorMessage || "Unable to take picture.");
+            Alert.alert(
+                "Camera Error",
+                result.errorMessage || "Unable to take picture."
+            );
             return;
         }
 
@@ -38,7 +43,12 @@ const DeliveryPhotoUploadScreen = ({ navigation }) => {
         }
     };
 
+    // ---------------- UPLOAD ----------------
     const handleContinue = async () => {
+        if (!order_id) {
+            Alert.alert("Error", "Order ID missing");
+            return;
+        }
 
         if (!deliveryPhoto) {
             Alert.alert("Photo Required", "Please capture the delivery photo.");
@@ -54,47 +64,68 @@ const DeliveryPhotoUploadScreen = ({ navigation }) => {
                 uri: deliveryPhoto.uri,
             });
 
-            const response = await delivered(order.id, formData);
+            const response = await delivered(order_id, formData);
 
             if (!response) {
                 Alert.alert("Failed", "Failed to upload");
                 return;
             }
 
-            Alert.alert("Success", "Package Delivered. Status changed to Delivered.");
-            navigation.navigate("DeliveryCompletedScreen");
+            Alert.alert(
+                "Success",
+                "Package Delivered. Status changed to Delivered."
+            );
+
+            navigation.navigate("DeliveryCompletedScreen", {
+                order_id,
+            });
 
         } catch (error) {
             Alert.alert("Error", error.message);
         }
-
     };
 
+    // ---------------- UI ----------------
     return (
         <View style={styles.container}>
 
             <Text style={styles.title}>Delivery Photo</Text>
-            <Text style={styles.subtitle}>Take a photo at the drop-off point</Text>
+            <Text style={styles.subtitle}>
+                Take a photo at the drop-off point
+            </Text>
 
             <TouchableOpacity style={styles.imageBox} onPress={takePhoto}>
                 {deliveryPhoto ? (
-                    <Image source={{ uri: deliveryPhoto.uri }} style={styles.preview} />
+                    <Image
+                        source={{ uri: deliveryPhoto.uri }}
+                        style={styles.preview}
+                    />
                 ) : (
                     <View style={styles.placeholder}>
-                        <MaterialIcons name="photo-camera" size={55} color="#1e3a8a" />
-                        <Text style={styles.placeholderText}>Tap to capture</Text>
+                        <MaterialIcons
+                            name="photo-camera"
+                            size={55}
+                            color="#1e3a8a"
+                        />
+                        <Text style={styles.placeholderText}>
+                            Tap to capture
+                        </Text>
                     </View>
                 )}
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.btn} onPress={handleContinue}>
-                <Text style={styles.btnText}>Confirm Delivery Photo</Text>
+                <Text style={styles.btnText}>
+                    Confirm Delivery Photo
+                </Text>
             </TouchableOpacity>
+
         </View>
     );
-}
+};
 
 export default DeliveryPhotoUploadScreen;
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,

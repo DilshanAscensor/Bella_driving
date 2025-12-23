@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -7,70 +7,110 @@ import {
     Image,
     Alert,
     ScrollView,
+    ActivityIndicator,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { scale } from "react-native-size-matters";
-import { useNavigation } from '@react-navigation/native';
-import { useSelector } from "react-redux";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { confirmPickup } from '../../../../api/order';
+
+import { getOrderById, confirmPickup } from "../../../../api/order";
 
 export default function PickupConfirmScreen() {
     const navigation = useNavigation();
-    const order = useSelector((state) => state.order.newOrder);
+    const route = useRoute();
+    const { order_id } = route.params || {};
 
-    const confirmPickupFuc = async () => {
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState(false);
+
+    // ---------------- LOAD ORDER ----------------
+    useEffect(() => {
+        if (!order_id) {
+            Alert.alert("Error", "Order ID missing");
+            navigation.goBack();
+            return;
+        }
+
+        fetchOrder();
+    }, [order_id]);
+
+    const fetchOrder = async () => {
         try {
-            const response = await confirmPickup(order.id);
+            const response = await getOrderById(order_id);
+            const orderData = response.data ?? response;
+            setOrder(orderData);
+        } catch (e) {
+            Alert.alert("Error", "Failed to load order");
+            navigation.goBack();
+        } finally {
+            setLoading(false);
+        }
+    };
 
-            if (!response) {
-                Alert.alert("Failed", "Failed to accept");
-                return;
-            }
-            navigation.navigate("PickupPhotoUpload");
+    // ---------------- CONFIRM PICKUP ----------------
+    const confirmPickupFunc = async () => {
+        try {
+            setProcessing(true);
+            await confirmPickup(order.id);
+            setProcessing(false);
+
+            navigation.navigate("PickupPhotoUpload", {
+                order_id: order.id,
+            });
         } catch (error) {
+            setProcessing(false);
             Alert.alert("Error", error.message);
         }
     };
 
-
-    if (!order) {
+    // ---------------- LOADING ----------------
+    if (loading) {
         return (
-            <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No order loaded.</Text>
-            </View>
+            <SafeAreaView style={styles.center}>
+                <ActivityIndicator size="large" />
+                <Text>Loading order…</Text>
+            </SafeAreaView>
         );
     }
 
-    // Compute total items
-    const totalItems = order.details.reduce((sum, item) => sum + Number(item.quantity), 0);
+    if (!order) return null;
+
+    // ---------------- COMPUTED ----------------
+    const totalItems = order.details.reduce(
+        (sum, item) => sum + Number(item.quantity),
+        0
+    );
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.container}>
-                {/* MAP AREA */}
+
+                {/* MAP PLACEHOLDER */}
                 <View style={styles.mapArea}>
                     <Text style={styles.mapText}>Google Map Here</Text>
 
-                    {/* Floating Navigation Button */}
                     <TouchableOpacity style={styles.navButton}>
                         <MaterialIcons name="navigation" size={28} color="#fff" />
                     </TouchableOpacity>
                 </View>
 
                 {/* BOTTOM CARD */}
-
                 <View style={styles.cardContainer}>
                     <ScrollView>
 
-                        {/* Drag Handle */}
                         <View style={styles.dragHandle} />
 
-                        {/* Pickup Title */}
+                        {/* PICKUP INFO */}
                         <View style={styles.titleRow}>
                             <View style={{ flex: 1 }}>
-                                <Text style={styles.pickupTitle}>{order.place.pickup_name}</Text>
-                                <Text style={styles.pickupAddress}>{order.place.pickup_address}</Text>
+                                <Text style={styles.pickupTitle}>
+                                    {order?.place?.pickup_name}
+                                </Text>
+                                <Text style={styles.pickupAddress}>
+                                    {order?.place?.pickup_address}
+                                </Text>
                             </View>
 
                             <Image
@@ -81,56 +121,74 @@ export default function PickupConfirmScreen() {
                             />
                         </View>
 
-                        {/* Order Details Header */}
+                        {/* ORDER HEADER */}
                         <View style={styles.section}>
                             <Text style={styles.sectionTitle}>ORDER DETAILS</Text>
-                            <Text style={styles.orderId}>ID: {order.order_code}</Text>
+                            <Text style={styles.orderId}>
+                                ID: {order?.order_code}
+                            </Text>
                         </View>
 
-                        {/* Order Items */}
+                        {/* ORDER ITEMS */}
                         <View style={styles.orderList}>
                             {order.details.map((item) => (
                                 <View key={item.id} style={styles.itemRow}>
-                                    <Text style={styles.itemName}>{item.item_name}</Text>
-                                    <Text style={styles.itemQuantity}>x{item.quantity}</Text>
-                                    {/* <Text style={styles.itemPrice}>{item.total}</Text> */}
+                                    <Text style={styles.itemName}>
+                                        {item.item_name}
+                                    </Text>
+                                    <Text style={styles.itemQuantity}>
+                                        x{item.quantity}
+                                    </Text>
                                 </View>
                             ))}
-
-                            {/* Total Amount */}
-                            {/* <View style={styles.totalRow}>
-                                <Text style={styles.totalText}>Total</Text>
-                                <Text style={styles.totalAmount}>{order.total_amount}</Text>
-                            </View> */}
                         </View>
 
-                        {/* Buttons Row */}
+                        {/* SUMMARY */}
+                        <Text style={{ marginTop: scale(10), fontWeight: "600" }}>
+                            Items: {totalItems}
+                        </Text>
+
+                        {/* ACTION BUTTONS */}
                         <View style={styles.btnRow}>
                             <TouchableOpacity style={styles.smallBtn}>
-                                <MaterialIcons name="call" size={22} color="#4b5563" />
+                                <MaterialIcons name="call" size={22} />
                                 <Text style={styles.smallBtnText}>Call</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.smallBtn}>
-                                <MaterialIcons name="chat" size={22} color="#4b5563" />
+                                <MaterialIcons name="chat" size={22} />
                                 <Text style={styles.smallBtnText}>Chat</Text>
                             </TouchableOpacity>
                         </View>
 
-                        {/* Confirm Button */}
+                        {/* CONFIRM */}
                         <TouchableOpacity
                             style={styles.confirmBtn}
-                            onPress={confirmPickupFuc}
+                            onPress={confirmPickupFunc}
                         >
-                            <Text style={styles.confirmText}>Confirm Pickup</Text>
+                            <Text style={styles.confirmText}>
+                                Confirm Pickup
+                            </Text>
                         </TouchableOpacity>
 
                     </ScrollView>
                 </View>
             </View>
+
+            {/* PROCESSING MODAL */}
+            {processing && (
+                <View style={styles.processingOverlay}>
+                    <ActivityIndicator size="large" color="#fff" />
+                    <Text style={{ color: "#fff", marginTop: 10 }}>
+                        Confirming pickup…
+                    </Text>
+                </View>
+            )}
+
         </SafeAreaView>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#eef1f4" },

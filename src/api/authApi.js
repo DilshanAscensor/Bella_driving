@@ -29,3 +29,12 @@ export const verifyOtp = async (payload) => {
     return response.data;
 };
 
+export const saveFcmToken = async (token) => {
+    console.log("Saving FCM token to backend:", token);
+
+    const response = await apiClient.post('/drivers/fcm-token', {
+        fcm_token: token,
+    });
+
+    return response.data;
+};
