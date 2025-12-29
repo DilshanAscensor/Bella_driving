@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     ScrollView,
     Alert,
     ActivityIndicator,
 } from 'react-native';
+
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,12 +17,11 @@ import {
     Button,
     Card,
     Surface,
-    Divider,
 } from 'react-native-paper';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
-
+import { useDispatch } from 'react-redux';
 import { BASE_URL } from '../../config/api';
 import { getVehicleByDriver } from '../../api/vehicleApi';
 import { userLogout, saveFcmToken } from '../../api/authApi';
@@ -35,11 +35,10 @@ const DriverDashboardScreen = () => {
 
     const [loading, setLoading] = useState(true);
     const [hasVehicle, setHasVehicle] = useState(false);
-    const [loggingOut, setLoggingOut] = useState(false);
     const [isOnline, setIsOnline] = useState(false);
+    const [loggingOut, setLoggingOut] = useState(false);
     const [active, setActive] = useState('home');
-
-    // ---------------- INIT ----------------
+    const dispatch = useDispatch();
     useEffect(() => {
         init();
     }, [driver]);
@@ -52,21 +51,21 @@ const DriverDashboardScreen = () => {
             await loadVehicle();
         }
 
-        setLoading(false); // ✅ ALWAYS stop loading
+        setLoading(false);
     };
 
-    // ---------------- FCM ----------------
+    /* ---------------- FCM ---------------- */
     const initFCM = async () => {
         try {
             await messaging().requestPermission();
             const token = await messaging().getToken();
             await saveFcmToken(token);
         } catch (e) {
-            console.log('FCM ERROR:', e);
+            console.log('FCM error', e);
         }
     };
 
-    // ---------------- LOADERS ----------------
+    /* ---------------- DATA ---------------- */
     const loadOnlineStatus = async () => {
         const saved = await AsyncStorage.getItem('driver_online_status');
         if (saved !== null) {
@@ -83,10 +82,10 @@ const DriverDashboardScreen = () => {
         }
     };
 
-    // ---------------- LOGOUT ----------------
+    /* ---------------- LOGOUT ---------------- */
     const handleLogout = () => {
         Alert.alert(
-            'Confirm Logout',
+            'Logout',
             'Are you sure you want to logout?',
             [
                 { text: 'Cancel', style: 'cancel' },
@@ -117,7 +116,7 @@ const DriverDashboardScreen = () => {
         }
     };
 
-    // ---------------- ONLINE / OFFLINE ----------------
+    /* ---------------- ONLINE / OFFLINE ---------------- */
     const toggleOnlineStatus = async () => {
         const newStatus = !isOnline;
         setIsOnline(newStatus);
@@ -133,115 +132,120 @@ const DriverDashboardScreen = () => {
         }
     };
 
-    // ---------------- LOADING UI ----------------
+    /* ---------------- LOADING ---------------- */
     if (loading) {
         return (
-            <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <SafeAreaView style={styles.center}>
                 <ActivityIndicator size="large" />
             </SafeAreaView>
         );
     }
 
-    // ---------------- SAFETY CHECK ----------------
     if (!driver) {
         return (
-            <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <SafeAreaView style={styles.center}>
                 <Text>Driver not loaded</Text>
             </SafeAreaView>
         );
     }
 
-    // ---------------- UI DATA ----------------
     const driverName = driver.first_name || 'Driver';
-
     const profilePic = driver?.driver_details?.profile_pic
         ? `${BASE_URL}/storage/${driver.driver_details.profile_pic}`
         : null;
 
-    // ---------------- RENDER ----------------
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.scroll}>
+            <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
-                {/* HEADER */}
+                {/* ================= HEADER ================= */}
                 <Surface style={styles.headerCard}>
                     <View style={styles.headerRow}>
                         {profilePic ? (
-                            <Avatar.Image size={scale(85)} source={{ uri: profilePic }} />
+                            <Avatar.Image size={scale(72)} source={{ uri: profilePic }} />
                         ) : (
-                            <Avatar.Icon size={scale(85)} icon="account" />
+                            <Avatar.Icon size={scale(72)} icon="account" />
                         )}
 
                         <View style={styles.headerInfo}>
-                            <Text variant="headlineMedium" style={styles.welcomeText}>
-                                Hello, {driverName}
-                            </Text>
-                            <Text style={styles.headerSubText}>
-                                Waiting for new delivery requests 🚀
-                            </Text>
+                            <Text style={styles.greeting}>Welcome back</Text>
+                            <Text style={styles.driverName}>{driverName}</Text>
                         </View>
                     </View>
                 </Surface>
 
-                {/* STATUS CARD */}
-                <Surface style={styles.onlineCard}>
-                    <View style={styles.onlineHeader}>
-                        <Text style={styles.statusLabel}>Driver Status</Text>
+                {/* ================= STATUS ================= */}
+                <Surface style={styles.statusCard}>
+                    <View style={styles.statusTop}>
+                        <View>
+                            <Text style={styles.statusTitle}>Driver Status</Text>
+                            <Text style={styles.statusDesc}>
+                                {isOnline
+                                    ? 'You are available for deliveries'
+                                    : 'Go online to receive orders'}
+                            </Text>
+                        </View>
+
                         <View
                             style={[
-                                styles.statusDot,
-                                { backgroundColor: isOnline ? '#28C76F' : '#EA5455' },
+                                styles.statusBadge,
+                                { backgroundColor: isOnline ? '#8DB600' : '#EA5455' },
                             ]}
-                        />
-                        <Text style={styles.statusText}>
-                            {isOnline ? 'Online' : 'Offline'}
-                        </Text>
+                        >
+                            <Text style={styles.statusBadgeText}>
+                                {isOnline ? 'ONLINE' : 'OFFLINE'}
+                            </Text>
+                        </View>
                     </View>
-
-                    <Divider style={{ marginVertical: 10 }} />
-
-                    <Text style={styles.statusSubText}>
-                        {isOnline
-                            ? 'You will receive delivery requests.'
-                            : 'Go online to receive orders.'}
-                    </Text>
 
                     <Button
                         mode="contained"
-                        style={styles.statusButton}
                         onPress={toggleOnlineStatus}
-                        buttonColor={isOnline ? '#EA5455' : '#28C76F'}
+                        style={[
+                            styles.statusButton,
+                            { backgroundColor: isOnline ? '#EA5455' : '#8DB600' },
+                        ]}
                     >
                         {isOnline ? 'Go Offline' : 'Go Online'}
                     </Button>
                 </Surface>
 
-                {/* MENU */}
-                {isOnline && (
-                    <View style={styles.menuList}>
-                        <Card
-                            style={styles.menuCard}
-                            onPress={() =>
-                                hasVehicle
-                                    ? navigation.navigate('MyVehicle')
-                                    : navigation.navigate('VehicleRegistration', { driver })
-                            }
-                        >
-                            <Card.Title title={hasVehicle ? 'My Vehicle' : 'Register Vehicle'} />
-                        </Card>
+                {/* ================= MENU ================= */}
+                <View style={styles.menuList}>
+                    <Card
+                        style={styles.menuCard}
+                        onPress={() =>
+                            hasVehicle
+                                ? navigation.navigate('MyVehicle')
+                                : navigation.navigate('VehicleRegistration', { driver })
+                        }
+                    >
+                        <Card.Title
+                            title={hasVehicle ? 'My Vehicle' : 'Register Vehicle'}
+                            left={(props) => <Avatar.Icon style={styles.iconStyle} {...props} icon="truck" />}
+                        />
+                    </Card>
 
-                        <Card
-                            style={styles.menuCard}
-                            onPress={() => navigation.navigate('DriverDeliveries')}
-                        >
-                            <Card.Title title="My Deliveries" />
-                        </Card>
+                    <Card
+                        style={styles.menuCard}
+                        onPress={() => navigation.navigate('DriverDeliveries')}
+                    >
+                        <Card.Title
+                            title="My Deliveries"
+                            left={(props) => <Avatar.Icon style={styles.iconStyle} {...props} icon="package-variant" />}
+                        />
+                    </Card>
 
-                        <Card style={styles.menuCard} onPress={handleLogout}>
-                            <Card.Title title="Logout" />
-                        </Card>
-                    </View>
-                )}
+                    <Card
+                        style={[styles.menuCard, styles.logoutCard]}
+                        onPress={handleLogout}
+                    >
+                        <Card.Title
+                            title="Logout"
+                            left={(props) => <Avatar.Icon style={styles.iconLogoutStyle} {...props} icon="logout" />}
+                        />
+                    </Card>
+                </View>
 
             </ScrollView>
 

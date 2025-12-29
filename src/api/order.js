@@ -91,27 +91,21 @@ export const onTheWay = async (order_id, formData) => {
 };
 
 export const delivered = async (order_id, formData) => {
-    try {
-        const token = await AsyncStorage.getItem("auth_token");
+    const token = await AsyncStorage.getItem("auth_token");
 
-        const response = await axios.post(
-            `${BASE_URL}/api/drivers/orders/${order_id}/delivered`,
-            formData,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    Accept: "application/json",
-                    "Content-Type": "multipart/form-data",
-                },
-            }
-        );
+    const response = await axios.post(
+        `${BASE_URL}/api/drivers/orders/${order_id}/delivered`,
+        formData,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: "application/json",
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
 
-        return response.data.order;
-
-    } catch (error) {
-        console.log("🔥 API Error:", error.response?.data || error.message);
-        throw error;
-    }
+    return response.data.order;
 };
 
 export const confirmDeliveryApi = async (orderId) => {
