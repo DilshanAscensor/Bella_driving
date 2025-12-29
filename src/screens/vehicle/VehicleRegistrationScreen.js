@@ -9,6 +9,7 @@ import {
     Platform,
     Image,
     Alert,
+    Linking,
     SafeAreaView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -18,6 +19,7 @@ import { Picker } from '@react-native-picker/picker';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import commonStyles from '../../assets/styles/driver';
 import { registerVehicle } from '../../api/vehicleApi';
+
 
 const VehicleRegistrationScreen = ({ route, navigation }) => {
     const [make, setMake] = useState('');
@@ -66,7 +68,6 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
         { label: '8', value: '8' },
     ];
 
-    // 🔹 Request photo library permission
     const requestPermission = async (permission) => {
         try {
             let result = await check(permission);
@@ -80,27 +81,48 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
         }
     };
 
-    // 🔹 Image picker
     const pickImage = async (setImage, type) => {
         try {
-            const permission =
-                Platform.OS === 'ios'
-                    ? PERMISSIONS.IOS.PHOTO_LIBRARY
-                    : PERMISSIONS.ANDROID.READ_MEDIA_IMAGES ||
-                    PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+            const permission = Platform.select({
+                ios: PERMISSIONS.IOS.PHOTO_LIBRARY,
+                android: Platform.Version >= 33
+                    ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES
+                    : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
+            });
 
-            const hasPermission = await requestPermission(permission);
-            if (!hasPermission) {
+            let result = await check(permission);
+
+            if (result === RESULTS.DENIED) {
+                result = await request(permission);
+            }
+
+            if (result === RESULTS.BLOCKED) {
                 Alert.alert(
                     'Permission Required',
-                    `Please allow access to photos to upload ${type}.`
+                    `Please allow access to photos from Settings to upload your ${type}.`,
+                    [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'Open Settings', onPress: () => Linking.openSettings() },
+                    ]
                 );
                 return;
             }
 
-            const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.8 });
-            if (!result.didCancel && result.assets?.length) {
-                const asset = result.assets[0];
+            if (result !== RESULTS.GRANTED) {
+                Alert.alert(
+                    'Permission Required',
+                    `Access to photos is needed to upload your ${type}.`
+                );
+                return;
+            }
+
+            const pickerResult = await launchImageLibrary({
+                mediaType: 'photo',
+                quality: 0.8,
+            });
+
+            if (!pickerResult.didCancel && pickerResult.assets?.length) {
+                const asset = pickerResult.assets[0];
                 setImage({
                     uri: asset.uri,
                     type: asset.type || 'image/jpeg',
@@ -109,11 +131,10 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
             }
         } catch (err) {
             console.error(err);
-            Alert.alert('Error', `Failed to pick ${type}`);
+            Alert.alert('Error', `Failed to pick ${type}.`);
         }
     };
 
-    // 🔹 Validate form
     const validateInputs = () => {
         if (!make) return 'Vehicle Make is required';
         if (!vehicle_type) return 'Vehicle Type is required';
@@ -131,7 +152,6 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
         return '';
     };
 
-    // 🔹 Handle vehicle registration
     const handleRegister = async () => {
         const validationError = validateInputs();
         if (validationError) {

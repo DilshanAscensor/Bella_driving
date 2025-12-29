@@ -34,9 +34,9 @@ const SplashScreen = () => {
         >
             <SafeAreaView style={styles.container}>
                 <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-                <View style={[styles.logoCircle, { backgroundColor: isDarkMode ? '#334155' : ACCENT_COLOR }]}>
+                <View style={[styles.logoCircle]}>
                     <Image
-                        source={require('../assets/images/taxi-app-logo.webp')}
+                        source={require('../assets/images/mickaido-main-logo.png')}
                         style={styles.logo}
                         resizeMode="contain"
                     />

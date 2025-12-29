@@ -12,18 +12,12 @@ export default StyleSheet.create({
         paddingHorizontal: scale(25),
     },
     logoCircle: {
-        padding: scale(35),
-        borderRadius: scale(120),
         marginBottom: verticalScale(25),
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 6,
         elevation: 6,
     },
     logo: {
-        width: scale(110),
-        height: scale(110),
+        width: scale(120),
+        height: scale(120),
     },
     title: {
         fontSize: moderateScale(26),

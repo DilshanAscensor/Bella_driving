@@ -14,11 +14,14 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import * as ImagePicker from "react-native-image-picker";
 import { updateVehicle } from "../../api/vehicleApi";
 import { BASE_URL } from "../../config/api";
+import Footer from '../../components/Footer';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const EditVehicleScreen = () => {
     const route = useRoute();
     const navigation = useNavigation();
     const { vehicle } = route.params;
+    const [active, setActive] = useState("home");
 
     const [form, setForm] = useState({
         make: vehicle.make,
@@ -148,110 +151,113 @@ const EditVehicleScreen = () => {
     };
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-            {/* ✅ Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <MaterialIcons name="arrow-back" size={26} color="#333" />
-                </TouchableOpacity>
+        <SafeAreaView style={styles.container}>
+            <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
+                {/* ✅ Header */}
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <MaterialIcons name="arrow-back" size={26} color="#333" />
+                    </TouchableOpacity>
 
-                <Text style={styles.headerTitle}>Edit Vehicle</Text>
+                    <Text style={styles.headerTitle}>Edit Vehicle</Text>
 
-                <View style={{ width: 26 }} />
-            </View>
-
-            {/* ✅ Card UI */}
-            <View style={styles.card}>
-                <Text style={styles.cardTitle}>Vehicle Information</Text>
-
-                {/* ✅ Two-column inputs */}
-                <View style={styles.row}>
-                    <View style={styles.inputBox}>
-                        <Text style={styles.label}>Make</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={form.make}
-                            onChangeText={(txt) => setForm({ ...form, make: txt })}
-                        />
-                    </View>
-
-                    <View style={styles.inputBox}>
-                        <Text style={styles.label}>Type</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={form.vehicle_type}
-                            onChangeText={(txt) => setForm({ ...form, vehicle_type: txt })}
-                        />
-                    </View>
+                    <View style={{ width: 26 }} />
                 </View>
 
-                <View style={styles.row}>
+                {/* ✅ Card UI */}
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>Vehicle Information</Text>
+
+                    {/* ✅ Two-column inputs */}
+                    <View style={styles.row}>
+                        <View style={styles.inputBox}>
+                            <Text style={styles.label}>Make</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={form.make}
+                                onChangeText={(txt) => setForm({ ...form, make: txt })}
+                            />
+                        </View>
+
+                        <View style={styles.inputBox}>
+                            <Text style={styles.label}>Type</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={form.vehicle_type}
+                                onChangeText={(txt) => setForm({ ...form, vehicle_type: txt })}
+                            />
+                        </View>
+                    </View>
+
+                    <View style={styles.row}>
+                        <View style={styles.inputBox}>
+                            <Text style={styles.label}>Model</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={form.model}
+                                onChangeText={(txt) => setForm({ ...form, model: txt })}
+                            />
+                        </View>
+
+                        <View style={styles.inputBox}>
+                            <Text style={styles.label}>Year</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={form.year}
+                                onChangeText={(txt) => setForm({ ...form, year: txt })}
+                            />
+                        </View>
+                    </View>
+
+                    <View style={styles.row}>
+                        <View style={styles.inputBox}>
+                            <Text style={styles.label}>Color</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={form.color}
+                                onChangeText={(txt) => setForm({ ...form, color: txt })}
+                            />
+                        </View>
+
+                        <View style={styles.inputBox}>
+                            <Text style={styles.label}>Seats</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={form.seats}
+                                onChangeText={(txt) => setForm({ ...form, seats: txt })}
+                            />
+                        </View>
+                    </View>
+
                     <View style={styles.inputBox}>
-                        <Text style={styles.label}>Model</Text>
+                        <Text style={styles.label}>License Plate</Text>
                         <TextInput
                             style={styles.input}
-                            value={form.model}
-                            onChangeText={(txt) => setForm({ ...form, model: txt })}
+                            value={form.license_plate}
+                            onChangeText={(txt) => setForm({ ...form, license_plate: txt })}
                         />
                     </View>
 
                     <View style={styles.inputBox}>
-                        <Text style={styles.label}>Year</Text>
+                        <Text style={styles.label}>VIN</Text>
                         <TextInput
                             style={styles.input}
-                            value={form.year}
-                            onChangeText={(txt) => setForm({ ...form, year: txt })}
-                        />
-                    </View>
-                </View>
-
-                <View style={styles.row}>
-                    <View style={styles.inputBox}>
-                        <Text style={styles.label}>Color</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={form.color}
-                            onChangeText={(txt) => setForm({ ...form, color: txt })}
+                            value={form.vin}
+                            onChangeText={(txt) => setForm({ ...form, vin: txt })}
                         />
                     </View>
 
-                    <View style={styles.inputBox}>
-                        <Text style={styles.label}>Seats</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={form.seats}
-                            onChangeText={(txt) => setForm({ ...form, seats: txt })}
-                        />
-                    </View>
+                    {/* ✅ NEW IMAGE GRID PICKER */}
+                    <ImageGridPicker images={images} pickImage={pickImage} />
+
+                    {/* ✅ Save Button */}
+                    <TouchableOpacity style={styles.saveButton} onPress={handleUpdate}>
+                        <Text style={styles.saveButtonText}>Save Changes</Text>
+                    </TouchableOpacity>
                 </View>
-
-                <View style={styles.inputBox}>
-                    <Text style={styles.label}>License Plate</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={form.license_plate}
-                        onChangeText={(txt) => setForm({ ...form, license_plate: txt })}
-                    />
-                </View>
-
-                <View style={styles.inputBox}>
-                    <Text style={styles.label}>VIN</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={form.vin}
-                        onChangeText={(txt) => setForm({ ...form, vin: txt })}
-                    />
-                </View>
-
-                {/* ✅ NEW IMAGE GRID PICKER */}
-                <ImageGridPicker images={images} pickImage={pickImage} />
-
-                {/* ✅ Save Button */}
-                <TouchableOpacity style={styles.saveButton} onPress={handleUpdate}>
-                    <Text style={styles.saveButtonText}>Save Changes</Text>
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
+            </ScrollView>
+            <Footer active={active} onPress={setActive} />
+        </SafeAreaView>
     );
 };
 
@@ -402,7 +408,7 @@ const styles = StyleSheet.create({
     /* Save Button */
     saveButton: {
         marginTop: 28,
-        backgroundColor: "#0A84FF",
+        backgroundColor: "#1e3a8a",
         padding: 16,
         borderRadius: 12,
         alignItems: "center",

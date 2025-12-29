@@ -1,30 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
     StyleSheet,
-    SafeAreaView,
     StatusBar,
     Image,
     TouchableOpacity,
     Alert,
 } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PRIMARY_COLOR, ACCENT_COLOR } from '../../assets/theme/colors';
+import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { ACCENT_COLOR } from '../../assets/theme/colors';
 import { BASE_URL } from '../../config/api';
 import { userLogout } from '../../api/authApi';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const CustomerDashboardScreen = () => {
     const navigation = useNavigation();
-    const route = useRoute();
 
     const [loggingOut, setLoggingOut] = useState(false);
+    const customer = useSelector(state => state.user.user) || {};
 
-    const { customer } = route.params || {};
-
-    // ================= Logout Function =================
     const handleLogout = () => {
         if (loggingOut) return;
 
@@ -63,108 +61,120 @@ const CustomerDashboardScreen = () => {
         }
     };
 
-    // ===================================================
-
-    if (!customer) return null;
-
     const customerName = customer?.first_name || 'Customer';
-    const profilePic = customer?.profile_pic
-        ? `${BASE_URL}/storage/${customer.profile_pic}`
+    const profilePic = customer.customer_details?.profile_pic
+        ? `${BASE_URL}/storage/${customer.customer_details.profile_pic}`
         : null;
 
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#fff" />
 
-            {/* Header */}
+            {/* HEADER */}
             <View style={styles.header}>
                 <View style={styles.profileContainer}>
-                    {profilePic ? (
-                        <Image
-                            source={{ uri: profilePic }}
-                            style={styles.profileImage}
-                            resizeMode="cover"
-                        />
-                    ) : (
-                        <Image
-                            source={require('../../assets/images/taxi-app-logo.webp')}
-                            style={styles.profileImage}
-                            resizeMode="contain"
-                        />
-                    )}
+                    <Image
+                        source={
+                            profilePic
+                                ? { uri: profilePic }
+                                : require('../../assets/images/user.png')
+                        }
+                        style={styles.profileImage}
+                    />
                 </View>
-                <Text style={styles.welcomeText}>Welcome, {customerName} 👋</Text>
-                <Text style={styles.subText}>Ready to book your ride?</Text>
+
+                <Text style={styles.welcomeText}>Hello, {customerName} 👋</Text>
+                <Text style={styles.subText}>What would you like to do today?</Text>
             </View>
 
-            {/* Dashboard Actions */}
+            {/* ACTION CARDS */}
             <View style={styles.cardContainer}>
+
                 {/* <TouchableOpacity
                     style={styles.card}
-                    onPress={() => navigation.navigate('MyBookings', { customer })}
+                    onPress={() => navigation.navigate("CreateOrderScreen")}
                 >
-                    <MaterialIcons name="directions-car" size={28} color={ACCENT_COLOR} />
-                    <Text style={styles.cardText}>My Bookings</Text>
+                    <MaterialIcons name="add-shopping-cart" size={28} color={ACCENT_COLOR} />
+                    <Text style={styles.cardText}>Place New Order</Text>
                 </TouchableOpacity> */}
-                {/* 
+
                 <TouchableOpacity
                     style={styles.card}
-                    onPress={() => navigation.navigate('Wallet', { customer })}
+                    onPress={() => navigation.navigate("OngoingOrders")}
                 >
-                    <MaterialIcons name="account-balance-wallet" size={28} color={ACCENT_COLOR} />
-                    <Text style={styles.cardText}>Wallet</Text>
-                </TouchableOpacity> */}
+                    <MaterialIcons name="directions-bike" size={28} color={ACCENT_COLOR} />
+                    <Text style={styles.cardText}>Ongoing Order</Text>
+                </TouchableOpacity>
 
-                {/* <TouchableOpacity
+                <TouchableOpacity
                     style={styles.card}
-                    onPress={() => navigation.navigate('ProfileSettings', { customer })}
+                    onPress={() => navigation.navigate("OrderHistory")}
                 >
-                    <MaterialIcons name="settings" size={28} color={ACCENT_COLOR} />
-                    <Text style={styles.cardText}>Profile Settings</Text>
-                </TouchableOpacity> */}
+                    <MaterialIcons name="history" size={28} color={ACCENT_COLOR} />
+                    <Text style={styles.cardText}>Order History</Text>
+                </TouchableOpacity>
 
-                {/* Logout Button */}
+                <TouchableOpacity
+                    style={styles.card}
+                    onPress={() => navigation.navigate("CustomerProfileScreen")}
+                >
+                    <MaterialIcons name="account-circle" size={28} color={ACCENT_COLOR} />
+                    <Text style={styles.cardText}>Profile Settings</Text>
+                </TouchableOpacity>
+
                 <TouchableOpacity
                     style={styles.card}
                     onPress={handleLogout}
                     disabled={loggingOut}
-                    activeOpacity={0.7}
                 >
-                    <MaterialIcons name="logout" size={28} color={loggingOut ? '#ccc' : ACCENT_COLOR} />
-                    <Text style={[styles.cardText, loggingOut && { color: '#ccc' }]}>
-                        {loggingOut ? 'Logging out...' : 'Logout'}
+                    <MaterialIcons name="logout" size={28} color={loggingOut ? '#aaa' : ACCENT_COLOR} />
+                    <Text style={[styles.cardText, loggingOut && { color: '#aaa' }]}>
+                        {loggingOut ? "Logging out..." : "Logout"}
                     </Text>
                 </TouchableOpacity>
+
             </View>
 
-            {/* Footer */}
+            {/* FOOTER */}
             <View style={styles.footer}>
                 <Text style={styles.footerText}>© 2025 Belle Driving Belle</Text>
             </View>
+
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#fff' },
-    header: { alignItems: 'center', padding: 16 },
-    profileContainer: { width: 80, height: 80, borderRadius: 40, overflow: 'hidden', marginBottom: 12 },
+
+    header: { alignItems: 'center', padding: 20 },
+    profileContainer: {
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+        overflow: 'hidden',
+        marginBottom: 10,
+    },
     profileImage: { width: '100%', height: '100%' },
-    welcomeText: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-    subText: { fontSize: 14, color: '#666' },
-    cardContainer: { paddingHorizontal: 16, marginTop: 20 },
+
+    welcomeText: { fontSize: 20, fontWeight: '700', marginBottom: 4 },
+    subText: { fontSize: 14, color: '#555' },
+
+    cardContainer: { paddingHorizontal: 16, marginTop: 10 },
+
     card: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 12,
+        padding: 14,
         backgroundColor: '#fff',
-        borderRadius: 8,
+        borderRadius: 10,
         marginVertical: 8,
-        elevation: 2,
+        elevation: 3,
     },
-    cardText: { marginLeft: 12, fontSize: 16, color: '#333' },
-    footer: { alignItems: 'center', padding: 16 },
-    footerText: { fontSize: 12, color: '#999' },
+    cardText: { marginLeft: 12, fontSize: 16, fontWeight: '500', color: '#333' },
+
+    footer: { alignItems: 'center', padding: 20 },
+    footerText: { color: '#999', fontSize: 12 },
 });
 
 export default CustomerDashboardScreen;

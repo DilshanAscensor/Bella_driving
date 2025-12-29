@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "768087237516",
+    "project_id": "bella-taxi",
+    "storage_bucket": "bella-taxi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768087237516:android:c5e5b97530ef34d0f26ca9",
+        "android_client_info": {
+          "package_name": "com.driverapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCH6jUxDmJ7BsaRs7o6kmFR4-Uz0s6Ns6M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
