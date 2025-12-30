@@ -5,7 +5,14 @@ import {
     Alert,
     ActivityIndicator,
 } from 'react-native';
-
+import {
+    PRIMARY_COLOR,
+    ACCENT_COLOR,
+    TEXT_DARK,
+    TEXT_LIGHT,
+    CARD_BG,
+    SCREEN_BG,
+} from '../../assets/theme/colors';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -189,7 +196,7 @@ const DriverDashboardScreen = () => {
                         <View
                             style={[
                                 styles.statusBadge,
-                                { backgroundColor: isOnline ? '#8DB600' : '#EA5455' },
+                                { backgroundColor: isOnline ? '#2ECC71' : '#E74C3C' },
                             ]}
                         >
                             <Text style={styles.statusBadgeText}>
@@ -197,14 +204,18 @@ const DriverDashboardScreen = () => {
                             </Text>
                         </View>
                     </View>
-
                     <Button
                         mode="contained"
                         onPress={toggleOnlineStatus}
                         style={[
                             styles.statusButton,
-                            { backgroundColor: isOnline ? '#EA5455' : '#8DB600' },
+                            { backgroundColor: isOnline ? '#E74C3C' : PRIMARY_COLOR },
                         ]}
+                        labelStyle={{
+                            color: '#FFFFFF',
+                            fontSize: scale(15),
+                            fontWeight: '700',
+                        }}
                     >
                         {isOnline ? 'Go Offline' : 'Go Online'}
                     </Button>
@@ -221,9 +232,22 @@ const DriverDashboardScreen = () => {
                         }
                     >
                         <Card.Title
-                            title={hasVehicle ? 'My Vehicle' : 'Register Vehicle'}
-                            left={(props) => <Avatar.Icon style={styles.iconStyle} {...props} icon="truck" />}
+                            title="Register Vehicle"
+                            titleStyle={{
+                                color: TEXT_DARK,
+                                fontWeight: '600',
+                                fontSize: scale(15),
+                            }}
+                            left={(props) => (
+                                <Avatar.Icon
+                                    {...props}
+                                    icon="truck"
+                                    color={PRIMARY_COLOR}
+                                    style={styles.iconStyle}
+                                />
+                            )}
                         />
+
                     </Card>
 
                     <Card
@@ -232,7 +256,19 @@ const DriverDashboardScreen = () => {
                     >
                         <Card.Title
                             title="My Deliveries"
-                            left={(props) => <Avatar.Icon style={styles.iconStyle} {...props} icon="package-variant" />}
+                            titleStyle={{
+                                color: TEXT_DARK,
+                                fontWeight: '600',
+                                fontSize: scale(15),
+                            }}
+                            left={(props) => (
+                                <Avatar.Icon
+                                    {...props}
+                                    icon="package-variant"
+                                    color={PRIMARY_COLOR}
+                                    style={styles.iconStyle}
+                                />
+                            )}
                         />
                     </Card>
 
@@ -242,9 +278,22 @@ const DriverDashboardScreen = () => {
                     >
                         <Card.Title
                             title="Logout"
-                            left={(props) => <Avatar.Icon style={styles.iconLogoutStyle} {...props} icon="logout" />}
+                            titleStyle={{
+                                color: '#D32F2F',
+                                fontWeight: '600',
+                                fontSize: scale(15),
+                            }}
+                            left={(props) => (
+                                <Avatar.Icon
+                                    {...props}
+                                    icon="logout"
+                                    color="#D32F2F"
+                                    style={styles.iconLogoutStyle}
+                                />
+                            )}
                         />
                     </Card>
+
                 </View>
 
             </ScrollView>

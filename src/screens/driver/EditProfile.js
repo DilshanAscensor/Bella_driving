@@ -140,7 +140,7 @@ const EditDriverProfile = () => {
                     />
                 ) : (
                     <>
-                        <MaterialIcons name="add-a-photo" size={30} color="#8DB600" />
+                        <MaterialIcons name="add-a-photo" size={30} color="#FFA500" />
                         <Text style={{ marginTop: 5, textAlign: 'center', fontSize: 12 }}>
                             {label}
                         </Text>
@@ -158,7 +158,7 @@ const EditDriverProfile = () => {
     if (loading) {
         return (
             <View style={styles.centered}>
-                <ActivityIndicator size="large" color="#8DB600" />
+                <ActivityIndicator size="large" color="#FFA500" />
             </View>
         );
     }
@@ -200,7 +200,7 @@ const EditDriverProfile = () => {
 
                 <TouchableOpacity
                     style={{
-                        backgroundColor: '#8DB600',
+                        backgroundColor: '#FFA500',
                         flexDirection: 'row',
                         alignItems: 'center',
                         justifyContent: 'center',

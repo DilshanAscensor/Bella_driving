@@ -19,7 +19,7 @@ export default StyleSheet.create({
     title: {
         fontSize: moderateScale(22),
         fontWeight: '700',
-        color: '#1e3a8a',
+        color: '#122948',
         marginBottom: verticalScale(15),
         textAlign: 'center',
     },
@@ -37,13 +37,13 @@ export default StyleSheet.create({
     sectionTitle: {
         fontSize: moderateScale(18),
         fontWeight: '700',
-        color: '#8DB600',
+        color: '#FFA500',
         marginBottom: verticalScale(12),
     },
     labels: {
         fontSize: moderateScale(12),
         fontWeight: '700',
-        color: '#1e3a8a',
+        color: '#122948',
         marginBottom: verticalScale(5),
     },
     input: {
@@ -59,7 +59,7 @@ export default StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#8DB600',
+        backgroundColor: '#FFA500',
         paddingVertical: verticalScale(14),
         borderRadius: scale(25),
         marginBottom: verticalScale(20),
@@ -91,7 +91,7 @@ export default StyleSheet.create({
     },
     placeholderText: {
         fontSize: moderateScale(12),
-        color: '#8DB600',
+        color: '#FFA500',
         marginTop: verticalScale(5),
     },
     row: {

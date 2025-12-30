@@ -109,7 +109,7 @@ const UserProfileScreen = () => {
     if (loading) {
         return (
             <View style={styles.centered}>
-                <ActivityIndicator size="large" color="#1e3a8a" />
+                <ActivityIndicator size="large" color="#122948" />
             </View>
         );
     }
@@ -144,7 +144,7 @@ const UserProfileScreen = () => {
                             <Image source={{ uri: profilePic }} style={styles.profileAvatar} />
                         ) : (
                             <View style={styles.profileAvatarPlaceholder}>
-                                <MaterialIcons name="person" size={55} color="#8DB600" />
+                                <MaterialIcons name="person" size={55} color="#FFA500" />
                             </View>
                         )}
                     </View>
@@ -167,22 +167,22 @@ const UserProfileScreen = () => {
                     <Text style={styles.sectionTitle}>Personal Details</Text>
 
                     <View style={styles.infoRow}>
-                        <MaterialIcons name="badge" size={20} color="#1e3a8a" />
+                        <MaterialIcons name="badge" size={20} color="#122948" />
                         <Text style={styles.infoText}>NIC: {d.nic}</Text>
                     </View>
 
                     <View style={styles.infoRow}>
-                        <MaterialIcons name="person" size={20} color="#1e3a8a" />
+                        <MaterialIcons name="person" size={20} color="#122948" />
                         <Text style={styles.infoText}>Gender: {d.gender}</Text>
                     </View>
 
                     <View style={styles.infoRow}>
-                        <MaterialIcons name="place" size={20} color="#1e3a8a" />
+                        <MaterialIcons name="place" size={20} color="#122948" />
                         <Text style={styles.infoText}>District: {d.district}</Text>
                     </View>
 
                     <View style={styles.infoRow}>
-                        <MaterialIcons name="calendar-today" size={20} color="#1e3a8a" />
+                        <MaterialIcons name="calendar-today" size={20} color="#122948" />
                         <Text style={styles.infoText}>DOB: {d.dob}</Text>
                     </View>
                 </View>
@@ -192,14 +192,14 @@ const UserProfileScreen = () => {
                     <Text style={styles.sectionTitle}>License Information</Text>
 
                     <View style={styles.infoRow}>
-                        <MaterialIcons name="credit-card" size={20} color="#1e3a8a" />
+                        <MaterialIcons name="credit-card" size={20} color="#122948" />
                         <Text style={styles.infoText}>
                             License Number: {d.license_number}
                         </Text>
                     </View>
 
                     <View style={styles.infoRow}>
-                        <MaterialIcons name="event" size={20} color="#1e3a8a" />
+                        <MaterialIcons name="event" size={20} color="#122948" />
                         <Text style={styles.infoText}>
                             License Expiry: {d.license_expiry}
                         </Text>
@@ -216,7 +216,7 @@ const UserProfileScreen = () => {
                             <Text style={styles.actionButtonTitle}>Documents & Licenses</Text>
                             <Text style={styles.actionButtonSubtitle}>View all your documents</Text>
                         </View>
-                        <MaterialIcons name="chevron-right" size={28} color="#8DB600" />
+                        <MaterialIcons name="chevron-right" size={28} color="#FFA500" />
                     </TouchableOpacity>
 
                     {/* Vehicle Information */}
@@ -228,7 +228,7 @@ const UserProfileScreen = () => {
                             <Text style={styles.actionButtonTitle}>Vehicle Information</Text>
                             <Text style={styles.actionButtonSubtitle}>View your vehicle details</Text>
                         </View>
-                        <MaterialIcons name="chevron-right" size={28} color="#8DB600" />
+                        <MaterialIcons name="chevron-right" size={28} color="#FFA500" />
                     </TouchableOpacity>
 
                     {/* Log Out */}

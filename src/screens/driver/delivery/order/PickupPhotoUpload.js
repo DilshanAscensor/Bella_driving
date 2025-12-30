@@ -6,7 +6,6 @@ import {
     Image,
     StyleSheet,
     Alert,
-    SafeAreaView,
     ScrollView,
 } from 'react-native';
 
@@ -16,6 +15,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 import { onTheWay } from '../../../../api/order';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const PickupPhotoScreen = () => {
     const navigation = useNavigation();
@@ -104,22 +104,22 @@ const PickupPhotoScreen = () => {
                         onPress={() => takePhoto(setPhoto2)}
                     />
                 </View>
-
+                <View style={styles.bottomBar}>
+                    <TouchableOpacity
+                        style={[
+                            styles.button,
+                            (!photo1 || !photo2) && styles.buttonDisabled,
+                        ]}
+                        disabled={!photo1 || !photo2}
+                        onPress={uploadPhotos}
+                    >
+                        <Text style={styles.buttonText}>Confirm Pickup</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
 
             {/* BOTTOM BUTTON */}
-            <View style={styles.bottomBar}>
-                <TouchableOpacity
-                    style={[
-                        styles.button,
-                        (!photo1 || !photo2) && styles.buttonDisabled,
-                    ]}
-                    disabled={!photo1 || !photo2}
-                    onPress={uploadPhotos}
-                >
-                    <Text style={styles.buttonText}>Confirm Pickup</Text>
-                </TouchableOpacity>
-            </View>
+
         </SafeAreaView>
     );
 };
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
         marginTop: verticalScale(8),
         fontSize: moderateScale(13),
         fontWeight: '600',
-        color: '#1e3a8a',
+        color: '#122948',
     },
 
     bottomBar: {
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     },
 
     button: {
-        backgroundColor: '#1e3a8a',
+        backgroundColor: '#122948',
         paddingVertical: verticalScale(14),
         borderRadius: moderateScale(14),
         alignItems: 'center',

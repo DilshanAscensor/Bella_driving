@@ -8,12 +8,12 @@ import {
     ActivityIndicator,
     Alert,
     Dimensions,
-    ScrollView,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useNavigation, useRoute } from '@react-navigation/native';
-
+import styles from '../../../../assets/styles/acceptOrder';
 import { getOrderById, acceptOrder } from '../../../../api/order';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { height } = Dimensions.get('window');
 
@@ -33,7 +33,6 @@ const AcceptDeliveryScreen = () => {
             navigation.goBack();
             return;
         }
-
         fetchOrder();
     }, [order_id]);
 
@@ -83,209 +82,171 @@ const AcceptDeliveryScreen = () => {
 
     if (!order) return null;
 
+    const driver = {
+        lat: Number(order?.driver_lat ?? 6.86495),
+        lng: Number(order?.driver_lng ?? 79.89962),
+    };
+
+    const pickup = {
+        lat: Number(order?.place?.pickup_lat ?? 6.9271),
+        lng: Number(order?.place?.pickup_lng ?? 79.8612),
+    };
+
+    const delivery = {
+        lat: Number(order?.place?.delivery_lat ?? 6.861),
+        lng: Number(order?.place?.delivery_lng ?? 79.899),
+    };
     // ---------------- MAP ----------------
     const mapHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-      <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    </head>
-    <body style="margin:0">
-      <div id="map" style="width:100%;height:100vh"></div>
-      <script>
-        var map = L.map('map').setView([${order.place.pickup_lat}, ${order.place.pickup_lng}], 14);
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        L.marker([${order.place.pickup_lat}, ${order.place.pickup_lng}]).addTo(map).bindPopup('Pickup');
-        L.marker([${order.place.delivery_lat}, ${order.place.delivery_lng}]).addTo(map).bindPopup('Drop');
-      </script>
-    </body>
-    </html>
-  `;
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
 
-    // ---------------- UI ----------------
+  <script>
+    const driver = { lat: ${driver.lat}, lng: ${driver.lng} };
+    const pickup = { lat: ${pickup.lat}, lng: ${pickup.lng} };
+    const delivery = { lat: ${delivery.lat}, lng: ${delivery.lng} };
+
+    const map = L.map('map').setView(
+      [driver.lat, driver.lng],
+      14
+    );
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19
+    }).addTo(map);
+
+    const markers = [
+      L.marker([driver.lat, driver.lng]).bindPopup('Driver'),
+      L.marker([pickup.lat, pickup.lng]).bindPopup('Pickup'),
+      L.marker([delivery.lat, delivery.lng]).bindPopup('Drop')
+    ];
+
+    markers.forEach(m => m.addTo(map));
+
+    map.fitBounds(
+      L.featureGroup(markers).getBounds(),
+      { padding: [40, 40] }
+    );
+  </script>
+</body>
+</html>
+`;
+
     return (
-        <View style={styles.root}>
+        <SafeAreaView style={styles.root}>
+            <View style={styles.root}>
 
-            {/* MAP */}
-            <WebView source={{ html: mapHtml }} style={StyleSheet.absoluteFill} />
+                {/* MAP */}
+                <WebView
+                    source={{ html: mapHtml }}
+                    style={StyleSheet.absoluteFill}
+                />
 
-            {/* BOTTOM SHEET */}
-            <View style={styles.sheet}>
+                {/* BOTTOM CARD */}
+                <View style={styles.sheetDark}>
 
-                {/* HANDLE */}
-                <View style={styles.handle} />
-
-                <ScrollView showsVerticalScrollIndicator={false}>
-
-                    <Text style={styles.title}>New Delivery Request</Text>
-
-                    <Text style={styles.orderCode}>
-                        Order • {order?.order_code}
+                    <Text style={styles.orderId}>
+                        {order.order_code}
                     </Text>
 
-                    {/* PICKUP */}
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Pickup</Text>
-                        <Text style={styles.placeName}>
-                            {order?.place?.pickup_name}
+                    <View style={styles.rowBetween}>
+                        <Text style={styles.customerName}>
+                            {order?.place?.delivery_name ?? 'Customer'}
                         </Text>
-                        <Text style={styles.address}>
-                            {order?.place?.pickup_address}
+
+                        <View style={styles.urgentBadge}>
+                            <Text style={styles.urgentText}>URGENT</Text>
+                        </View>
+                    </View>
+
+                    {/* Distance & Price */}
+                    <View style={styles.rowBetween}>
+                        <Text style={styles.meta}>
+                            Distance{'\n'}
+                            <Text style={styles.metaValue}>
+                                {order.distance ?? '0.35'} KM
+                            </Text>
+                        </Text>
+
+                        <Text style={styles.meta}>
+                            Price{'\n'}
+                            <Text style={styles.metaValue}>
+                                {order.delivery_fee ?? '6.50'}
+                            </Text>
+                        </Text>
+                    </View>
+
+                    {/* PICKUP */}
+                    <View style={styles.locationBlock}>
+                        <Text style={styles.locationTitle}>PICK-UP</Text>
+                        <Text style={styles.locationText}>
+                            {order.place.pickup_address}
                         </Text>
                     </View>
 
                     {/* DROP */}
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Drop</Text>
-                        <Text style={styles.placeName}>
-                            {order?.place?.delivery_name}
-                        </Text>
-                        <Text style={styles.address}>
-                            {order?.place?.delivery_address}
+                    <View style={styles.locationBlock}>
+                        <Text style={styles.locationTitle}>DESTINATION</Text>
+                        <Text style={styles.locationText}>
+                            {order.place.delivery_address}
                         </Text>
                     </View>
 
-                    {/* ORDER SUMMARY */}
-                    <View style={styles.summary}>
-                        <Text style={styles.summaryText}>
-                            Items: {order?.details?.length ?? 0}
+                    {/* INFO */}
+                    <View style={styles.bullets}>
+                        <Text style={styles.bullet}>• Time sensitive</Text>
+                        <Text style={styles.bullet}>• Handpicked resources</Text>
+                        <Text style={styles.bullet}>
+                            • Instant pickup and doorstep drop-off
                         </Text>
-                        {/* <Text style={styles.summaryText}>
-                            Total: Rs. {order?.total_amount}
-                        </Text> */}
                     </View>
 
                     {/* ACTIONS */}
                     <View style={styles.actions}>
                         <TouchableOpacity
-                            style={styles.declineBtn}
+                            style={styles.ignoreBtn}
                             onPress={handleDecline}
                         >
-                            <Text>Decline</Text>
+                            <Text style={styles.ignoreText}>IGNORE</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             style={styles.acceptBtn}
                             onPress={handleAccept}
                         >
-                            <Text style={styles.acceptText}>Accept</Text>
+                            <Text style={styles.acceptText}>ACCEPT</Text>
                         </TouchableOpacity>
                     </View>
 
-                </ScrollView>
-            </View>
-
-            {/* PROCESSING MODAL */}
-            <Modal transparent visible={processing}>
-                <View style={styles.center}>
-                    <ActivityIndicator size="large" />
-                    <Text style={{ marginTop: 10 }}>Accepting order…</Text>
                 </View>
-            </Modal>
 
-        </View>
+                {/* PROCESSING */}
+                <Modal transparent visible={processing}>
+                    <View style={styles.center}>
+                        <ActivityIndicator size="large" />
+                        <Text style={{ marginTop: 10 }}>
+                            Accepting order…
+                        </Text>
+                    </View>
+                </Modal>
+
+            </View>
+        </SafeAreaView>
     );
 };
 
 export default AcceptDeliveryScreen;
-
-//
-// ---------------- STYLES ----------------
-//
-const styles = StyleSheet.create({
-    root: {
-        flex: 1,
-    },
-    center: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#ffffff',
-    },
-
-    // Bottom Sheet
-    sheet: {
-        position: 'absolute',
-        bottom: 0,
-        height: height * 0.45,
-        width: '100%',
-        backgroundColor: '#fff',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        paddingHorizontal: 16,
-        paddingTop: 10,
-    },
-    handle: {
-        width: 50,
-        height: 5,
-        backgroundColor: '#ccc',
-        borderRadius: 5,
-        alignSelf: 'center',
-        marginBottom: 8,
-    },
-
-    title: {
-        fontSize: 18,
-        fontWeight: '700',
-        marginBottom: 4,
-    },
-    orderCode: {
-        fontSize: 14,
-        fontWeight: '600',
-        marginBottom: 12,
-        color: '#555',
-    },
-
-    section: {
-        marginBottom: 14,
-    },
-    sectionTitle: {
-        fontSize: 13,
-        fontWeight: '700',
-        color: '#888',
-        marginBottom: 2,
-    },
-    placeName: {
-        fontSize: 15,
-        fontWeight: '600',
-    },
-    address: {
-        fontSize: 13,
-        color: '#666',
-    },
-
-    summary: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginVertical: 12,
-    },
-    summaryText: {
-        fontWeight: '600',
-    },
-
-    actions: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 10,
-    },
-    declineBtn: {
-        width: '48%',
-        padding: 14,
-        borderRadius: 10,
-        backgroundColor: '#eee',
-        alignItems: 'center',
-    },
-    acceptBtn: {
-        width: '48%',
-        padding: 14,
-        borderRadius: 10,
-        backgroundColor: '#8DB600',
-        alignItems: 'center',
-    },
-    acceptText: {
-        color: '#fff',
-        fontWeight: '700',
-    },
-});

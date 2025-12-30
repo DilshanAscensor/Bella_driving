@@ -2,8 +2,8 @@ import { StyleSheet } from 'react-native';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 export default StyleSheet.create({
-    PRIMARY_COLOR: '#1e3a8a',
-    ACCENT_COLOR: '#8DB600',
+    PRIMARY_COLOR: '#122948',
+    ACCENT_COLOR: '#FFA500',
     BACKGROUND_COLOR: '#f8fafc',
     CARD_COLOR: '#ffffff',
 
@@ -30,7 +30,7 @@ export default StyleSheet.create({
     title: {
         fontSize: moderateScale(25),
         fontWeight: '700',
-        color: '#1e3a8a',
+        color: '#122948',
         marginTop: verticalScale(16),
         marginBottom: verticalScale(8),
         textAlign: 'center',
@@ -57,7 +57,7 @@ export default StyleSheet.create({
     cardTitle: {
         fontSize: moderateScale(18),
         fontWeight: '600',
-        color: '#1e3a8a',
+        color: '#122948',
         marginBottom: verticalScale(16),
     },
 
@@ -159,7 +159,7 @@ export default StyleSheet.create({
     },
 
     registerButton: {
-        backgroundColor: '#8DB600',
+        backgroundColor: '#FFA500',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',

@@ -14,7 +14,7 @@ export default StyleSheet.create({
         paddingVertical: verticalScale(30),
         borderBottomLeftRadius: scale(25),
         borderBottomRightRadius: scale(25),
-        backgroundColor: '#8DB600',
+        backgroundColor: '#FFA500',
     },
     avatarContainer: {
         width: scale(110),
@@ -57,7 +57,7 @@ export default StyleSheet.create({
     sectionTitle: {
         fontSize: moderateScale(18),
         fontWeight: '700',
-        color: '#1e3a8a',
+        color: '#122948',
         marginBottom: verticalScale(10),
     },
     infoRow: {
@@ -81,7 +81,7 @@ export default StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#8DB600',
+        backgroundColor: '#FFA500',
         marginHorizontal: scale(16),
         marginTop: verticalScale(25),
         paddingVertical: verticalScale(12),
@@ -214,7 +214,7 @@ export default StyleSheet.create({
     },
     actionButtonSubtitle: {
         fontSize: moderateScale(13),
-        color: '#8DB600',
+        color: '#FFA500',
         marginTop: verticalScale(2),
     },
 

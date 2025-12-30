@@ -13,6 +13,7 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 
 import { getOrderById } from "../../../../api/order";
 import OrderNavigation from "../../../../components/OrderNavigation";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { height } = Dimensions.get("window");
 
@@ -60,15 +61,9 @@ const DeliveryMapScreen = () => {
 
   if (!order) return null;
 
-  // ---------------- COORDINATES ----------------
-  const driver = {
-    lat: order.place.pickup_lat,
-    lng: order.place.pickup_lng,
-  };
-
   const delivery = {
-    lat: order.place.delivery_lat,
-    lng: order.place.delivery_lng,
+    lat: Number(order?.place?.delivery_lat ?? 6.9271),
+    lng: Number(order?.place?.delivery_lng ?? 79.8612),
   };
 
   // ---------------- MAP HTML ----------------
@@ -80,55 +75,42 @@ const DeliveryMapScreen = () => {
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
-      html, body, #map {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
+      html, body, #map { height:100%; margin:0; padding:0; }
     </style>
   </head>
   <body>
     <div id="map"></div>
     <script>
-      var map = L.map('map').setView([${driver.lat}, ${driver.lng}], 14);
-
+      var map = L.map('map').setView([${delivery.lat}, ${delivery.lng}], 15);
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-      var driverMarker = L.marker([${driver.lat}, ${driver.lng}])
-        .addTo(map)
-        .bindPopup('Pickup');
-
-      var deliveryMarker = L.marker([${delivery.lat}, ${delivery.lng}])
-        .addTo(map)
-        .bindPopup('Delivery');
-
-      var group = new L.featureGroup([driverMarker, deliveryMarker]);
-      map.fitBounds(group.getBounds().pad(0.2));
+      L.marker([${delivery.lat}, ${delivery.lng}]).addTo(map).bindPopup('Pickup');
     </script>
   </body>
   </html>
   `;
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* MAP */}
-      <WebView source={{ html }} style={{ height: height * 0.72 }} />
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        {/* MAP */}
+        <WebView source={{ html }} style={{ height: height * 0.72 }} />
 
-      {/* ORDER INFO */}
-      <OrderNavigation order={order} />
+        {/* ORDER INFO */}
+        <OrderNavigation order={order} />
 
-      {/* COMPLETE BUTTON */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() =>
-          navigation.navigate("DeliveryPhotoUploadScreen", {
-            order_id: order.id,
-          })
-        }
-      >
-        <Text style={styles.buttonText}>Complete Order</Text>
-      </TouchableOpacity>
-    </View>
+        {/* COMPLETE BUTTON */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() =>
+            navigation.navigate("DeliveryPhotoUploadScreen", {
+              order_id: order.id,
+            })
+          }
+        >
+          <Text style={styles.buttonText}>Complete Order</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -142,7 +124,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   button: {
-    backgroundColor: "#8DB600",
+    backgroundColor: "#FFA500",
     margin: 16,
     padding: 16,
     borderRadius: 10,

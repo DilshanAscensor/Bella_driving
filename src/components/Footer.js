@@ -5,22 +5,22 @@ import {
     Animated,
     StyleSheet,
     Easing,
-    Dimensions,
+    useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
-const PRIMARY = '#1e3a8a';
+const PRIMARY = '#122948';
 const ICON = '#666';
 const BG = '#FFF';
 
 export default function Footer() {
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
-    const { width, height } = Dimensions.get('window');
+    const { width } = useWindowDimensions();
 
-    const BAR_HEIGHT = Math.round(height * 0.08);
+    const BAR_HEIGHT = 56 + insets.bottom;
     const FAB_SIZE = Math.round(width * 0.18);
     const ICON_SIZE = Math.round(width * 0.065);
     const HOME_ICON_SIZE = Math.round(width * 0.09);
@@ -47,30 +47,26 @@ export default function Footer() {
 
     return (
         <View style={[styles.root, { paddingBottom: insets.bottom }]}>
+
             {/* Footer Bar */}
             <View style={[styles.bar, { height: BAR_HEIGHT }]}>
-
-                {/* HOME */}
-                <TouchableOpacity style={styles.col} onPress={() => go('DriverDashboard')} activeOpacity={0.7}>
-                    <MaterialIcons name="settings" color={ICON} size={ICON_SIZE} />
+                <TouchableOpacity style={styles.col} onPress={() => go('DriverDashboard')}>
+                    <MaterialIcons name="settings" size={ICON_SIZE} color={ICON} />
                 </TouchableOpacity>
 
-                {/* EARNINGS */}
-                <TouchableOpacity style={styles.col} onPress={() => go('EarningsScreen')} activeOpacity={0.7}>
-                    <MaterialIcons name="account-balance-wallet" color={ICON} size={ICON_SIZE} />
+                <TouchableOpacity style={styles.col} onPress={() => go('EarningsScreen')}>
+                    <MaterialIcons name="account-balance-wallet" size={ICON_SIZE} color={ICON} />
                 </TouchableOpacity>
 
-                {/* EMPTY CENTER */}
-                <View style={[styles.col, { width: FAB_SIZE }]} />
+                {/* Spacer for FAB */}
+                <View style={{ width: FAB_SIZE }} />
 
-                {/* SUPPORT */}
-                <TouchableOpacity style={styles.col} onPress={() => go('AcceptDeliveryScreen')} activeOpacity={0.7}>
-                    <MaterialIcons name="headset-mic" color={ICON} size={ICON_SIZE} />
+                <TouchableOpacity style={styles.col} onPress={() => go('AcceptDeliveryScreen')}>
+                    <MaterialIcons name="headset-mic" size={ICON_SIZE} color={ICON} />
                 </TouchableOpacity>
 
-                {/* PROFILE */}
-                <TouchableOpacity style={styles.col} onPress={() => go('DriverProfile')} activeOpacity={0.7}>
-                    <MaterialIcons name="person-outline" color={ICON} size={ICON_SIZE} />
+                <TouchableOpacity style={styles.col} onPress={() => go('DriverProfile')}>
+                    <MaterialIcons name="person-outline" size={ICON_SIZE} color={ICON} />
                 </TouchableOpacity>
             </View>
 
@@ -79,9 +75,7 @@ export default function Footer() {
                 style={[
                     styles.fabContainer,
                     {
-                        width: FAB_SIZE,
-                        height: FAB_SIZE,
-                        bottom: BAR_HEIGHT / 5,
+                        bottom: BAR_HEIGHT - FAB_SIZE / 2,
                         transform: [{ scale: scaleAnim }],
                     },
                 ]}
@@ -101,15 +95,16 @@ export default function Footer() {
                                 height: FAB_SIZE,
                                 borderRadius: FAB_SIZE / 2,
                                 backgroundColor: PRIMARY,
-                                borderWidth: Math.round(FAB_SIZE * 0.08),
+                                borderWidth: 4,
                                 borderColor: BG,
                             },
                         ]}
                     >
-                        <MaterialIcons name="home" color={BG} size={HOME_ICON_SIZE} />
+                        <MaterialIcons name="home" size={HOME_ICON_SIZE} color={BG} />
                     </View>
                 </TouchableOpacity>
             </Animated.View>
+
         </View>
     );
 }
@@ -117,27 +112,24 @@ export default function Footer() {
 const styles = StyleSheet.create({
     root: {
         position: 'absolute',
-        bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: 'transparent',
+        bottom: 0,
         alignItems: 'center',
     },
     bar: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: BG,
         borderTopWidth: 1,
         borderColor: '#ddd',
-        paddingHorizontal: 10,
-        elevation: 5,
+        paddingHorizontal: 12,
+        elevation: 10,
     },
     col: {
         flex: 1,
-        justifyContent: 'center',
         alignItems: 'center',
-        height: '100%',
+        justifyContent: 'center',
     },
     fabContainer: {
         position: 'absolute',
@@ -147,6 +139,6 @@ const styles = StyleSheet.create({
     fab: {
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 6,
+        elevation: 8,
     },
 });

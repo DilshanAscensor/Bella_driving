@@ -32,7 +32,7 @@ export default StyleSheet.create({
         alignItems: "center",
     },
     activeTabButton: {
-        backgroundColor: '#8DB600',
+        backgroundColor: '#FFA500',
     },
     tabText: {
         fontSize: 14,
@@ -62,7 +62,7 @@ export default StyleSheet.create({
         color: "#1e293b",
     },
     status: {
-        color: '#8DB600',
+        color: '#FFA500',
         fontSize: 13,
         fontWeight: "600",
     },

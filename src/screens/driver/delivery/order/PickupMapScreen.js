@@ -13,6 +13,7 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 
 import { getOrderById } from "../../../../api/order";
 import OrderNavigation from "../../../../components/OrderNavigation";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { height } = Dimensions.get("window");
 
@@ -60,16 +61,10 @@ const PickupMapScreen = () => {
 
   if (!order) return null;
 
-  const driver = {
-    lat: order.place.pickup_lat,
-    lng: order.place.pickup_lng,
-  };
-
   const pickup = {
-    lat: order.place.pickup_lat,
-    lng: order.place.pickup_lng,
+    lat: Number(order?.place?.pickup_lat ?? 6.9271),
+    lng: Number(order?.place?.pickup_lng ?? 79.8612),
   };
-
   // ---------------- MAP ----------------
   const html = `
   <!DOCTYPE html>
@@ -94,25 +89,27 @@ const PickupMapScreen = () => {
   `;
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* MAP */}
-      <WebView source={{ html }} style={{ height: height * 0.72 }} />
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        {/* MAP */}
+        <WebView source={{ html }} style={{ height: height * 0.72 }} />
 
-      {/* ORDER DETAILS BAR */}
-      <OrderNavigation order={order} />
+        {/* ORDER DETAILS BAR */}
+        <OrderNavigation order={order} />
 
-      {/* ACTION BUTTON */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() =>
-          navigation.navigate("PickupConfirm", {
-            order_id: order.id,
-          })
-        }
-      >
-        <Text style={styles.buttonText}>Pickup Order</Text>
-      </TouchableOpacity>
-    </View>
+        {/* ACTION BUTTON */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() =>
+            navigation.navigate("PickupConfirm", {
+              order_id: order.id,
+            })
+          }
+        >
+          <Text style={styles.buttonText}>Pickup Order</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -189,7 +186,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   button: {
-    backgroundColor: "#8DB600",
+    backgroundColor: "#FFA500",
     margin: 16,
     padding: 14,
     borderRadius: 10,

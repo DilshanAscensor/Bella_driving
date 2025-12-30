@@ -11,8 +11,8 @@ import { scale, verticalScale, moderateScale } from "react-native-size-matters";
 import Footer from '../../../../components/Footer';
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const PRIMARY = "#1e3a8a";
-const ACCENT = "#8DB600";
+const PRIMARY = "#122948";
+const ACCENT = "#FFA500";
 const TEXT_DARK = "#111";
 const TEXT_LIGHT = "#6b7280";
 const BG = "#fff";

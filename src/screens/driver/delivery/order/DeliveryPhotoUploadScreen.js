@@ -6,7 +6,6 @@ import {
     Image,
     StyleSheet,
     Alert,
-    SafeAreaView,
     ScrollView,
 } from 'react-native';
 
@@ -16,6 +15,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 import { delivered } from '../../../../api/order';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DeliveryPhotoUploadScreen = () => {
     const navigation = useNavigation();
@@ -103,21 +103,19 @@ const DeliveryPhotoUploadScreen = () => {
                         onPress={() => takePhoto(setPhoto2)}
                     />
                 </View>
-
+                <View style={styles.bottomBar}>
+                    <TouchableOpacity
+                        style={[
+                            styles.button,
+                            (!photo1 || !photo2) && styles.buttonDisabled,
+                        ]}
+                        disabled={!photo1 || !photo2}
+                        onPress={handleContinue}
+                    >
+                        <Text style={styles.buttonText}>Confirm Delivery</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
-
-            <View style={styles.bottomBar}>
-                <TouchableOpacity
-                    style={[
-                        styles.button,
-                        (!photo1 || !photo2) && styles.buttonDisabled,
-                    ]}
-                    disabled={!photo1 || !photo2}
-                    onPress={handleContinue}
-                >
-                    <Text style={styles.buttonText}>Confirm Delivery</Text>
-                </TouchableOpacity>
-            </View>
         </SafeAreaView>
     );
 };

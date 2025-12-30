@@ -5,6 +5,7 @@ import {
     TouchableOpacity,
     StyleSheet,
     Dimensions,
+    Linking, Platform,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
@@ -24,6 +25,46 @@ export default function OrderNavigation({ order }) {
     const etaMinutes =
         order?.place?.estimated_time ??
         Math.round(distanceKm * 4); // fallback ETA logic
+
+    const openGoogleMaps = () => {
+        if (!order?.place) return;
+
+        const pickupLat = '6.9271';
+        const pickupLng = '79.8612';
+        // const pickupLng = order.place.pickup_lng;
+        // const deliveryLat = order.place.delivery_lat;
+        const deliveryLat = '6.861';
+        const deliveryLng = '79.899';
+        // const deliveryLng = order.place.delivery_lng;
+
+        if (!pickupLat || !pickupLng || !deliveryLat || !deliveryLng) {
+            alert("Location not available");
+            return;
+        }
+
+        let url = "";
+
+        if (Platform.OS === "ios") {
+            // Apple Maps fallback → Google Maps if installed
+            url = `comgooglemaps://?saddr=${pickupLat},${pickupLng}&daddr=${deliveryLat},${deliveryLng}&directionsmode=driving`;
+        } else {
+            // Android → Google Maps
+            url = `https://www.google.com/maps/dir/?api=1&origin=${pickupLat},${pickupLng}&destination=${deliveryLat},${deliveryLng}&travelmode=driving`;
+        }
+
+        Linking.canOpenURL(url)
+            .then((supported) => {
+                if (!supported) {
+                    // Fallback for iOS if Google Maps not installed
+                    const fallback = `https://www.google.com/maps/dir/?api=1&origin=${pickupLat},${pickupLng}&destination=${deliveryLat},${deliveryLng}`;
+                    Linking.openURL(fallback);
+                } else {
+                    Linking.openURL(url);
+                }
+            })
+            .catch(err => console.error("Map error:", err));
+    };
+
 
     return (
         <View style={[styles.footer, { height: height * 0.28 }]}>
@@ -73,7 +114,10 @@ export default function OrderNavigation({ order }) {
                     <MaterialIcons name="headset-mic" size={22} color="#fff" />
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.navButton}>
+                <TouchableOpacity
+                    style={styles.navButton}
+                    onPress={openGoogleMaps}
+                >
                     <MaterialIcons name="navigation" size={22} color="#fff" />
                 </TouchableOpacity>
             </View>
@@ -132,12 +176,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     chatButton: {
-        backgroundColor: "#1e3a8a",
+        backgroundColor: "#122948",
         padding: 10,
         borderRadius: 8,
     },
     navButton: {
-        backgroundColor: "#8DB600",
+        backgroundColor: "#FFA500",
         padding: 12,
         borderRadius: 30,
     },

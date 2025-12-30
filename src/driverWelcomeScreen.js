@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons'
 
-const PRIMARY_COLOR = '#1e3a8a';
-const ACCENT_COLOR = '#8DB600';
+const PRIMARY_COLOR = '#122948';
+const ACCENT_COLOR = '#FFA500';
 const BACKGROUND_COLOR = '#f8fafc';
 const CARD_COLOR = '#ffffff';
 

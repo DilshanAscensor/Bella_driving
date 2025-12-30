@@ -247,6 +247,6 @@ const styles = StyleSheet.create({
     smallBtn: { flex: 1, backgroundColor: "#f3f4f6", padding: scale(12), borderRadius: 12, flexDirection: "row", justifyContent: "center", alignItems: "center", marginHorizontal: 5 },
     smallBtnText: { marginLeft: 8, fontSize: scale(15), color: "#374151", fontWeight: "600" },
 
-    confirmBtn: { backgroundColor: "#1e3a8a", padding: scale(16), borderRadius: 14, alignItems: "center", marginTop: scale(20) },
+    confirmBtn: { backgroundColor: "#122948", padding: scale(16), borderRadius: 14, alignItems: "center", marginTop: scale(20) },
     confirmText: { color: "#fff", fontSize: scale(17), fontWeight: "700" },
 });

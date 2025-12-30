@@ -248,7 +248,7 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                     keyboardShouldPersistTaps="handled"
                 >
                     <View style={commonStyles.header}>
-                        <MaterialIcons name="directions-car" size={60} color="#1e3a8a" />
+                        <MaterialIcons name="directions-car" size={60} color="#122948" />
                         <Text style={commonStyles.title}>Vehicle Registration</Text>
                         <Text style={commonStyles.subtitle}>
                             Add your vehicle details to get started
@@ -272,14 +272,14 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                                 <MaterialIcons
                                     name="car-rental"
                                     size={20}
-                                    color="#1e3a8a"
+                                    color="#122948"
                                     style={commonStyles.inputIcon}
                                 />
                                 <Picker
                                     selectedValue={make}
                                     onValueChange={setMake}
                                     style={commonStyles.picker}
-                                    dropdownIconColor="#1e3a8a"
+                                    dropdownIconColor="#122948"
                                 >
                                     {vehicleMakes.map((item) => (
                                         <Picker.Item
@@ -300,7 +300,7 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                                 <MaterialIcons
                                     name="directions-car"
                                     size={20}
-                                    color="#1e3a8a"
+                                    color="#122948"
                                     style={commonStyles.inputIcon}
                                 />
                                 <TextInput
@@ -320,7 +320,7 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                                 <MaterialIcons
                                     name="directions-car"
                                     size={20}
-                                    color="#1e3a8a"
+                                    color="#122948"
                                     style={commonStyles.inputIcon}
                                 />
                                 <TextInput
@@ -340,7 +340,7 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                                 <MaterialIcons
                                     name="event"
                                     size={20}
-                                    color="#1e3a8a"
+                                    color="#122948"
                                     style={commonStyles.inputIcon}
                                 />
                                 <TouchableOpacity
@@ -372,14 +372,14 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                                 <MaterialIcons
                                     name="color-lens"
                                     size={20}
-                                    color="#1e3a8a"
+                                    color="#122948"
                                     style={commonStyles.inputIcon}
                                 />
                                 <Picker
                                     selectedValue={color}
                                     onValueChange={setColor}
                                     style={commonStyles.picker}
-                                    dropdownIconColor="#1e3a8a"
+                                    dropdownIconColor="#122948"
                                 >
                                     {colors.map((item) => (
                                         <Picker.Item
@@ -400,7 +400,7 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                                 <MaterialIcons
                                     name="confirmation-number"
                                     size={20}
-                                    color="#1e3a8a"
+                                    color="#122948"
                                     style={commonStyles.inputIcon}
                                 />
                                 <TextInput
@@ -423,7 +423,7 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                                 <MaterialIcons
                                     name="fingerprint"
                                     size={20}
-                                    color="#1e3a8a"
+                                    color="#122948"
                                     style={commonStyles.inputIcon}
                                 />
                                 <TextInput
@@ -444,14 +444,14 @@ const VehicleRegistrationScreen = ({ route, navigation }) => {
                                 <MaterialIcons
                                     name="event-seat"
                                     size={20}
-                                    color="#1e3a8a"
+                                    color="#122948"
                                     style={commonStyles.inputIcon}
                                 />
                                 <Picker
                                     selectedValue={seats}
                                     onValueChange={setSeats}
                                     style={commonStyles.picker}
-                                    dropdownIconColor="#1e3a8a"
+                                    dropdownIconColor="#122948"
                                 >
                                     {seatOptions.map((item) => (
                                         <Picker.Item
