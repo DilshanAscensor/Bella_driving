@@ -7,6 +7,7 @@ import {
     StyleSheet,
     Alert,
     ScrollView,
+    ActivityIndicator,
 } from 'react-native';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -24,6 +25,7 @@ const PickupPhotoScreen = () => {
 
     const [photo1, setPhoto1] = useState(null);
     const [photo2, setPhoto2] = useState(null);
+    const [isLoading, setIsLoading] = useState(false); // ✅ NEW
 
     /* ---------------- CAMERA ---------------- */
     const takePhoto = async (setPhoto) => {
@@ -47,51 +49,51 @@ const PickupPhotoScreen = () => {
 
     /* ---------------- UPLOAD ---------------- */
     const uploadPhotos = async () => {
-        if (!order_id) {
-            Alert.alert('Error', 'Order ID missing');
-            return;
-        }
-
         if (!photo1 || !photo2) {
-            Alert.alert('Missing Photos', 'Please capture both photos.');
+            Alert.alert('Error', 'Please take both photos');
             return;
         }
 
         try {
+            setIsLoading(true);
+
             const formData = new FormData();
 
             formData.append('picked_up_image', {
                 uri: photo1.uri,
-                name: photo1.fileName || 'pickup_1.jpg',
-                type: photo1.type,
+                name: 'pickup1.jpg',
+                type: photo1.type || 'image/jpeg',
             });
 
             formData.append('picked_up_image_2', {
                 uri: photo2.uri,
-                name: photo2.fileName || 'pickup_2.jpg',
-                type: photo2.type,
+                name: 'pickup2.jpg',
+                type: photo2.type || 'image/jpeg',
             });
 
             await onTheWay(order_id, formData);
 
-            Alert.alert('Success', 'Pickup confirmed');
+            Alert.alert('Success', 'Order is on the way');
             navigation.navigate('DeliveryMap', { order_id });
+
         } catch (error) {
-            Alert.alert('Upload Failed', error.message);
+            Alert.alert('Upload failed', 'Please try again');
+        } finally {
+            setIsLoading(false);
         }
     };
+
+    const isButtonDisabled = !photo1 || !photo2 || isLoading;
 
     return (
         <SafeAreaView style={styles.safe}>
             <ScrollView contentContainerStyle={styles.container}>
 
-                {/* HEADER */}
                 <Text style={styles.title}>Pickup Verification</Text>
                 <Text style={styles.subtitle}>
                     Take clear photos of the package before pickup
                 </Text>
 
-                {/* IMAGE CARDS */}
                 <View style={styles.imageRow}>
                     <PhotoCard
                         label="Photo 1"
@@ -104,22 +106,27 @@ const PickupPhotoScreen = () => {
                         onPress={() => takePhoto(setPhoto2)}
                     />
                 </View>
+
+                {/* BOTTOM BAR */}
                 <View style={styles.bottomBar}>
                     <TouchableOpacity
                         style={[
                             styles.button,
-                            (!photo1 || !photo2) && styles.buttonDisabled,
+                            isButtonDisabled && styles.buttonDisabled,
                         ]}
-                        disabled={!photo1 || !photo2}
+                        disabled={isButtonDisabled}
                         onPress={uploadPhotos}
+                        activeOpacity={0.8}
                     >
-                        <Text style={styles.buttonText}>Confirm Pickup</Text>
+                        {isLoading ? (
+                            <ActivityIndicator color="#ffffff" />
+                        ) : (
+                            <Text style={styles.buttonText}>Confirm Pickup</Text>
+                        )}
                     </TouchableOpacity>
                 </View>
+
             </ScrollView>
-
-            {/* BOTTOM BUTTON */}
-
         </SafeAreaView>
     );
 };
@@ -150,30 +157,25 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f8fafc',
     },
-
     container: {
         padding: scale(16),
         paddingBottom: verticalScale(120),
     },
-
     title: {
         fontSize: moderateScale(22),
         fontWeight: '700',
         color: '#0f172a',
         marginBottom: verticalScale(6),
     },
-
     subtitle: {
         fontSize: moderateScale(14),
         color: '#64748b',
         marginBottom: verticalScale(24),
     },
-
     imageRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-
     card: {
         width: '48%',
         height: verticalScale(180),
@@ -187,23 +189,19 @@ const styles = StyleSheet.create({
         elevation: 4,
         overflow: 'hidden',
     },
-
     image: {
         width: '100%',
         height: '100%',
     },
-
     placeholder: {
         alignItems: 'center',
     },
-
     placeholderText: {
         marginTop: verticalScale(8),
         fontSize: moderateScale(13),
         fontWeight: '600',
         color: '#122948',
     },
-
     bottomBar: {
         position: 'absolute',
         bottom: 0,
@@ -214,18 +212,15 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#e5e7eb',
     },
-
     button: {
         backgroundColor: '#122948',
         paddingVertical: verticalScale(14),
         borderRadius: moderateScale(14),
         alignItems: 'center',
     },
-
     buttonDisabled: {
         backgroundColor: '#94a3b8',
     },
-
     buttonText: {
         color: '#ffffff',
         fontSize: moderateScale(16),

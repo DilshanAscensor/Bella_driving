@@ -8,9 +8,10 @@ import {
     ActivityIndicator,
     Alert,
     Dimensions,
+    BackHandler,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import styles from '../../../../assets/styles/acceptOrder';
 import { getOrderById, acceptOrder } from '../../../../api/order';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,6 +36,20 @@ const AcceptDeliveryScreen = () => {
         }
         fetchOrder();
     }, [order_id]);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const onBackPress = () => true;
+
+            const subscription = BackHandler.addEventListener(
+                'hardwareBackPress',
+                onBackPress
+            );
+
+            return () => subscription.remove();
+        }, [])
+    );
+
 
     const fetchOrder = async () => {
         try {
@@ -83,18 +98,18 @@ const AcceptDeliveryScreen = () => {
     if (!order) return null;
 
     const driver = {
-        lat: Number(order?.driver_lat ?? 6.86495),
-        lng: Number(order?.driver_lng ?? 79.89962),
+        lat: Number(order?.driver_lat ?? 7.91173),
+        lng: Number(order?.driver_lng ?? 81.561939),
     };
 
     const pickup = {
-        lat: Number(order?.place?.pickup_lat ?? 6.9271),
-        lng: Number(order?.place?.pickup_lng ?? 79.8612),
+        lat: Number(order?.place?.pickup_lat ?? 7.925843),
+        lng: Number(order?.place?.pickup_lng ?? 81.569569),
     };
 
     const delivery = {
-        lat: Number(order?.place?.delivery_lat ?? 6.861),
-        lng: Number(order?.place?.delivery_lng ?? 79.899),
+        lat: Number(order?.driver_lat ?? 7.860895),
+        lng: Number(order?.driver_lng ?? 81.539730),
     };
     // ---------------- MAP ----------------
     const mapHtml = `

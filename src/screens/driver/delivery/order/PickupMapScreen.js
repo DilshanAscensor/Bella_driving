@@ -62,8 +62,8 @@ const PickupMapScreen = () => {
   if (!order) return null;
 
   const pickup = {
-    lat: Number(order?.place?.pickup_lat ?? 6.9271),
-    lng: Number(order?.place?.pickup_lng ?? 79.8612),
+    lat: Number(order?.place?.pickup_lat ?? 7.925843),
+    lng: Number(order?.place?.pickup_lng ?? 81.569569),
   };
   // ---------------- MAP ----------------
   const html = `

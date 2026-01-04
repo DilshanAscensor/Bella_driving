@@ -7,6 +7,7 @@ import {
     StyleSheet,
     Alert,
     ScrollView,
+    ActivityIndicator,
 } from 'react-native';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -24,6 +25,7 @@ const DeliveryPhotoUploadScreen = () => {
 
     const [photo1, setPhoto1] = useState(null);
     const [photo2, setPhoto2] = useState(null);
+    const [isLoading, setIsLoading] = useState(false); // ✅ NEW
 
     /* ---------------- CAMERA ---------------- */
     const takePhoto = async (setPhoto) => {
@@ -47,6 +49,8 @@ const DeliveryPhotoUploadScreen = () => {
 
     /* ---------------- UPLOAD ---------------- */
     const handleContinue = async () => {
+        if (isLoading) return; // ✅ prevent double click
+
         if (!order_id) {
             Alert.alert('Error', 'Order ID missing');
             return;
@@ -58,6 +62,8 @@ const DeliveryPhotoUploadScreen = () => {
         }
 
         try {
+            setIsLoading(true); // ✅ START LOADER
+
             const formData = new FormData();
 
             formData.append('handover_image', {
@@ -76,11 +82,14 @@ const DeliveryPhotoUploadScreen = () => {
 
             Alert.alert('Success', 'Order delivered successfully');
             navigation.navigate('DeliveryCompletedScreen', { order_id });
-
         } catch (error) {
             Alert.alert('Upload Failed', error.message);
+        } finally {
+            setIsLoading(false); // ✅ STOP LOADER
         }
     };
+
+    const isButtonDisabled = !photo1 || !photo2 || isLoading;
 
     return (
         <SafeAreaView style={styles.safe}>
@@ -103,18 +112,28 @@ const DeliveryPhotoUploadScreen = () => {
                         onPress={() => takePhoto(setPhoto2)}
                     />
                 </View>
+
+                {/* BOTTOM BAR */}
                 <View style={styles.bottomBar}>
                     <TouchableOpacity
                         style={[
                             styles.button,
-                            (!photo1 || !photo2) && styles.buttonDisabled,
+                            isButtonDisabled && styles.buttonDisabled,
                         ]}
-                        disabled={!photo1 || !photo2}
+                        disabled={isButtonDisabled}
                         onPress={handleContinue}
+                        activeOpacity={0.8}
                     >
-                        <Text style={styles.buttonText}>Confirm Delivery</Text>
+                        {isLoading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.buttonText}>
+                                Confirm Delivery
+                            </Text>
+                        )}
                     </TouchableOpacity>
                 </View>
+
             </ScrollView>
         </SafeAreaView>
     );
@@ -202,7 +221,7 @@ const styles = StyleSheet.create({
         borderTopColor: '#e5e7eb',
     },
     button: {
-        backgroundColor: '#1e40af',
+        backgroundColor: '#122948',
         paddingVertical: verticalScale(14),
         borderRadius: moderateScale(14),
         alignItems: 'center',

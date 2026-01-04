@@ -62,8 +62,8 @@ const DeliveryMapScreen = () => {
   if (!order) return null;
 
   const delivery = {
-    lat: Number(order?.place?.delivery_lat ?? 6.9271),
-    lng: Number(order?.place?.delivery_lng ?? 79.8612),
+    lat: Number(order?.driver_lat ?? 7.860895),
+    lng: Number(order?.driver_lng ?? 81.539730),
   };
 
   // ---------------- MAP HTML ----------------

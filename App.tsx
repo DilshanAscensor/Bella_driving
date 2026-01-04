@@ -1,7 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import messaging from '@react-native-firebase/messaging';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
+import { AppState } from 'react-native';
 
 // Redux
 import { Provider } from 'react-redux';
@@ -9,10 +11,14 @@ import { store, persistor } from './src/redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
 import { PaperProvider } from 'react-native-paper';
 
-// Navigation ref
+// Navigation
 import { navigationRef, navigate } from './src/navigation/NavigationService';
 
-// Screens (UNCHANGED)
+// Utils
+import { playOrderSound } from './src/utils/notificationSound';
+import apiClient from './src/api/apiClient';
+
+// Screens
 import RegistrationScreen from './src/screens/customer/RegistrationScreen';
 import DriverRegistration from './src/screens/driver/DriverRegistrationScreen';
 import MyVehicleScreen from './src/screens/driver/MyVehicleScreen';
@@ -47,19 +53,74 @@ import CustomerOrderDetailsScreen from './src/screens/customer/OrderDetailsScree
 import CustomerProfileScreen from './src/screens/customer/profile/CustomerProfileScreen';
 import EditCustomerProfileScreen from './src/screens/customer/profile/EditCustomerProfileScreen';
 
-//FCM listeners
-import { playOrderSound } from './src/utils/notificationSound';
+
 
 const Stack = createNativeStackNavigator();
 
+
 export default function App() {
+
+  const hasNavigatedRef = useRef(false);
+  /* ================= ACTIVE ORDER CHECK ================= */
+  const checkActiveOrder = async () => {
+    if (hasNavigatedRef.current) return;
+
+    try {
+      const res = await apiClient.get('/drivers/active-order');
+      const order = res?.data?.data;
+
+      if (!order) return;
+
+      hasNavigatedRef.current = true;
+
+      if (order.status === 'accepted') {
+        navigate('AcceptDeliveryScreen', { order_id: order.id });
+      }
+
+      if (order.status === 'picked_up') {
+        navigate('PickupConfirm', { order_id: order.id });
+      }
+
+      if (order.status === 'on_the_way') {
+        navigate('DeliveryMap', { order_id: order.id });
+      }
+    } catch { }
+  };
+
 
   useEffect(() => {
 
-    // 🔹 App opened from killed state
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
+    /* ========== ANDROID NOTIFICATION PERMISSION ========= */
+    notifee.requestPermission();
+
+    /* ========== CHANNEL ========= */
+    notifee.createChannel({
+      id: 'orders',
+      name: 'Orders',
+      importance: AndroidImportance.HIGH,
+      sound: 'order_sound',
+    });
+
+    /* ========== APP STATE (REOPEN APP) ========= */
+    const appStateSub = AppState.addEventListener('change', state => {
+      if (state === 'active') {
+        checkActiveOrder();
+      }
+    });
+
+    /* ========== KILLED STATE ========= */
+    messaging().getInitialNotification().then(remoteMessage => {
+      if (remoteMessage?.data?.type === 'new_order') {
+        playOrderSound();
+        navigate('AcceptDeliveryScreen', {
+          order_id: remoteMessage.data.order_id,
+        });
+      }
+    });
+
+    /* ========== BACKGROUND ========= */
+    const unsubscribeBackground =
+      messaging().onNotificationOpenedApp(remoteMessage => {
         if (remoteMessage?.data?.type === 'new_order') {
           playOrderSound();
           navigate('AcceptDeliveryScreen', {
@@ -68,36 +129,52 @@ export default function App() {
         }
       });
 
-    // 🔹 App opened from background
-    const unsubscribeBackground = messaging().onNotificationOpenedApp(
-      remoteMessage => {
+    /* ========== FOREGROUND ========= */
+    const unsubscribeForeground =
+      messaging().onMessage(async remoteMessage => {
         if (remoteMessage?.data?.type === 'new_order') {
-          playOrderSound();
-          navigate('AcceptDeliveryScreen', {
-            order_id: remoteMessage.data.order_id,
-          });
-        }
-      }
-    );
 
-    // 🔹 Foreground notification
-    const unsubscribeForeground = messaging().onMessage(
-      async remoteMessage => {
-        if (remoteMessage?.data?.type === 'new_order') {
-          playOrderSound();
-          navigate('AcceptDeliveryScreen', {
-            order_id: remoteMessage.data.order_id,
+          await notifee.displayNotification({
+            title: 'New Order Available',
+            body: 'Tap to accept the order',
+            data: remoteMessage.data,
+            android: {
+              channelId: 'orders',
+              importance: AndroidImportance.HIGH,
+              sound: 'order_sound',
+              pressAction: { id: 'default' },
+            },
           });
-        }
-      }
-    );
 
+          playOrderSound();
+        }
+      });
+
+    /* ========== NOTIFEE PRESS ========= */
+    const unsubscribeNotifee =
+      notifee.onForegroundEvent(({ type, detail }) => {
+        if (type === EventType.PRESS) {
+          const data = detail.notification?.data;
+
+          if (data?.type === 'new_order') {
+            navigate('AcceptDeliveryScreen', {
+              order_id: data.order_id,
+            });
+          }
+        }
+      });
+
+    /* ========== CLEANUP ========= */
     return () => {
-      unsubscribeBackground();
+      appStateSub.remove();
       unsubscribeForeground();
+      unsubscribeBackground();
+      unsubscribeNotifee();
     };
 
   }, []);
+
+
 
   return (
     <Provider store={store}>
@@ -108,7 +185,6 @@ export default function App() {
               initialRouteName="AuthLoadingScreen"
               screenOptions={{ headerShown: false }}
             >
-              {/* UNCHANGED SCREENS */}
               <Stack.Screen name="AuthLoadingScreen" component={AuthLoadingScreen} />
               <Stack.Screen name="SplashScreen" component={SplashScreen} />
               <Stack.Screen name="HomeScreen" component={HomeScreen} />

@@ -53,15 +53,17 @@ export default function PickupConfirmScreen() {
     const confirmPickupFunc = async () => {
         try {
             setProcessing(true);
-            await confirmPickup(order.id);
-            setProcessing(false);
 
-            navigation.navigate("PickupPhotoUpload", {
+            await confirmPickup(order.id);
+
+            navigation.navigate('PickupPhotoUpload', {
                 order_id: order.id,
             });
+
         } catch (error) {
+            Alert.alert('Error', 'Failed to confirm pickup');
+        } finally {
             setProcessing(false);
-            Alert.alert("Error", error.message);
         }
     };
 

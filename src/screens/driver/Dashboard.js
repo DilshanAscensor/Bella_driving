@@ -7,11 +7,7 @@ import {
 } from 'react-native';
 import {
     PRIMARY_COLOR,
-    ACCENT_COLOR,
     TEXT_DARK,
-    TEXT_LIGHT,
-    CARD_BG,
-    SCREEN_BG,
 } from '../../assets/theme/colors';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
@@ -28,10 +24,10 @@ import {
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale } from 'react-native-size-matters';
-import { useDispatch } from 'react-redux';
 import { BASE_URL } from '../../config/api';
 import { getVehicleByDriver } from '../../api/vehicleApi';
 import { userLogout, saveFcmToken } from '../../api/authApi';
+import apiClient from '../../api/apiClient';
 
 import styles from '../../assets/styles/driverDashboard';
 import Footer from '../../components/Footer';
@@ -45,26 +41,66 @@ const DriverDashboardScreen = () => {
     const [isOnline, setIsOnline] = useState(false);
     const [loggingOut, setLoggingOut] = useState(false);
     const [active, setActive] = useState('home');
-    const dispatch = useDispatch();
+
     useEffect(() => {
-        init();
+        if (driver?.id) {
+            init();
+        }
     }, [driver]);
 
+    /* ================= ACTIVE ORDER CHECK ================= */
+    const checkActiveOrder = async () => {
+        try {
+            const res = await apiClient.get('/driver/active-order');
+            const order = res?.data?.data;
+
+            if (!order) return;
+
+            if (order.status === 'accepted') {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'AcceptDeliveryScreen', params: { order_id: order.id } }],
+                });
+            }
+
+            if (order.status === 'picked_up') {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'PickupConfirm', params: { order_id: order.id } }],
+                });
+            }
+
+            if (order.status === 'on_the_way') {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'DeliveryMap', params: { order_id: order.id } }],
+                });
+            }
+        } catch (e) {
+            // ignore
+        }
+    };
+
+    /* ================= INIT ================= */
     const init = async () => {
         await loadOnlineStatus();
 
-        if (driver?.id) {
-            await initFCM();
-            await loadVehicle();
-        }
+        await initFCM();
+        await loadVehicle();
 
         setLoading(false);
     };
 
-    /* ---------------- FCM ---------------- */
+    /* ================= FCM ================= */
     const initFCM = async () => {
         try {
-            await messaging().requestPermission();
+            const authStatus = await messaging().requestPermission();
+            const enabled =
+                authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+                authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+            if (!enabled) return;
+
             const token = await messaging().getToken();
             await saveFcmToken(token);
         } catch (e) {
@@ -72,12 +108,10 @@ const DriverDashboardScreen = () => {
         }
     };
 
-    /* ---------------- DATA ---------------- */
+    /* ================= DATA ================= */
     const loadOnlineStatus = async () => {
         const saved = await AsyncStorage.getItem('driver_online_status');
-        if (saved !== null) {
-            setIsOnline(JSON.parse(saved));
-        }
+        if (saved !== null) setIsOnline(JSON.parse(saved));
     };
 
     const loadVehicle = async () => {
@@ -89,16 +123,30 @@ const DriverDashboardScreen = () => {
         }
     };
 
-    /* ---------------- LOGOUT ---------------- */
-    const handleLogout = () => {
-        Alert.alert(
-            'Logout',
-            'Are you sure you want to logout?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Logout', style: 'destructive', onPress: performLogout },
-            ]
-        );
+    /* ================= LOGOUT ================= */
+    const handleLogout = async () => {
+        try {
+            const res = await apiClient.get('/driver/active-order');
+
+            if (res.data?.data) {
+                Alert.alert(
+                    'Active Order',
+                    'You must complete the active order before logging out'
+                );
+                return;
+            }
+
+            Alert.alert(
+                'Logout',
+                'Are you sure you want to logout?',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Logout', style: 'destructive', onPress: performLogout },
+                ]
+            );
+        } catch {
+            performLogout();
+        }
     };
 
     const performLogout = async () => {
@@ -107,23 +155,18 @@ const DriverDashboardScreen = () => {
 
         try {
             await userLogout();
-            await AsyncStorage.multiRemove([
-                'auth_token',
-                'driver_online_status',
-            ]);
+            await AsyncStorage.multiRemove(['auth_token', 'driver_online_status']);
 
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'HomeScreen' }],
             });
-        } catch (e) {
-            Alert.alert('Logout Error', e.message);
         } finally {
             setLoggingOut(false);
         }
     };
 
-    /* ---------------- ONLINE / OFFLINE ---------------- */
+    /* ================= ONLINE / OFFLINE ================= */
     const toggleOnlineStatus = async () => {
         const newStatus = !isOnline;
         setIsOnline(newStatus);
@@ -302,5 +345,6 @@ const DriverDashboardScreen = () => {
         </SafeAreaView>
     );
 };
+
 
 export default DriverDashboardScreen;

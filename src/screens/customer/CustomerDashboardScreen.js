@@ -137,7 +137,7 @@ const CustomerDashboardScreen = () => {
 
             {/* FOOTER */}
             <View style={styles.footer}>
-                <Text style={styles.footerText}>© 2025 Belle Driving Belle</Text>
+                <Text style={styles.footerText}>© 2025 Mickaido</Text>
             </View>
 
         </SafeAreaView>

@@ -55,7 +55,7 @@ const HomeScreen = () => {
                             resizeMode="contain"
                         />
                     </View>
-                    <Text style={[styles.title, { color: textColor }]}>Belle Driving Belle</Text>
+                    {/* <Text style={[styles.title, { color: textColor }]}>Belle Driving Belle</Text> */}
                     <Text style={[styles.subtitle, { color: isDarkMode ? '#d4deff' : '#475569' }]}>
                         Safe, simple rides at your fingertips
                     </Text>
@@ -92,7 +92,7 @@ const HomeScreen = () => {
 
                 {/* Footer - Subtle */}
                 <View style={styles.footer}>
-                    <Text style={[styles.footerText, { color: footerTextColor }]}>© 2025 Belle Driving Belle</Text>
+                    <Text style={[styles.footerText, { color: footerTextColor }]}>© 2025 Mickaido</Text>
                 </View>
             </SafeAreaView>
         </LinearGradient>

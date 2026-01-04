@@ -41,7 +41,7 @@ const SplashScreen = () => {
                         resizeMode="contain"
                     />
                 </View>
-                <Text style={[styles.title, { color: textColor }]}>Belle Driving Belle</Text>
+                <Text style={[styles.title, { color: textColor }]}>Mickaido</Text>
                 <Text style={[styles.subtitle, { color: subtitleColor }]}>Your Ride, Your Way</Text>
             </SafeAreaView>
         </LinearGradient>

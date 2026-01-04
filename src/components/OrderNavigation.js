@@ -29,34 +29,55 @@ export default function OrderNavigation({ order }) {
     const openGoogleMaps = () => {
         if (!order?.place) return;
 
-        const pickupLat = '6.9271';
-        const pickupLng = '79.8612';
-        // const pickupLng = order.place.pickup_lng;
-        // const deliveryLat = order.place.delivery_lat;
-        const deliveryLat = '6.861';
-        const deliveryLng = '79.899';
-        // const deliveryLng = order.place.delivery_lng;
+        const status = order.status;
 
-        if (!pickupLat || !pickupLng || !deliveryLat || !deliveryLng) {
-            alert("Location not available");
+        // 🔹 Driver current location (GPS or mock)
+        const driverLat = Number(order?.driver_lat ?? 7.91173);
+        const driverLng = Number(order?.driver_lng ?? 81.561939);
+
+        // 🔹 Pickup
+        const pickupLat = Number(order?.place?.pickup_lat ?? 7.925843);
+        const pickupLng = Number(order?.place?.pickup_lng ?? 81.569569);
+
+        // 🔹 Delivery
+        const deliveryLat = Number(order?.place?.delivery_lat ?? 7.860895);
+        const deliveryLng = Number(order?.place?.delivery_lng ?? 81.53973);
+
+        let originLat, originLng, destLat, destLng;
+
+        // ---------------- STATUS BASED LOGIC ----------------
+        if (status === "accepted") {
+            // Driver → Pickup
+            originLat = driverLat;
+            originLng = driverLng;
+            destLat = pickupLat;
+            destLng = pickupLng;
+        }
+        else if (status === "picked_up" || status === "on_the_way") {
+            // Pickup → Delivery
+            originLat = pickupLat;
+            originLng = pickupLng;
+            destLat = deliveryLat;
+            destLng = deliveryLng;
+        }
+        else {
+            alert("Navigation not available for this order status");
             return;
         }
 
+        // ---------------- GOOGLE MAP URL ----------------
         let url = "";
 
         if (Platform.OS === "ios") {
-            // Apple Maps fallback → Google Maps if installed
-            url = `comgooglemaps://?saddr=${pickupLat},${pickupLng}&daddr=${deliveryLat},${deliveryLng}&directionsmode=driving`;
+            url = `comgooglemaps://?saddr=${originLat},${originLng}&daddr=${destLat},${destLng}&directionsmode=driving`;
         } else {
-            // Android → Google Maps
-            url = `https://www.google.com/maps/dir/?api=1&origin=${pickupLat},${pickupLng}&destination=${deliveryLat},${deliveryLng}&travelmode=driving`;
+            url = `https://www.google.com/maps/dir/?api=1&origin=${originLat},${originLng}&destination=${destLat},${destLng}&travelmode=driving`;
         }
 
         Linking.canOpenURL(url)
             .then((supported) => {
                 if (!supported) {
-                    // Fallback for iOS if Google Maps not installed
-                    const fallback = `https://www.google.com/maps/dir/?api=1&origin=${pickupLat},${pickupLng}&destination=${deliveryLat},${deliveryLng}`;
+                    const fallback = `https://www.google.com/maps/dir/?api=1&origin=${originLat},${originLng}&destination=${destLat},${destLng}`;
                     Linking.openURL(fallback);
                 } else {
                     Linking.openURL(url);
