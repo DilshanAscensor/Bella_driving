@@ -32,7 +32,7 @@ const DeliveryMapScreen = () => {
       navigation.goBack();
       return;
     }
-
+    console.log('Go online failed', order);
     fetchOrder();
   }, [order_id]);
 
@@ -61,10 +61,20 @@ const DeliveryMapScreen = () => {
 
   if (!order) return null;
 
-  const delivery = {
-    lat: Number(order?.driver_lat ?? 7.860895),
-    lng: Number(order?.driver_lng ?? 81.539730),
+  const pickup = {
+    lat: Number(order?.place?.pickup_lat),
+    lng: Number(order?.place?.pickup_lng),
   };
+
+  const delivery = {
+    lat: Number(order?.place?.delivery_lat),
+    lng: Number(order?.place?.delivery_lng),
+  };
+
+  // const delivery = {
+  //   lat: Number(order?.driver_lat ?? 7.860895),
+  //   lng: Number(order?.driver_lng ?? 81.539730),
+  // };
 
   // ---------------- MAP HTML ----------------
   const html = `

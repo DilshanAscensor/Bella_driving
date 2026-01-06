@@ -7,6 +7,7 @@ import {
     Image,
     Alert,
     ScrollView,
+    Linking,
     ActivityIndicator,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
@@ -66,6 +67,34 @@ export default function PickupConfirmScreen() {
             setProcessing(false);
         }
     };
+
+    const handleCallCustomer = () => {
+        const phone = order?.customer_phone;
+
+        if (!phone) {
+            Alert.alert(
+                'Phone number unavailable',
+                'Customer phone number is not provided'
+            );
+            return;
+        }
+
+        const phoneUrl = `tel:${phone}`;
+
+        Linking.canOpenURL(phoneUrl)
+            .then((supported) => {
+                if (!supported) {
+                    Alert.alert('Error', 'Cannot open phone dialer');
+                } else {
+                    return Linking.openURL(phoneUrl);
+                }
+            })
+            .catch(() => {
+                Alert.alert('Error', 'Something went wrong');
+            });
+    };
+
+
 
     // ---------------- LOADING ----------------
     if (loading) {
@@ -152,7 +181,7 @@ export default function PickupConfirmScreen() {
 
                         {/* ACTION BUTTONS */}
                         <View style={styles.btnRow}>
-                            <TouchableOpacity style={styles.smallBtn}>
+                            <TouchableOpacity style={styles.smallBtn} onPress={handleCallCustomer}>
                                 <MaterialIcons name="call" size={22} />
                                 <Text style={styles.smallBtnText}>Call</Text>
                             </TouchableOpacity>

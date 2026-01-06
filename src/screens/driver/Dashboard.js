@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     View,
     ScrollView,
@@ -28,11 +28,14 @@ import { BASE_URL } from '../../config/api';
 import { getVehicleByDriver } from '../../api/vehicleApi';
 import { userLogout, saveFcmToken } from '../../api/authApi';
 import apiClient from '../../api/apiClient';
+import OngoingTripBar from '../../components/OngoingTripBar';
+import { useOrder } from '../../context/OrderContext';
 
 import styles from '../../assets/styles/driverDashboard';
 import Footer from '../../components/Footer';
 
 const DriverDashboardScreen = () => {
+    const { activeOrder, reload } = useOrder();
     const navigation = useNavigation();
     const driver = useSelector(state => state.user.user);
 
@@ -42,44 +45,49 @@ const DriverDashboardScreen = () => {
     const [loggingOut, setLoggingOut] = useState(false);
     const [active, setActive] = useState('home');
 
+    const reloadOrder = useCallback(() => {
+        reload();
+    }, [reload]);
+
     useEffect(() => {
         if (driver?.id) {
             init();
+            reloadOrder();
         }
-    }, [driver]);
+    }, [driver, reloadOrder]);
 
     /* ================= ACTIVE ORDER CHECK ================= */
-    const checkActiveOrder = async () => {
-        try {
-            const res = await apiClient.get('/driver/active-order');
-            const order = res?.data?.data;
+    // const checkActiveOrder = async () => {
+    //     try {
+    //         const res = await apiClient.get('/driver/active-order');
+    //         const order = res?.data?.data;
 
-            if (!order) return;
+    //         if (!order) return;
 
-            if (order.status === 'accepted') {
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'AcceptDeliveryScreen', params: { order_id: order.id } }],
-                });
-            }
+    //         if (order.status === 'accepted') {
+    //             navigation.reset({
+    //                 index: 0,
+    //                 routes: [{ name: 'AcceptDeliveryScreen', params: { order_id: order.id } }],
+    //             });
+    //         }
 
-            if (order.status === 'picked_up') {
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'PickupConfirm', params: { order_id: order.id } }],
-                });
-            }
+    //         if (order.status === 'picked_up') {
+    //             navigation.reset({
+    //                 index: 0,
+    //                 routes: [{ name: 'PickupConfirm', params: { order_id: order.id } }],
+    //             });
+    //         }
 
-            if (order.status === 'on_the_way') {
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'DeliveryMap', params: { order_id: order.id } }],
-                });
-            }
-        } catch (e) {
-            // ignore
-        }
-    };
+    //         if (order.status === 'on_the_way') {
+    //             navigation.reset({
+    //                 index: 0,
+    //                 routes: [{ name: 'DeliveryMap', params: { order_id: order.id } }],
+    //             });
+    //         }
+    //     } catch (e) {
+    //         // ignore
+    //     }
+    // };
 
     /* ================= INIT ================= */
     const init = async () => {
@@ -126,7 +134,7 @@ const DriverDashboardScreen = () => {
     /* ================= LOGOUT ================= */
     const handleLogout = async () => {
         try {
-            const res = await apiClient.get('/driver/active-order');
+            const res = await apiClient.get('/drivers/active-order');
 
             if (res.data?.data) {
                 Alert.alert(
@@ -166,21 +174,71 @@ const DriverDashboardScreen = () => {
         }
     };
 
-    /* ================= ONLINE / OFFLINE ================= */
-    const toggleOnlineStatus = async () => {
-        const newStatus = !isOnline;
-        setIsOnline(newStatus);
+    const resumeOrder = (navigation, order) => {
+        switch (order.status) {
+            case 'accepted':
+                navigation.navigate('PickupConfirm', { order_id: order.id });
+                break;
 
-        await AsyncStorage.setItem(
-            'driver_online_status',
-            JSON.stringify(newStatus)
-        );
+            case 'picked_up':
+                navigation.navigate('PickupPhotoUpload', { order_id: order.id });
+                break;
 
-        if (newStatus) {
-            const token = await messaging().getToken();
-            await saveFcmToken(token);
+            case 'on_the_way':
+                navigation.navigate('DeliveryMap', { order_id: order.id });
+                break;
+
+            default:
+                break;
         }
     };
+
+    /* ================= ONLINE / OFFLINE ================= */
+    const toggleOnlineStatus = async () => {
+        if (isOnline) {
+            await goOffline();
+        } else {
+            await goOnline();
+        }
+    };
+
+
+    const goOnline = async () => {
+        try {
+            setIsOnline(true);
+
+            await AsyncStorage.setItem(
+                'driver_online_status',
+                JSON.stringify(true)
+            );
+
+            const token = await messaging().getToken();
+
+            await apiClient.post('/drivers/online', {
+                fcm_token: token,
+            });
+        } catch (e) {
+            console.log('Go online failed', e);
+        }
+    };
+
+
+    const goOffline = async () => {
+        try {
+            setIsOnline(false);
+
+            await AsyncStorage.setItem(
+                'driver_online_status',
+                JSON.stringify(false)
+            );
+
+            // 🔥 Tell backend to go offline & delete tokens
+            await apiClient.post('/drivers/offline');
+        } catch (e) {
+            console.log('Go offline failed', e);
+        }
+    };
+
 
     /* ---------------- LOADING ---------------- */
     if (loading) {
@@ -207,7 +265,6 @@ const DriverDashboardScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-
                 {/* ================= HEADER ================= */}
                 <Surface style={styles.headerCard}>
                     <View style={styles.headerRow}>
@@ -265,7 +322,12 @@ const DriverDashboardScreen = () => {
                 </Surface>
 
                 {/* ================= MENU ================= */}
+
                 <View style={styles.menuList}>
+                    <OngoingTripBar
+                        order={activeOrder}
+                        onPress={() => resumeOrder(navigation, activeOrder)}
+                    />
                     <Card
                         style={styles.menuCard}
                         onPress={() =>
@@ -336,7 +398,6 @@ const DriverDashboardScreen = () => {
                             )}
                         />
                     </Card>
-
                 </View>
 
             </ScrollView>

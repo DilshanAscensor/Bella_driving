@@ -6,6 +6,7 @@ import {
     StyleSheet,
     Dimensions,
     Linking, Platform,
+    Alert,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
@@ -36,8 +37,8 @@ export default function OrderNavigation({ order }) {
         const driverLng = Number(order?.driver_lng ?? 81.561939);
 
         // 🔹 Pickup
-        const pickupLat = Number(order?.place?.pickup_lat ?? 7.925843);
-        const pickupLng = Number(order?.place?.pickup_lng ?? 81.569569);
+        const pickupLat = Number(order?.place?.pickup_lat);
+        const pickupLng = Number(order?.place?.pickup_lng);
 
         // 🔹 Delivery
         const deliveryLat = Number(order?.place?.delivery_lat ?? 7.860895);
@@ -87,6 +88,32 @@ export default function OrderNavigation({ order }) {
     };
 
 
+    const handleCallCustomer = () => {
+        const phone = order?.customer_phone;
+
+        if (!phone) {
+            Alert.alert(
+                'Phone number unavailable',
+                'Customer phone number is not provided'
+            );
+            return;
+        }
+
+        const phoneUrl = `tel:${phone}`;
+
+        Linking.canOpenURL(phoneUrl)
+            .then((supported) => {
+                if (!supported) {
+                    Alert.alert('Error', 'Cannot open phone dialer');
+                } else {
+                    return Linking.openURL(phoneUrl);
+                }
+            })
+            .catch(() => {
+                Alert.alert('Error', 'Something went wrong');
+            });
+    };
+
     return (
         <View style={[styles.footer, { height: height * 0.28 }]}>
 
@@ -131,7 +158,10 @@ export default function OrderNavigation({ order }) {
 
             {/* ACTIONS */}
             <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.chatButton}>
+                <TouchableOpacity
+                    style={styles.chatButton}
+                    onPress={handleCallCustomer}
+                >
                     <MaterialIcons name="headset-mic" size={22} color="#fff" />
                 </TouchableOpacity>
 

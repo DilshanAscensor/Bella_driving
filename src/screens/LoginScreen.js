@@ -83,10 +83,10 @@ const LoginScreen = ({ navigation }) => {
                         }
                     }
                 } else {
-                    navigation.navigate('HomeHomeScreen');
+                    navigation.navigate('HomeScreen');
                 }
             } else {
-                navigation.navigate('HomeHomeScreen');
+                navigation.navigate('HomeScreen');
             }
         } catch (err) {
             setError(err?.message || String(err) + ' - Login failed. Please try again.');

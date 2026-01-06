@@ -56,6 +56,7 @@ const AcceptDeliveryScreen = () => {
             const response = await getOrderById(order_id);
             const orderData = response.data ?? response;
             setOrder(orderData);
+            console.log('Go online failed0------------------------', orderData);
         } catch (e) {
             Alert.alert('Error', 'Failed to load order');
             navigation.goBack();
@@ -76,7 +77,7 @@ const AcceptDeliveryScreen = () => {
             });
         } catch (e) {
             setProcessing(false);
-            Alert.alert('Error', 'Failed to accept order');
+            Alert.alert('Error', e?.message || 'Failed to accept order');
         }
     };
 
@@ -96,20 +97,19 @@ const AcceptDeliveryScreen = () => {
     }
 
     if (!order) return null;
+    const pickup = {
+        lat: Number(order?.place?.pickup_lat),
+        lng: Number(order?.place?.pickup_lng),
+    };
+
+    const delivery = {
+        lat: Number(order?.place?.delivery_lat),
+        lng: Number(order?.place?.delivery_lng),
+    };
 
     const driver = {
         lat: Number(order?.driver_lat ?? 7.91173),
         lng: Number(order?.driver_lng ?? 81.561939),
-    };
-
-    const pickup = {
-        lat: Number(order?.place?.pickup_lat ?? 7.925843),
-        lng: Number(order?.place?.pickup_lng ?? 81.569569),
-    };
-
-    const delivery = {
-        lat: Number(order?.driver_lat ?? 7.860895),
-        lng: Number(order?.driver_lng ?? 81.539730),
     };
     // ---------------- MAP ----------------
     const mapHtml = `
