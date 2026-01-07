@@ -83,7 +83,7 @@ const HomeScreen = () => {
                     <TouchableOpacity
                         style={[styles.button, { backgroundColor: buttonSecondaryBg, borderColor: ACCENT_COLOR, borderWidth: 2 }]}
                         activeOpacity={0.7}
-                        onPress={() => navigation.navigate('Registration')}
+                        onPress={() => navigation.navigate('CustomerRegistration')}
                     >
                         <MaterialIcons name="person-add" size={28} color={ACCENT_COLOR} style={styles.buttonIcon} />
                         <Text style={[styles.buttonText, { color: ACCENT_COLOR }]}>Customer Registration</Text>

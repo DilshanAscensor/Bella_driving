@@ -7,11 +7,13 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
+  BackHandler,
 } from "react-native";
 import { WebView } from "react-native-webview";
+import { useFocusEffect } from "@react-navigation/native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 
-import { getOrderById } from "../../../../api/order";
+import { getOrderById, WayToPickup } from "../../../../api/order";
 import OrderNavigation from "../../../../components/OrderNavigation";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -21,18 +23,37 @@ const PickupMapScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { order_id } = route.params || {};
+  const [processing, setProcessing] = useState(false);
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // ---------------- LOAD ORDER ----------------
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => true; // block back
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [])
+  );
+
   useEffect(() => {
     if (!order_id) {
       Alert.alert("Error", "Order ID missing");
-      navigation.goBack();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "HomeScreen" }],
+      });
       return;
     }
-    console.log('Go online failed', order);
+
     fetchOrder();
   }, [order_id]);
 
@@ -46,6 +67,29 @@ const PickupMapScreen = () => {
       navigation.goBack();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const wayToPickupFunc = async () => {
+    try {
+      setProcessing(true);
+
+      await WayToPickup(order.id);
+
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: "PickupConfirm",
+            params: { order_id: order.id },
+          },
+        ],
+      });
+
+    } catch (error) {
+      Alert.alert('Error', 'Failed to pickup');
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -66,20 +110,6 @@ const PickupMapScreen = () => {
     lng: Number(order?.place?.pickup_lng),
   };
 
-  const delivery = {
-    lat: Number(order?.place?.delivery_lat),
-    lng: Number(order?.place?.delivery_lng),
-  };
-
-  const driver = {
-    lat: Number(order?.driver_lat ?? 7.91173),
-    lng: Number(order?.driver_lng ?? 81.561939),
-  };
-
-  // const pickup = {
-  //   lat: Number(order?.place?.pickup_lat ?? 7.925843),
-  //   lng: Number(order?.place?.pickup_lng ?? 81.569569),
-  // };
   // ---------------- MAP ----------------
   const html = `
   <!DOCTYPE html>
@@ -115,11 +145,7 @@ const PickupMapScreen = () => {
         {/* ACTION BUTTON */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() =>
-            navigation.navigate("PickupConfirm", {
-              order_id: order.id,
-            })
-          }
+          onPress={wayToPickupFunc}
         >
           <Text style={styles.buttonText}>Pickup Order</Text>
         </TouchableOpacity>

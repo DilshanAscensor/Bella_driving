@@ -8,7 +8,7 @@ export const OrderProvider = ({ children }) => {
 
     const reload = async () => {
         try {
-            const res = await apiClient.get('/drivers/active-order'); // ✅ FIXED
+            const res = await apiClient.get('/drivers/active-order');
             setActiveOrder(res?.data?.data || null);
         } catch {
             setActiveOrder(null);

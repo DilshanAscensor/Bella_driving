@@ -29,11 +29,19 @@ const AcceptDeliveryScreen = () => {
 
     // ---------------- LOAD ORDER ----------------
     useEffect(() => {
+        navigation.setOptions({
+            gestureEnabled: false,
+        });
+
         if (!order_id) {
-            Alert.alert('Error', 'Order ID missing');
-            navigation.goBack();
+            Alert.alert("Error", "Order ID missing");
+            navigation.reset({
+                index: 0,
+                routes: [{ name: "HomeScreen" }],
+            });
             return;
         }
+
         fetchOrder();
     }, [order_id]);
 
@@ -42,7 +50,7 @@ const AcceptDeliveryScreen = () => {
             const onBackPress = () => true;
 
             const subscription = BackHandler.addEventListener(
-                'hardwareBackPress',
+                "hardwareBackPress",
                 onBackPress
             );
 
@@ -72,8 +80,14 @@ const AcceptDeliveryScreen = () => {
             await acceptOrder(order.id);
             setProcessing(false);
 
-            navigation.replace('PickupMap', {
-                order_id: order.id,
+            navigation.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: "PickupMap",
+                        params: { order_id: order.id },
+                    },
+                ],
             });
         } catch (e) {
             setProcessing(false);
@@ -200,7 +214,7 @@ const AcceptDeliveryScreen = () => {
                         <Text style={styles.meta}>
                             Price{'\n'}
                             <Text style={styles.metaValue}>
-                                {order.delivery_fee ?? '6.50'}
+                                {order.total_amount ?? '250'}
                             </Text>
                         </Text>
                     </View>

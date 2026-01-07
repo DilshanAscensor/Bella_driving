@@ -246,4 +246,29 @@ export default StyleSheet.create({
         color: '#f59e0b',
         fontWeight: '600',
     },
+
+    formErrorBox: {
+        marginTop: verticalScale(14),
+        marginBottom: verticalScale(14),
+        backgroundColor: '#fab0b0ff', // strong red
+        borderRadius: moderateScale(12),
+        paddingVertical: verticalScale(12),
+        paddingHorizontal: scale(14),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.25,
+        shadowRadius: 6,
+        elevation: 6,
+    },
+
+    formErrorText: {
+        color: '#f00606a9',
+        fontSize: moderateScale(15),
+        fontWeight: '700',
+        marginLeft: scale(8),
+        textAlign: 'center',
+    },
+
 });

@@ -7,9 +7,10 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
+  BackHandler,
 } from "react-native";
 import { WebView } from "react-native-webview";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { useRoute, useNavigation, useFocusEffect } from "@react-navigation/native";
 
 import { getOrderById } from "../../../../api/order";
 import OrderNavigation from "../../../../components/OrderNavigation";
@@ -25,14 +26,36 @@ const DeliveryMapScreen = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => true;
+
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        onBackPress
+      );
+
+      return () => subscription.remove();
+    }, [])
+  );
+
+
   // ---------------- LOAD ORDER ----------------
   useEffect(() => {
+    navigation.setOptions({
+      gestureEnabled: false,
+      headerLeft: () => null,
+    });
+
     if (!order_id) {
       Alert.alert("Error", "Order ID missing");
-      navigation.goBack();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "HomeScreen" }],
+      });
       return;
     }
-    console.log('Go online failed', order);
+
     fetchOrder();
   }, [order_id]);
 
@@ -43,7 +66,10 @@ const DeliveryMapScreen = () => {
       setOrder(orderData);
     } catch (e) {
       Alert.alert("Error", "Failed to load order");
-      navigation.goBack();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "HomeScreen" }],
+      });
     } finally {
       setLoading(false);
     }
@@ -61,20 +87,11 @@ const DeliveryMapScreen = () => {
 
   if (!order) return null;
 
-  const pickup = {
-    lat: Number(order?.place?.pickup_lat),
-    lng: Number(order?.place?.pickup_lng),
-  };
 
   const delivery = {
     lat: Number(order?.place?.delivery_lat),
     lng: Number(order?.place?.delivery_lng),
   };
-
-  // const delivery = {
-  //   lat: Number(order?.driver_lat ?? 7.860895),
-  //   lng: Number(order?.driver_lng ?? 81.539730),
-  // };
 
   // ---------------- MAP HTML ----------------
   const html = `
@@ -112,8 +129,14 @@ const DeliveryMapScreen = () => {
         <TouchableOpacity
           style={styles.button}
           onPress={() =>
-            navigation.navigate("DeliveryPhotoUploadScreen", {
-              order_id: order.id,
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: "DeliveryPhotoUploadScreen",
+                  params: { order_id: order.id },
+                },
+              ],
             })
           }
         >

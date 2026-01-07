@@ -62,7 +62,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
   const inputBgColor = isDarkMode ? '#334155' : '#f1f5f9';
   const placeholderColor = isDarkMode ? '#a5b4fc' : '#94a3b8';
   const buttonTextColor = '#fff';
-
+  const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 
   const districts = [
     { label: 'Select District', value: '' },
@@ -86,42 +86,52 @@ const DriverRegistrationScreen = ({ navigation }) => {
     }
   };
 
-  const pickImage = async (setImage, type) => {
-    try {
-      let permission;
-      if (Platform.OS === 'ios') {
-        permission = PERMISSIONS.IOS.PHOTO_LIBRARY;
-      } else {
-        permission =
-          Platform.Version >= 33
-            ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES
-            : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
-      }
+  const validateImageSize = (asset, label) => {
+    const size = asset?.fileSize;
 
-      const hasPermission = await requestPermission(permission);
-      if (!hasPermission) {
-        Alert.alert('Permission Required', `Please allow access to photos to upload ${type}.`);
-        return;
-      }
-
-      const result = await launchImageLibrary({
-        mediaType: 'photo',
-        quality: 0.8,
-        includeBase64: false,
-      });
-
-      if (!result.didCancel && result.assets?.length > 0) {
-        // ✅ Store the full asset object like customer registration
-        setImage(result.assets[0]);
-      } else if (result.errorCode) {
-        Alert.alert('Error', `Failed to pick ${type}: ${result.errorMessage || 'Unknown error'}`);
-      }
-    } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred while picking the image.');
-      console.error(error);
+    if (typeof size !== 'number') {
+      console.warn('Image size unavailable for:', label);
+      return true;
     }
+
+    if (size > MAX_IMAGE_SIZE) {
+      setError(`${label} must be less than 2 MB`);
+      return false;
+    }
+
+    return true;
   };
 
+
+  const pickImage = async (setImage, label) => {
+    const permission =
+      Platform.OS === 'ios'
+        ? PERMISSIONS.IOS.PHOTO_LIBRARY
+        : Platform.Version >= 33
+          ? PERMISSIONS.ANDROID.READ_MEDIA_IMAGES
+          : PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE;
+
+    const status = await check(permission);
+    if (status !== RESULTS.GRANTED) {
+      const req = await request(permission);
+      if (req !== RESULTS.GRANTED) {
+        Alert.alert('Permission required', 'Please allow photo access');
+        return;
+      }
+    }
+
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      quality: 0.8,
+      includeExtra: true,
+    });
+    if (result.assets?.length) {
+      const asset = result.assets[0];
+      if (!validateImageSize(asset, label)) return;
+      setImage(asset);
+      setError('');
+    }
+  };
 
 
   const validateInputs = () => {
@@ -129,7 +139,9 @@ const DriverRegistrationScreen = ({ navigation }) => {
     if (!last_name.trim()) return 'Last name is required';
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return 'Please enter a valid email';
     if (!phone.match(/^\+?\d{10,15}$/)) return 'Please enter a valid phone number';
-    if (!nic.trim()) return 'National ID (NIC) is required';
+    if (!/^(?:\d{9}[Vv]|\d{12})$/.test(nic)) {
+      return 'NIC must be either 9 digits followed by V, or exactly 12 digits';
+    }
     if (!gender) return 'Gender is required';
     if (!district) return 'District is required';
     if (!license_number.trim()) return 'Driver’s License Number is required';
@@ -140,7 +152,34 @@ const DriverRegistrationScreen = ({ navigation }) => {
     if (!nic_back_pic) return 'NIC back image is required';
     if (!license_front_pic) return 'License front image is required';
     if (!license_back_pic) return 'License back image is required';
+    if (!dob) return 'Date of birth is required';
+    if (!isAtLeast18(dob)) return 'You must be at least 18 years old to register';
+    const images = [
+      { img: profile_pic, label: 'Profile picture' },
+      { img: nic_front_pic, label: 'NIC front image' },
+      { img: nic_back_pic, label: 'NIC back image' },
+      { img: license_front_pic, label: 'License front image' },
+      { img: license_back_pic, label: 'License back image' },
+    ];
+
+    for (const { img, label } of images) {
+      if (img?.fileSize && img.fileSize > MAX_IMAGE_SIZE) {
+        return `${label} must be less than 2 MB`;
+      }
+    }
     return '';
+  };
+
+  const isAtLeast18 = (dob) => {
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+
+    return age >= 18;
   };
 
   const handleRegister = async () => {
@@ -224,7 +263,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
       setTimeout(() => {
         navigation.reset({
           index: 0,
-          routes: [{ name: 'DriverDashboard' }],
+          routes: [{ name: 'LoginScreen' }],
         });
       }, 1000);
 
@@ -272,13 +311,6 @@ const DriverRegistrationScreen = ({ navigation }) => {
             <Text style={styles.title}>Driver Registration</Text>
             <Text style={styles.subtitle}>Complete your profile to start driving</Text>
           </View>
-
-          {error ? (
-            <View style={styles.errorContainer}>
-              <MaterialIcons name="error-outline" size={20} color="#ef4444" />
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          ) : null}
 
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Personal Information</Text>
@@ -361,7 +393,11 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   placeholder="Enter National ID (NIC)"
                   placeholderTextColor="#94a3b8"
                   value={nic}
-                  onChangeText={setNic}
+                  onChangeText={(text) => {
+                    setNic(text.toUpperCase());
+                    if (error) setError('');
+                  }}
+                  autoCapitalize="characters"
                   returnKeyType="next"
                 />
               </View>
@@ -587,6 +623,13 @@ const DriverRegistrationScreen = ({ navigation }) => {
 
 
           </View>
+
+          {error ? (
+            <View style={styles.formErrorBox}>
+              <MaterialIcons name="error" size={22} color="#fff" />
+              <Text style={styles.formErrorText}>{error}</Text>
+            </View>
+          ) : null}
 
           {/* Register Button */}
           <TouchableOpacity

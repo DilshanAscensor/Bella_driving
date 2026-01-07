@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,11 +8,12 @@ import {
     Alert,
     ScrollView,
     ActivityIndicator,
+    BackHandler,
 } from 'react-native';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { launchCamera } from 'react-native-image-picker';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 import { delivered } from '../../../../api/order';
@@ -26,6 +27,26 @@ const DeliveryPhotoUploadScreen = () => {
     const [photo1, setPhoto1] = useState(null);
     const [photo2, setPhoto2] = useState(null);
     const [isLoading, setIsLoading] = useState(false); // ✅ NEW
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const onBackPress = () => true;
+
+            const subscription = BackHandler.addEventListener(
+                "hardwareBackPress",
+                onBackPress
+            );
+
+            return () => subscription.remove();
+        }, [])
+    );
+
+    useEffect(() => {
+        navigation.setOptions({
+            gestureEnabled: false,
+            headerLeft: () => null,
+        });
+    }, [navigation]);
 
     /* ---------------- CAMERA ---------------- */
     const takePhoto = async (setPhoto) => {
@@ -62,7 +83,7 @@ const DeliveryPhotoUploadScreen = () => {
         }
 
         try {
-            setIsLoading(true); // ✅ START LOADER
+            setIsLoading(true);
 
             const formData = new FormData();
 
@@ -81,11 +102,19 @@ const DeliveryPhotoUploadScreen = () => {
             await delivered(order_id, formData);
 
             Alert.alert('Success', 'Order delivered successfully');
-            navigation.navigate('DeliveryCompletedScreen', { order_id });
+            navigation.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: "DeliveryCompletedScreen",
+                        params: { order_id },
+                    },
+                ],
+            });
         } catch (error) {
             Alert.alert('Upload Failed', error.message);
         } finally {
-            setIsLoading(false); // ✅ STOP LOADER
+            setIsLoading(false);
         }
     };
 

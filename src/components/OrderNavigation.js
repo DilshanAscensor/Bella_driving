@@ -32,60 +32,44 @@ export default function OrderNavigation({ order }) {
 
         const status = order.status;
 
-        // 🔹 Driver current location (GPS or mock)
-        const driverLat = Number(order?.driver_lat ?? 7.91173);
-        const driverLng = Number(order?.driver_lng ?? 81.561939);
-
-        // 🔹 Pickup
+        // Pickup location (required)
         const pickupLat = Number(order?.place?.pickup_lat);
         const pickupLng = Number(order?.place?.pickup_lng);
 
-        // 🔹 Delivery
-        const deliveryLat = Number(order?.place?.delivery_lat ?? 7.860895);
-        const deliveryLng = Number(order?.place?.delivery_lng ?? 81.53973);
+        // Delivery location (required only after pickup)
+        const deliveryLat = Number(order?.place?.delivery_lat);
+        const deliveryLng = Number(order?.place?.delivery_lng);
 
-        let originLat, originLng, destLat, destLng;
-
-        // ---------------- STATUS BASED LOGIC ----------------
-        if (status === "accepted") {
-            // Driver → Pickup
-            originLat = driverLat;
-            originLng = driverLng;
-            destLat = pickupLat;
-            destLng = pickupLng;
-        }
-        else if (status === "picked_up" || status === "on_the_way") {
-            // Pickup → Delivery
-            originLat = pickupLat;
-            originLng = pickupLng;
-            destLat = deliveryLat;
-            destLng = deliveryLng;
-        }
-        else {
-            alert("Navigation not available for this order status");
+        if (Number.isNaN(pickupLat) || Number.isNaN(pickupLng)) {
+            Alert.alert("Navigation Error", "Pickup location not available");
             return;
         }
 
-        // ---------------- GOOGLE MAP URL ----------------
         let url = "";
 
-        if (Platform.OS === "ios") {
-            url = `comgooglemaps://?saddr=${originLat},${originLng}&daddr=${destLat},${destLng}&directionsmode=driving`;
-        } else {
-            url = `https://www.google.com/maps/dir/?api=1&origin=${originLat},${originLng}&destination=${destLat},${destLng}&travelmode=driving`;
+        // ---------------- STATUS LOGIC ----------------
+        if (status === "accepted") {
+            url = `https://www.google.com/maps/search/?api=1&query=${pickupLat},${pickupLng}`;
+        }
+        else if (status === "picked_up" || status === "on_the_way") {
+            if (Number.isNaN(deliveryLat) || Number.isNaN(deliveryLng)) {
+                Alert.alert("Navigation Error", "Delivery location not available");
+                return;
+            }
+
+            url = `https://www.google.com/maps/dir/?api=1&origin=${pickupLat},${pickupLng}&destination=${deliveryLat},${deliveryLng}&travelmode=driving`;
+        }
+        else {
+            Alert.alert("Navigation not available for this order status");
+            return;
         }
 
-        Linking.canOpenURL(url)
-            .then((supported) => {
-                if (!supported) {
-                    const fallback = `https://www.google.com/maps/dir/?api=1&origin=${originLat},${originLng}&destination=${destLat},${destLng}`;
-                    Linking.openURL(fallback);
-                } else {
-                    Linking.openURL(url);
-                }
-            })
-            .catch(err => console.error("Map error:", err));
+        // ---------------- OPEN MAP ----------------
+        Linking.openURL(url).catch(() => {
+            Alert.alert("Error", "Unable to open Google Maps");
+        });
     };
+
 
 
     const handleCallCustomer = () => {

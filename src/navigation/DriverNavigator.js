@@ -34,9 +34,9 @@ const DriverNavigator = () => {
                 initialRouteName="DriverDashboard"
             >
                 <Stack.Screen name="DriverDashboard" component={DriverDashboard} />
-                <Stack.Screen name="DriverRegistration" component={DriverRegistration} />
+                {/* <Stack.Screen name="DriverRegistration" component={DriverRegistration} /> */}
                 <Stack.Screen name="DriverDeliveries" component={DriverDeliveries} />
-                <Stack.Screen name="VehicleRegistration" component={VehicleRegistration} />
+                {/* <Stack.Screen name="VehicleRegistration" component={VehicleRegistration} /> */}
                 <Stack.Screen name="MyVehicle" component={MyVehicleScreen} />
                 <Stack.Screen name="EditVehicle" component={EditVehicleScreen} />
                 <Stack.Screen name="DriverProfile" component={DriverProfile} />
@@ -47,7 +47,7 @@ const DriverNavigator = () => {
                 <Stack.Screen name="PickupPhotoUpload" component={PickupPhotoUpload} />
                 <Stack.Screen name="DeliveryCompletedScreen" component={DeliveryCompletedScreen} />
                 <Stack.Screen name="DeliveryPhotoUploadScreen" component={DeliveryPhotoUploadScreen} />
-                <Stack.Screen name="DocumentsAndLicenses" component={DocumentsAndLicensesScreen} />
+                {/* <Stack.Screen name="DocumentsAndLicenses" component={DocumentsAndLicensesScreen} /> */}
                 <Stack.Screen name="EarningsScreen" component={EarningsScreen} />
                 <Stack.Screen name="PickupConfirm" component={PickupConfirmScreen} />
                 <Stack.Screen name="PickupMap" component={PickupMapScreen} />

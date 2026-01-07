@@ -61,6 +61,23 @@ export const confirmPickup = async (order_id) => {
     return response.data;
 };
 
+export const WayToPickup = async (order_id) => {
+    const token = await AsyncStorage.getItem('auth_token');
+
+    const response = await axios.post(
+        `${BASE_URL}/api/drivers/orders/${order_id}/way_to_pickup`,
+        null,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json',
+            },
+        }
+    );
+
+    return response.data;
+};
+
 export const onTheWay = async (order_id, formData) => {
     const token = await AsyncStorage.getItem('auth_token');
 

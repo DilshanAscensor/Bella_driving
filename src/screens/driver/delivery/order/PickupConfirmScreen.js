@@ -9,10 +9,11 @@ import {
     ScrollView,
     Linking,
     ActivityIndicator,
+    BackHandler,
 } from "react-native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { scale } from "react-native-size-matters";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getOrderById, confirmPickup } from "../../../../api/order";
@@ -26,16 +27,35 @@ export default function PickupConfirmScreen() {
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
 
+    useFocusEffect(
+        React.useCallback(() => {
+            const onBackPress = () => true;
+
+            const subscription = BackHandler.addEventListener(
+                "hardwareBackPress",
+                onBackPress
+            );
+
+            return () => subscription.remove();
+        }, [])
+    );
+
     // ---------------- LOAD ORDER ----------------
     useEffect(() => {
         if (!order_id) {
             Alert.alert("Error", "Order ID missing");
-            navigation.goBack();
+            navigation.reset({
+                index: 0,
+                routes: [{ name: "HomeScreen" }],
+            });
             return;
         }
-
+        navigation.setOptions({
+            gestureEnabled: false,
+            headerLeft: () => null,
+        });
         fetchOrder();
-    }, [order_id]);
+    }, [order_id, navigation]);
 
     const fetchOrder = async () => {
         try {
@@ -57,8 +77,14 @@ export default function PickupConfirmScreen() {
 
             await confirmPickup(order.id);
 
-            navigation.navigate('PickupPhotoUpload', {
-                order_id: order.id,
+            navigation.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: "PickupPhotoUpload",
+                        params: { order_id: order.id },
+                    },
+                ],
             });
 
         } catch (error) {

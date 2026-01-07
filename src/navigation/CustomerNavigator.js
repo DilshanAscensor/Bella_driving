@@ -8,6 +8,7 @@ import CustomerOrderDetailsScreen from '../../src/screens/customer/OrderDetailsS
 import CustomerProfileScreen from '../../src/screens/customer/profile/CustomerProfileScreen';
 import EditCustomerProfileScreen from '../../src/screens/customer/profile/EditCustomerProfileScreen';
 
+
 const Stack = createStackNavigator();
 
 const CustomerNavigator = () => {
@@ -19,6 +20,7 @@ const CustomerNavigator = () => {
             <Stack.Screen name="CustomerOrderDetails" component={CustomerOrderDetailsScreen} />
             <Stack.Screen name="CustomerProfileScreen" component={CustomerProfileScreen} />
             <Stack.Screen name="EditCustomerProfile" component={EditCustomerProfileScreen} />
+
         </Stack.Navigator>
     );
 };

@@ -7,10 +7,11 @@ import {
     TouchableOpacity,
     ScrollView,
     ActivityIndicator,
+    BackHandler,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { scale, verticalScale, moderateScale } from "react-native-size-matters";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 
 import { getOrderById, confirmDeliveryApi } from "../../../../api/order";
 
@@ -23,6 +24,20 @@ export default function DeliveryCompletedScreen() {
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
 
+    useFocusEffect(
+        React.useCallback(() => {
+            const onBackPress = () => true;
+
+            const subscription = BackHandler.addEventListener(
+                "hardwareBackPress",
+                onBackPress
+            );
+
+            return () => subscription.remove();
+        }, [])
+    );
+
+
     // ---------------- LOAD ORDER ----------------
     useEffect(() => {
         if (!order_id) {
@@ -31,8 +46,13 @@ export default function DeliveryCompletedScreen() {
             return;
         }
 
+        navigation.setOptions({
+            gestureEnabled: false,
+            headerLeft: () => null,
+        });
+
         fetchOrder();
-    }, [order_id]);
+    }, [order_id, navigation]);
 
     const fetchOrder = async () => {
         try {

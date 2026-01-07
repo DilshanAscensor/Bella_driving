@@ -136,7 +136,7 @@ const DriverDashboardScreen = () => {
         try {
             const res = await apiClient.get('/drivers/active-order');
 
-            if (res.data?.data) {
+            if (res.data?.data?.id) {
                 Alert.alert(
                     'Active Order',
                     'You must complete the active order before logging out'
@@ -152,13 +152,15 @@ const DriverDashboardScreen = () => {
                     { text: 'Logout', style: 'destructive', onPress: performLogout },
                 ]
             );
-        } catch {
+        } catch (e) {
+            // If API fails, still allow logout
             performLogout();
         }
     };
 
     const performLogout = async () => {
         if (loggingOut) return;
+
         setLoggingOut(true);
 
         try {
@@ -169,17 +171,25 @@ const DriverDashboardScreen = () => {
                 index: 0,
                 routes: [{ name: 'HomeScreen' }],
             });
+
+        } catch (e) {
+            console.log('Logout error', e);
+            Alert.alert('Logout failed', 'Please try again');
         } finally {
             setLoggingOut(false);
         }
     };
 
+
+
     const resumeOrder = (navigation, order) => {
         switch (order.status) {
             case 'accepted':
+                navigation.navigate('PickupMap', { order_id: order.id });
+                break;
+            case 'way_to_pickup':
                 navigation.navigate('PickupConfirm', { order_id: order.id });
                 break;
-
             case 'picked_up':
                 navigation.navigate('PickupPhotoUpload', { order_id: order.id });
                 break;

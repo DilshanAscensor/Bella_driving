@@ -34,6 +34,8 @@ import WelcomeScreen from './src/WelcomScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import OtpScreen from './src/screens/login/OtpVerificationScreen';
 
+import DriverRegistration from './src/screens/driver/DriverRegistrationScreen';
+import RegistrationScreen from './src/screens/customer/RegistrationScreen';
 const Stack = createNativeStackNavigator();
 
 /* ======================================================
@@ -55,12 +57,15 @@ const RootNavigator = () => {
     try {
       const res = await apiClient.get('/drivers/active-order');
       const order = res?.data?.data;
+      console.log('Resuming order with status:', order);
       if (!order) return;
 
       hasNavigatedRef.current = true;
-
       switch (order.status) {
         case 'accepted':
+          navigate('PickupMap', { order_id: order.id });
+          break;
+        case 'way_to_pickup':
           navigate('PickupConfirm', { order_id: order.id });
           break;
         case 'picked_up':
@@ -184,6 +189,8 @@ const RootNavigator = () => {
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="OtpScreen" component={OtpScreen} />
+        <Stack.Screen name="DriverRegistration" component={DriverRegistration} />
+        <Stack.Screen name="CustomerRegistration" component={RegistrationScreen} />
       </Stack.Navigator>
     );
   }
