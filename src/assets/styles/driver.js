@@ -18,7 +18,7 @@ export default StyleSheet.create({
 
     scrollContainer: {
         padding: scale(20),
-        paddingBottom: verticalScale(40),
+        paddingBottom: verticalScale(120),
         backgroundColor: '#f8fafc',
     },
 

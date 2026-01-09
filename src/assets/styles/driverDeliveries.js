@@ -63,8 +63,13 @@ export default StyleSheet.create({
     },
     status: {
         color: '#FFA500',
-        fontSize: 13,
+        backgroundColor: '#fff4e5',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 5,
+        fontSize: 12,
         fontWeight: "600",
+        textTransform: "capitalize",
     },
 
     row: {

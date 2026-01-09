@@ -61,7 +61,7 @@ export default function Footer() {
                 {/* Spacer for FAB */}
                 <View style={{ width: FAB_SIZE }} />
 
-                <TouchableOpacity style={styles.col} onPress={() => go('AcceptDeliveryScreen')}>
+                <TouchableOpacity style={styles.col}>
                     <MaterialIcons name="headset-mic" size={ICON_SIZE} color={ICON} />
                 </TouchableOpacity>
 

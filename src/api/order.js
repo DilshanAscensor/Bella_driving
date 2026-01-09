@@ -177,3 +177,19 @@ export const getOrderById = async (orderId) => {
         throw error;
     }
 };
+
+export const getDriverOrders = async () => {
+    const token = await AsyncStorage.getItem('auth_token');
+
+    const response = await axios.get(
+        `${BASE_URL}/api/drivers/orders`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/json',
+            },
+        }
+    );
+
+    return response.data.data;
+};

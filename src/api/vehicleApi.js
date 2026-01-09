@@ -13,14 +13,15 @@ export const getVehicleByDriver = async (driverId) => {
 };
 
 export const updateVehicle = async (vehicleId, formData) => {
-    const response = await apiClient.put(
+    const response = await apiClient.post(
         `/vehicle/update/${vehicleId}`,
         formData,
         {
             headers: {
                 "Content-Type": "multipart/form-data",
-            }
+            },
         }
     );
+
     return response.data;
 };

@@ -4,7 +4,6 @@ import {
     Text,
     Image,
     ScrollView,
-    Alert,
     TouchableOpacity,
     ActivityIndicator,
 } from 'react-native';
@@ -18,9 +17,6 @@ import { setUser } from '../../redux/slices/userSlice';
 import Footer from '../../components/Footer';
 import Styles from '../../assets/styles/driverProfile';
 import { scale } from 'react-native-size-matters';
-import { userLogout } from '../../api/authApi';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 const resolveFileUrl = (path) => {
     if (!path) return null;
@@ -31,7 +27,6 @@ const UserProfileScreen = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation();
     const [active, setActive] = useState('profile');
-    const [loggingOut, setLoggingOut] = useState(false);
     const user = useSelector((state) => state.user.user) || {};
 
     const [loading, setLoading] = useState(true);
@@ -62,47 +57,6 @@ const UserProfileScreen = () => {
     useEffect(() => {
         fetchDriver();
     }, [fetchDriver]);
-
-
-    // ================= Logout Function =================
-    const handleLogout = () => {
-        if (loggingOut) return;
-
-        Alert.alert(
-            'Confirm Logout',
-            'Are you sure you want to logout?',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Logout',
-                    style: 'destructive',
-                    onPress: () => performLogout()
-                },
-            ]
-        );
-    };
-
-    const performLogout = async () => {
-        setLoggingOut(true);
-        try {
-            const response = await userLogout();
-
-            await AsyncStorage.removeItem('auth_token');
-
-            Alert.alert('Success', response.message || 'Logged out successfully.');
-
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'HomeScreen' }],
-            });
-
-        } catch (error) {
-            Alert.alert('Logout Error', error.message);
-        } finally {
-            setLoggingOut(false);
-        }
-    };
-
 
     const d = user.driver_details;
 
@@ -136,8 +90,9 @@ const UserProfileScreen = () => {
         <SafeAreaView style={styles.safeArea}>
             <ScrollView
                 style={styles.container}
-                contentContainerStyle={{ paddingBottom: scale(100) }}
+                contentContainerStyle={{ paddingBottom: scale(120) }}
             >
+                {/* Profile Header */}
                 <View style={styles.profileCard}>
                     <View style={styles.profileLeft}>
                         {profilePic ? (
@@ -206,46 +161,36 @@ const UserProfileScreen = () => {
                     </View>
                 </View>
 
+                {/* Actions */}
                 <View style={styles.actionButtonsContainer}>
-                    {/* Documents & Licenses */}
                     <TouchableOpacity
                         style={styles.actionButtonWhite}
                         onPress={() => navigation.navigate('DocumentsAndLicenses')}
                     >
                         <View style={styles.actionTextContainer}>
                             <Text style={styles.actionButtonTitle}>Documents & Licenses</Text>
-                            <Text style={styles.actionButtonSubtitle}>View all your documents</Text>
+                            <Text style={styles.actionButtonSubtitle}>
+                                View all your documents
+                            </Text>
                         </View>
                         <MaterialIcons name="chevron-right" size={28} color="#FFA500" />
                     </TouchableOpacity>
 
-                    {/* Vehicle Information */}
                     <TouchableOpacity
                         style={styles.actionButtonWhite}
                         onPress={() => navigation.navigate('MyVehicle')}
                     >
                         <View style={styles.actionTextContainer}>
                             <Text style={styles.actionButtonTitle}>Vehicle Information</Text>
-                            <Text style={styles.actionButtonSubtitle}>View your vehicle details</Text>
+                            <Text style={styles.actionButtonSubtitle}>
+                                View your vehicle details
+                            </Text>
                         </View>
                         <MaterialIcons name="chevron-right" size={28} color="#FFA500" />
                     </TouchableOpacity>
-
-                    {/* Log Out */}
-                    <TouchableOpacity
-                        style={[styles.actionButtonWhite, styles.logoutButtonWhite]}
-                        onPress={handleLogout}
-                    >
-                        <View style={styles.actionTextContainer}>
-                            <Text style={styles.logoutActionButtonTitle}>Log Out</Text>
-                            {/* <Text style={styles.actionButtonSubtitle}>Sign out from your account</Text> */}
-                        </View>
-                        <MaterialIcons name="logout" size={28} color="#ef4444" />
-                    </TouchableOpacity>
                 </View>
 
-
-                {/* Edit Button */}
+                {/* Edit Profile */}
                 <TouchableOpacity
                     style={styles.editButton}
                     onPress={() => navigation.navigate('EditDriverProfile')}

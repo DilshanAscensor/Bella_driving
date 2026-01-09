@@ -30,7 +30,9 @@ import { userLogout, saveFcmToken } from '../../api/authApi';
 import apiClient from '../../api/apiClient';
 import OngoingTripBar from '../../components/OngoingTripBar';
 import { useOrder } from '../../context/OrderContext';
-
+import { useDispatch } from 'react-redux';
+import { clearUser } from '../../redux/slices/userSlice';
+import { persistor } from '../../redux/store';
 import styles from '../../assets/styles/driverDashboard';
 import Footer from '../../components/Footer';
 
@@ -38,7 +40,7 @@ const DriverDashboardScreen = () => {
     const { activeOrder, reload } = useOrder();
     const navigation = useNavigation();
     const driver = useSelector(state => state.user.user);
-
+    const dispatch = useDispatch();
     const [loading, setLoading] = useState(true);
     const [hasVehicle, setHasVehicle] = useState(false);
     const [isOnline, setIsOnline] = useState(false);
@@ -125,8 +127,10 @@ const DriverDashboardScreen = () => {
     const loadVehicle = async () => {
         try {
             const res = await getVehicleByDriver(driver.id);
+
+            // res = { status: true, data: {...vehicle} }
             setHasVehicle(!!res?.data);
-        } catch {
+        } catch (e) {
             setHasVehicle(false);
         }
     };
@@ -160,20 +164,30 @@ const DriverDashboardScreen = () => {
 
     const performLogout = async () => {
         if (loggingOut) return;
-
         setLoggingOut(true);
 
         try {
+
+            if (isOnline) {
+                Alert.alert('Go Offline First');
+                return;
+            }
+
             await userLogout();
-            await AsyncStorage.multiRemove(['auth_token', 'driver_online_status']);
+
+            await AsyncStorage.multiRemove([
+                'auth_token',
+                'driver_online_status',
+            ]);
+
+            dispatch(clearUser());
+            await persistor.purge();
 
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'HomeScreen' }],
             });
-
         } catch (e) {
-            console.log('Logout error', e);
             Alert.alert('Logout failed', 'Please try again');
         } finally {
             setLoggingOut(false);
@@ -347,7 +361,7 @@ const DriverDashboardScreen = () => {
                         }
                     >
                         <Card.Title
-                            title="Register Vehicle"
+                            title={hasVehicle ? 'My Vehicle' : 'Register Vehicle'}
                             titleStyle={{
                                 color: TEXT_DARK,
                                 fontWeight: '600',
@@ -362,8 +376,8 @@ const DriverDashboardScreen = () => {
                                 />
                             )}
                         />
-
                     </Card>
+
 
                     <Card
                         style={styles.menuCard}
