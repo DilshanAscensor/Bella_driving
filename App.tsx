@@ -3,39 +3,40 @@ import { AppState } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Redux
+/* ================= REDUX ================= */
 import { Provider, useSelector } from 'react-redux';
 import { store, persistor } from './src/redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
 
-// UI
+/* ================= UI ================= */
 import { PaperProvider } from 'react-native-paper';
 
-// Firebase / Notifications
+/* ================= FIREBASE ================= */
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 
-// Navigation helpers
+/* ================= NAVIGATION ================= */
 import { navigationRef, navigate } from './src/navigation/NavigationService';
 
-// Utils
+/* ================= UTILS ================= */
 import { playOrderSound } from './src/utils/notificationSound';
 import apiClient from './src/api/apiClient';
 import { isDriverOnline } from './src/utils/driverStatus';
+import { isCameraActive } from './src/utils/appLock';
 
-// Navigators
+/* ================= NAVIGATORS ================= */
 import DriverNavigator from './src/navigation/DriverNavigator';
 import CustomerNavigator from './src/navigation/CustomerNavigator';
 
-// Screens
+/* ================= SCREENS ================= */
 import HomeScreen from './src/screens/HomeScreen';
 import SplashScreen from './src/screens/SplashScreen';
 import WelcomeScreen from './src/WelcomScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import OtpScreen from './src/screens/login/OtpVerificationScreen';
-
 import DriverRegistration from './src/screens/driver/DriverRegistrationScreen';
 import RegistrationScreen from './src/screens/customer/RegistrationScreen';
+
 const Stack = createNativeStackNavigator();
 
 /* ======================================================
@@ -43,7 +44,19 @@ const Stack = createNativeStackNavigator();
 ====================================================== */
 const RootNavigator = () => {
   const user = useSelector(state => state.user.user);
-  const hasNavigatedRef = useRef(false);
+
+  // 🔒 Prevent duplicate navigation PER ORDER
+  const lastNavigatedOrderRef = useRef(null);
+
+  /* ================= SAFE ACCEPT NAV ================= */
+  const safeNavigateToAccept = (orderId) => {
+    if (!orderId) return;
+
+    if (lastNavigatedOrderRef.current === orderId) return;
+
+    lastNavigatedOrderRef.current = orderId;
+    navigate('AcceptDeliveryScreen', { order_id: orderId });
+  };
 
   /* ================= ACTIVE ORDER RESUME ================= */
   const checkActiveOrder = async () => {
@@ -52,15 +65,17 @@ const RootNavigator = () => {
     const online = await isDriverOnline();
     if (!online) return;
 
-    if (hasNavigatedRef.current) return;
-
     try {
       const res = await apiClient.get('/drivers/active-order');
       const order = res?.data?.data;
-      console.log('Resuming order with status:', order);
-      if (!order) return;
 
-      hasNavigatedRef.current = true;
+      if (!order) {
+        lastNavigatedOrderRef.current = null;
+        return;
+      }
+
+      lastNavigatedOrderRef.current = order.id;
+
       switch (order.status) {
         case 'accepted':
           navigate('PickupMap', { order_id: order.id });
@@ -74,11 +89,9 @@ const RootNavigator = () => {
         case 'on_the_way':
           navigate('DeliveryMap', { order_id: order.id });
           break;
-        default:
-          hasNavigatedRef.current = false;
       }
     } catch {
-      hasNavigatedRef.current = false;
+      lastNavigatedOrderRef.current = null;
     }
   };
 
@@ -93,74 +106,49 @@ const RootNavigator = () => {
       sound: 'order_sound',
     });
 
-    /* ---------- AppState ---------- */
-    const appStateSub = AppState.addEventListener('change', async state => {
+    /* ---------- APP STATE ---------- */
+    const appStateSub = AppState.addEventListener('change', state => {
       if (state === 'active') {
-        await checkActiveOrder();
+        if (isCameraActive()) return; // 🛑 BLOCK CAMERA RESUME
+        checkActiveOrder();
       }
     });
 
-    /* ---------- Cold Start ---------- */
-    messaging().getInitialNotification().then(async remoteMessage => {
-      const online = await isDriverOnline();
-      if (!online) return;
-
+    /* ---------- COLD START ---------- */
+    messaging().getInitialNotification().then(remoteMessage => {
       if (remoteMessage?.data?.type === 'new_order') {
-        navigate('AcceptDeliveryScreen', {
-          order_id: remoteMessage.data.order_id,
-        });
+        safeNavigateToAccept(remoteMessage.data.order_id);
       }
     });
 
-    /* ---------- Background ---------- */
+    /* ---------- BACKGROUND ---------- */
     const unsubscribeBackground =
-      messaging().onNotificationOpenedApp(async remoteMessage => {
-        const online = await isDriverOnline();
-        if (!online) return;
-
+      messaging().onNotificationOpenedApp(remoteMessage => {
         if (remoteMessage?.data?.type === 'new_order') {
-          navigate('AcceptDeliveryScreen', {
-            order_id: remoteMessage.data.order_id,
-          });
+          safeNavigateToAccept(remoteMessage.data.order_id);
         }
       });
 
-    /* ---------- Foreground ---------- */
+    /* ---------- FOREGROUND ---------- */
     const unsubscribeForeground =
       messaging().onMessage(async remoteMessage => {
         const online = await isDriverOnline();
         if (!online) return;
 
         if (remoteMessage?.data?.type === 'new_order') {
-          await notifee.displayNotification({
-            title: 'New Order Available',
-            body: 'Tap to accept the order',
-            android: {
-              channelId: 'orders',
-              sound: 'order_sound',
-              importance: AndroidImportance.HIGH,
-              pressAction: { id: 'default' },
-            },
-            data: remoteMessage.data,
-          });
-
           playOrderSound();
+          safeNavigateToAccept(remoteMessage.data.order_id);
         }
       });
 
-    /* ---------- Notifee Press ---------- */
+    /* ---------- NOTIFEE PRESS ---------- */
     const unsubscribeNotifee =
-      notifee.onForegroundEvent(async ({ type, detail }) => {
+      notifee.onForegroundEvent(({ type, detail }) => {
         if (type !== EventType.PRESS) return;
-
-        const online = await isDriverOnline();
-        if (!online) return;
 
         const data = detail.notification?.data;
         if (data?.type === 'new_order') {
-          navigate('AcceptDeliveryScreen', {
-            order_id: data.order_id,
-          });
+          safeNavigateToAccept(data.order_id);
         }
       });
 

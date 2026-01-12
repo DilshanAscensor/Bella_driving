@@ -89,6 +89,7 @@ export default function PickupConfirmScreen() {
 
         } catch (error) {
             Alert.alert('Error', 'Failed to confirm pickup');
+            console.error('Confirm Pickup Error:', error);
         } finally {
             setProcessing(false);
         }
@@ -105,21 +106,47 @@ export default function PickupConfirmScreen() {
             return;
         }
 
-        const phoneUrl = `tel:${phone}`;
+        const phoneUrl = Platform.OS === 'android'
+            ? `tel:${phone}`
+            : `telprompt:${phone}`;
 
-        Linking.canOpenURL(phoneUrl)
+        Linking.openURL(phoneUrl).catch(() => {
+            Alert.alert(
+                'Call Failed',
+                'Unable to open phone dialer on this device'
+            );
+        });
+    };
+
+
+    const handleChatCustomer = () => {
+        const phone = order?.customer_phone;
+
+        if (!phone) {
+            Alert.alert(
+                'Phone number unavailable',
+                'Customer phone number is not provided'
+            );
+            return;
+        }
+
+        const smsUrl =
+            Platform.OS === 'ios'
+                ? `sms:${phone}`
+                : `sms:${phone}?body=`;
+
+        Linking.canOpenURL(smsUrl)
             .then((supported) => {
                 if (!supported) {
-                    Alert.alert('Error', 'Cannot open phone dialer');
+                    Alert.alert('Error', 'Cannot open messaging app');
                 } else {
-                    return Linking.openURL(phoneUrl);
+                    return Linking.openURL(smsUrl);
                 }
             })
             .catch(() => {
                 Alert.alert('Error', 'Something went wrong');
             });
     };
-
 
 
     // ---------------- LOADING ----------------
@@ -212,10 +239,10 @@ export default function PickupConfirmScreen() {
                                 <Text style={styles.smallBtnText}>Call</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.smallBtn}>
+                            {/* <TouchableOpacity style={styles.smallBtn} onPress={handleChatCustomer}>
                                 <MaterialIcons name="chat" size={22} />
                                 <Text style={styles.smallBtnText}>Chat</Text>
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </View>
 
                         {/* CONFIRM */}

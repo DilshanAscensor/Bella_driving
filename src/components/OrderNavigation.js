@@ -83,20 +83,18 @@ export default function OrderNavigation({ order }) {
             return;
         }
 
-        const phoneUrl = `tel:${phone}`;
+        const phoneUrl = Platform.OS === 'android'
+            ? `tel:${phone}`
+            : `telprompt:${phone}`;
 
-        Linking.canOpenURL(phoneUrl)
-            .then((supported) => {
-                if (!supported) {
-                    Alert.alert('Error', 'Cannot open phone dialer');
-                } else {
-                    return Linking.openURL(phoneUrl);
-                }
-            })
-            .catch(() => {
-                Alert.alert('Error', 'Something went wrong');
-            });
+        Linking.openURL(phoneUrl).catch(() => {
+            Alert.alert(
+                'Call Failed',
+                'Unable to open phone dialer on this device'
+            );
+        });
     };
+
 
     return (
         <View style={[styles.footer, { height: height * 0.28 }]}>

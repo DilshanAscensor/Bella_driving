@@ -18,6 +18,8 @@ import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/nativ
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 import { delivered } from '../../../../api/order';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
+import { setCameraActive } from '../../../../utils/appLock';
 
 const DeliveryPhotoUploadScreen = () => {
     const navigation = useNavigation();
@@ -26,7 +28,8 @@ const DeliveryPhotoUploadScreen = () => {
 
     const [photo1, setPhoto1] = useState(null);
     const [photo2, setPhoto2] = useState(null);
-    const [isLoading, setIsLoading] = useState(false); // ✅ NEW
+    const [isLoading, setIsLoading] = useState(false);
+    const isFocused = useIsFocused();
 
     useFocusEffect(
         React.useCallback(() => {
@@ -50,14 +53,17 @@ const DeliveryPhotoUploadScreen = () => {
 
     /* ---------------- CAMERA ---------------- */
     const takePhoto = async (setPhoto) => {
+        setCameraActive(true);
+
         const result = await launchCamera({
             mediaType: 'photo',
-            cameraType: 'back',
             quality: 0.8,
+            cameraType: 'back',
         });
 
-        if (result.didCancel) return;
+        setCameraActive(false);
 
+        if (result.didCancel) return;
         if (result.errorCode) {
             Alert.alert('Camera Error', result.errorMessage);
             return;
@@ -68,9 +74,10 @@ const DeliveryPhotoUploadScreen = () => {
         }
     };
 
+
     /* ---------------- UPLOAD ---------------- */
     const handleContinue = async () => {
-        if (isLoading) return; // ✅ prevent double click
+        if (isLoading) return;
 
         if (!order_id) {
             Alert.alert('Error', 'Order ID missing');

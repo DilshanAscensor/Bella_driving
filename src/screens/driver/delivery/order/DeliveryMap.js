@@ -129,21 +129,15 @@ const DeliveryMapScreen = () => {
         <TouchableOpacity
           style={styles.button}
           onPress={() =>
-            navigation.reset({
-              index: 0,
-              routes: [
-                {
-                  name: "DeliveryPhotoUploadScreen",
-                  params: { order_id: order.id },
-                },
-              ],
+            navigation.navigate("DeliveryPhotoUploadScreen", {
+              order_id: order.id,
             })
           }
         >
           <Text style={styles.buttonText}>Complete Order</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 };
 
