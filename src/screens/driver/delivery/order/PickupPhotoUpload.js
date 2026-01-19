@@ -29,7 +29,13 @@ const PickupPhotoScreen = () => {
 
     useFocusEffect(
         React.useCallback(() => {
-            const onBackPress = () => true;
+            const onBackPress = () => {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: "DriverDashboard" }],
+                });
+                return true;
+            };
 
             const subscription = BackHandler.addEventListener(
                 "hardwareBackPress",
@@ -37,7 +43,7 @@ const PickupPhotoScreen = () => {
             );
 
             return () => subscription.remove();
-        }, [])
+        }, [navigation])
     );
 
     useEffect(() => {
@@ -77,6 +83,9 @@ const PickupPhotoScreen = () => {
         try {
             setIsLoading(true);
 
+            // ⏱ small delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+
             const formData = new FormData();
 
             formData.append('picked_up_image', {
@@ -96,20 +105,17 @@ const PickupPhotoScreen = () => {
             Alert.alert('Success', 'Order is on the way');
             navigation.reset({
                 index: 0,
-                routes: [
-                    {
-                        name: "DeliveryMap",
-                        params: { order_id },
-                    },
-                ],
+                routes: [{ name: 'DeliveryMap', params: { order_id } }],
             });
 
         } catch (error) {
+            console.log(error.response?.data || error.message);
             Alert.alert('Upload failed', 'Please try again');
         } finally {
             setIsLoading(false);
         }
     };
+
 
     const isButtonDisabled = !photo1 || !photo2 || isLoading;
 

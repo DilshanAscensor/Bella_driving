@@ -28,7 +28,13 @@ const DeliveryMapScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      const onBackPress = () => true;
+      const onBackPress = () => {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "DriverDashboard" }],
+        });
+        return true;
+      };
 
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
@@ -36,9 +42,8 @@ const DeliveryMapScreen = () => {
       );
 
       return () => subscription.remove();
-    }, [])
+    }, [navigation])
   );
-
 
   // ---------------- LOAD ORDER ----------------
   useEffect(() => {
@@ -88,9 +93,14 @@ const DeliveryMapScreen = () => {
   if (!order) return null;
 
 
+  // const delivery = {
+  //   lat: Number(order?.place?.delivery_lat),
+  //   lng: Number(order?.place?.delivery_lng),
+  // };
+
   const delivery = {
-    lat: Number(order?.place?.delivery_lat),
-    lng: Number(order?.place?.delivery_lng),
+    lat: Number('7.860948705987937'),
+    lng: Number('81.53975152116719'),
   };
 
   // ---------------- MAP HTML ----------------

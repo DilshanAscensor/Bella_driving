@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
     TextInput,
     TouchableOpacity,
-    StyleSheet,
     Image,
     StatusBar,
-    SafeAreaView,
     useColorScheme,
     KeyboardAvoidingView,
     Platform,
@@ -21,6 +19,8 @@ import { PRIMARY_COLOR, ACCENT_COLOR } from '../assets/theme/colors';
 import styles from '../assets/styles/login';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { userLogin, sendOtp } from '../api/authApi';
+import DeviceInfo from 'react-native-device-info';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const LoginScreen = ({ navigation }) => {
     const scheme = useColorScheme();
@@ -31,7 +31,11 @@ const LoginScreen = ({ navigation }) => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [hidden, setHidden] = useState(true);
+    const [deviceId, setDeviceId] = useState(null);
 
+    useEffect(() => {
+        DeviceInfo.getUniqueId().then(setDeviceId);
+    }, []);
     const backgroundColors = isDarkMode ? ['#000', '#172554'] : [PRIMARY_COLOR, '#e0e7ff'];
     const textColor = isDarkMode ? '#fff' : '#000';
     const inputBgColor = isDarkMode ? '#334155' : '#f1f5f9';
@@ -48,7 +52,7 @@ const LoginScreen = ({ navigation }) => {
         return '';
     };
 
-    const handleRegister = async () => {
+    const handleLogin = async () => {
         setError('');
         const validationError = validateInputs();
         if (validationError) {
@@ -58,13 +62,21 @@ const LoginScreen = ({ navigation }) => {
 
         setLoading(true);
 
-        try {
-            const formData = new FormData();
-            formData.append('email', String(email));
-            formData.append('password', String(password));
+        if (!deviceId) {
+            Alert.alert('Please wait', 'Initializing device...');
+            return;
+        }
 
-            const response = await userLogin(formData);
+        try {
+            const payload = {
+                email: email.trim(),
+                password: password,
+                device_id: deviceId,
+            };
+
+            const response = await userLogin(payload);
             if (response.status === true && response.token) {
+
                 if (response?.token) {
                     await AsyncStorage.setItem('auth_token', response.token);
                     console.log('Token saved:', response.token);
@@ -72,12 +84,12 @@ const LoginScreen = ({ navigation }) => {
 
                 if (response.user) {
                     if (response.user.role === 'driver') {
-                        const otpResponse = await sendOtp({ email });
+                        const otpResponse = await sendOtp(email);
                         if (otpResponse.status === true) {
                             navigation.navigate('OtpScreen', { email });
                         }
                     } else if (response.user.role === 'customer') {
-                        const otpResponse = await sendOtp({ email });
+                        const otpResponse = await sendOtp(email);
                         if (otpResponse.status === true) {
                             navigation.navigate('OtpScreen', { email });
                         }
@@ -89,7 +101,14 @@ const LoginScreen = ({ navigation }) => {
                 navigation.navigate('HomeScreen');
             }
         } catch (err) {
-            setError(err?.message || String(err) + ' - Login failed. Please try again.');
+            if (err.response?.data?.error_code === 'ALREADY_LOGGED_IN') {
+                Alert.alert(
+                    'Account Already Logged In',
+                    'Your account is currently logged in on another device.'
+                );
+            } else {
+                Alert.alert('Login Failed', err.message || 'Something went wrong');
+            }
         } finally {
             setLoading(false);
         }
@@ -165,7 +184,7 @@ const LoginScreen = ({ navigation }) => {
                             {/* Login Button */}
                             <TouchableOpacity
                                 style={[styles.button, { backgroundColor: ACCENT_COLOR, opacity: loading ? 0.7 : 1 }]}
-                                onPress={handleRegister}
+                                onPress={handleLogin}
                                 disabled={loading}
                             >
                                 {loading ? (

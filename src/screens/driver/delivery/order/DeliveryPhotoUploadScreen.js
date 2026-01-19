@@ -33,7 +33,13 @@ const DeliveryPhotoUploadScreen = () => {
 
     useFocusEffect(
         React.useCallback(() => {
-            const onBackPress = () => true;
+            const onBackPress = () => {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: "DriverDashboard" }],
+                });
+                return true;
+            };
 
             const subscription = BackHandler.addEventListener(
                 "hardwareBackPress",
@@ -41,7 +47,7 @@ const DeliveryPhotoUploadScreen = () => {
             );
 
             return () => subscription.remove();
-        }, [])
+        }, [navigation])
     );
 
     useEffect(() => {

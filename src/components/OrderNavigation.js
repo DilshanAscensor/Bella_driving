@@ -33,12 +33,18 @@ export default function OrderNavigation({ order }) {
         const status = order.status;
 
         // Pickup location (required)
-        const pickupLat = Number(order?.place?.pickup_lat);
-        const pickupLng = Number(order?.place?.pickup_lng);
+        // const pickupLat = Number(order?.place?.pickup_lat);
+        // const pickupLng = Number(order?.place?.pickup_lng); 
+
+        const pickupLat = Number('7.925360129479699');
+        const pickupLng = Number('81.56944681983668');
 
         // Delivery location (required only after pickup)
-        const deliveryLat = Number(order?.place?.delivery_lat);
-        const deliveryLng = Number(order?.place?.delivery_lng);
+        // const deliveryLat = Number(order?.place?.delivery_lat);
+        // const deliveryLng = Number(order?.place?.delivery_lng);
+
+        const deliveryLat = Number('7.860948705987937');
+        const deliveryLng = Number('81.53975152116719');
 
         if (Number.isNaN(pickupLat) || Number.isNaN(pickupLng)) {
             Alert.alert("Navigation Error", "Pickup location not available");

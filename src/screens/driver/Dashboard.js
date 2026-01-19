@@ -157,7 +157,6 @@ const DriverDashboardScreen = () => {
                 ]
             );
         } catch (e) {
-            // If API fails, still allow logout
             performLogout();
         }
     };

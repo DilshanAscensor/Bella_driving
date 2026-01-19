@@ -111,14 +111,23 @@ const AcceptDeliveryScreen = () => {
     }
 
     if (!order) return null;
+    // const pickup = {
+    //     lat: Number(order?.place?.pickup_lat),
+    //     lng: Number(order?.place?.pickup_lng),
+    // };
+
     const pickup = {
-        lat: Number(order?.place?.pickup_lat),
-        lng: Number(order?.place?.pickup_lng),
+        lat: Number('7.925360129479699'),
+        lng: Number('81.56944681983668'),
     };
 
+    // const delivery = {
+    //     lat: Number(order?.place?.delivery_lat),
+    //     lng: Number(order?.place?.delivery_lng),
+    // };
     const delivery = {
-        lat: Number(order?.place?.delivery_lat),
-        lng: Number(order?.place?.delivery_lng),
+        lat: Number('7.860948705987937'),
+        lng: Number('81.53975152116719'),
     };
 
     const driver = {

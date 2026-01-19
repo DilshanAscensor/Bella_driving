@@ -33,7 +33,13 @@ const PickupMapScreen = () => {
 
   useFocusEffect(
     React.useCallback(() => {
-      const onBackPress = () => true; // block back
+      const onBackPress = () => {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "DriverDashboard" }],
+        });
+        return true;
+      };
 
       const subscription = BackHandler.addEventListener(
         "hardwareBackPress",
@@ -41,7 +47,7 @@ const PickupMapScreen = () => {
       );
 
       return () => subscription.remove();
-    }, [])
+    }, [navigation])
   );
 
   useEffect(() => {
@@ -49,7 +55,7 @@ const PickupMapScreen = () => {
       Alert.alert("Error", "Order ID missing");
       navigation.reset({
         index: 0,
-        routes: [{ name: "HomeScreen" }],
+        routes: [{ name: "DriverDashboard" }],
       });
       return;
     }
@@ -105,9 +111,13 @@ const PickupMapScreen = () => {
 
   if (!order) return null;
 
+  // const pickup = {
+  //   lat: Number(order?.place?.pickup_lat),
+  //   lng: Number(order?.place?.pickup_lng),
+  // };
   const pickup = {
-    lat: Number(order?.place?.pickup_lat),
-    lng: Number(order?.place?.pickup_lng),
+    lat: Number('7.925360129479699'),
+    lng: Number('81.56944681983668'),
   };
 
   // ---------------- MAP ----------------

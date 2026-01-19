@@ -32,6 +32,7 @@
     "pusher-js": "^8.4.0",
     "react": "19.1.0",
     "react-native": "0.81.4",
+    "react-native-device-info": "^15.0.1",
     "react-native-geolocation-service": "^5.3.1",
     "react-native-gesture-handler": "^2.30.0",
     "react-native-image-picker": "^8.2.1",

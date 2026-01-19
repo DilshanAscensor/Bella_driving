@@ -29,7 +29,13 @@ export default function PickupConfirmScreen() {
 
     useFocusEffect(
         React.useCallback(() => {
-            const onBackPress = () => true;
+            const onBackPress = () => {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: "DriverDashboard" }],
+                });
+                return true;
+            };
 
             const subscription = BackHandler.addEventListener(
                 "hardwareBackPress",
@@ -37,7 +43,7 @@ export default function PickupConfirmScreen() {
             );
 
             return () => subscription.remove();
-        }, [])
+        }, [navigation])
     );
 
     // ---------------- LOAD ORDER ----------------

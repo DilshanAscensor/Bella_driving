@@ -1,9 +1,7 @@
 import apiClient from "./apiClient";
 
-export const userLogin = async (formData) => {
-    const response = await apiClient.post('/login', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-    });
+export const userLogin = async (payload) => {
+    const response = await apiClient.post('/login', payload);
     return response.data;
 };
 
@@ -13,7 +11,9 @@ export const userLogout = async () => {
 };
 
 export const sendOtp = async (email) => {
-    const response = await apiClient.post('/send-otp', email);
+    const response = await apiClient.post('/send-otp', {
+        email: email,
+    });
     return response.data;
 };
 
