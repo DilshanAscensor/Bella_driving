@@ -36,6 +36,7 @@ import LoginScreen from './src/screens/LoginScreen';
 import OtpScreen from './src/screens/login/OtpVerificationScreen';
 import DriverRegistration from './src/screens/driver/DriverRegistrationScreen';
 import RegistrationScreen from './src/screens/customer/RegistrationScreen';
+import VehicleOwnerRegistration from './src/screens/vehicleOwner/VehicleOwnerRegisterScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -220,6 +221,7 @@ const RootNavigator = () => {
         <Stack.Screen name="OtpScreen" component={OtpScreen} />
         <Stack.Screen name="DriverRegistration" component={DriverRegistration} />
         <Stack.Screen name="CustomerRegistration" component={RegistrationScreen} />
+        <Stack.Screen name="VehicleOwnerRegistration" component={VehicleOwnerRegistration} />
       </Stack.Navigator>
     );
   }

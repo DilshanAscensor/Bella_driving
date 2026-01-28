@@ -83,6 +83,16 @@ const HomeScreen = () => {
                     <TouchableOpacity
                         style={[styles.button, { backgroundColor: buttonSecondaryBg, borderColor: ACCENT_COLOR, borderWidth: 2 }]}
                         activeOpacity={0.7}
+                        onPress={() => navigation.navigate('VehicleOwnerRegistration')}
+                    >
+                        <MaterialIcons name="business" size={28} color={ACCENT_COLOR} />
+                        <Text style={[styles.buttonText, { color: ACCENT_COLOR }]}>Vehicle Owner Registration</Text>
+                    </TouchableOpacity>
+
+
+                    <TouchableOpacity
+                        style={[styles.button, { backgroundColor: buttonSecondaryBg, borderColor: ACCENT_COLOR, borderWidth: 2 }]}
+                        activeOpacity={0.7}
                         onPress={() => navigation.navigate('CustomerRegistration')}
                     >
                         <MaterialIcons name="person-add" size={28} color={ACCENT_COLOR} style={styles.buttonIcon} />
