@@ -11,18 +11,19 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { ACCENT_COLOR } from '../../assets/theme/colors';
 import { BASE_URL } from '../../config/api';
 import { userLogout } from '../../api/authApi';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { clearUser } from '../../redux/slices/userSlice';
+import { persistor } from '../../redux/store';
 const CustomerDashboardScreen = () => {
     const navigation = useNavigation();
 
     const [loggingOut, setLoggingOut] = useState(false);
     const customer = useSelector(state => state.user.user) || {};
-
+    const dispatch = useDispatch();
     const handleLogout = () => {
         if (loggingOut) return;
 
@@ -41,25 +42,32 @@ const CustomerDashboardScreen = () => {
     };
 
     const performLogout = async () => {
+        if (loggingOut) return;
         setLoggingOut(true);
+
         try {
-            const response = await userLogout();
 
-            await AsyncStorage.removeItem('auth_token');
+            await userLogout();
 
-            Alert.alert('Success', response.message || 'Logged out successfully.');
+            dispatch(clearUser());
+            await persistor.purge();
+
+            await AsyncStorage.multiRemove([
+                'auth_token',
+            ]);
 
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'HomeScreen' }],
             });
-
-        } catch (error) {
-            Alert.alert('Logout Error', error.message);
+        } catch (e) {
+            console.error('Logout error:', e);
+            Alert.alert('Logout failed', 'Please try again');
         } finally {
             setLoggingOut(false);
         }
     };
+
 
     const customerName = customer?.first_name || 'Customer';
     const profilePic = customer.customer_details?.profile_pic

@@ -4,13 +4,11 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    StyleSheet,
     ScrollView,
     KeyboardAvoidingView,
     Platform,
     Image,
     Alert,
-    SafeAreaView,
     Dimensions,
     ActivityIndicator,
 } from 'react-native';
@@ -23,6 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { registerCustomer } from '../../api/registrationApi';
 import commonStyles from '../../assets/styles/customer';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -34,10 +33,11 @@ const RegistrationScreen = ({ navigation }) => {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [gender, setGender] = useState('');
-    const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // ❗ NEW — Correct permission for all Android versions
+    // ✅ NEW
+    const [fieldErrors, setFieldErrors] = useState({});
+
     const getAndroidImagePermission = () => {
         if (Platform.Version >= 33) {
             return PERMISSIONS.ANDROID.READ_MEDIA_IMAGES;
@@ -59,7 +59,6 @@ const RegistrationScreen = ({ navigation }) => {
         }
     };
 
-    // 📸 Handle image picking
     const pickImage = async (setImage) => {
         try {
             let permission;
@@ -97,29 +96,27 @@ const RegistrationScreen = ({ navigation }) => {
         }
     };
 
-    // Validate inputs
+    // ✅ Object validation
     const validateInputs = () => {
-        if (!profile_pic) return 'Profile picture is required';
-        if (!first_name.trim()) return 'First name is required';
-        if (!last_name.trim()) return 'Last name is required';
-        if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return 'Please enter a valid email';
-        if (!phone.match(/^\+?\d{10,15}$/)) return 'Please enter a valid phone number';
-        if (password.length < 6) return 'Password must be at least 6 characters';
-        if (!gender) return 'Gender is required';
-        return '';
+        let errors = {};
+
+        if (!profile_pic) errors.profile_pic = 'Profile picture is required';
+        if (!first_name.trim()) errors.first_name = 'First name is required';
+        if (!last_name.trim()) errors.last_name = 'Last name is required';
+        if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) errors.email = 'Please enter a valid email';
+        if (!phone.match(/^\+?\d{10,15}$/)) errors.phone = 'Please enter a valid phone number';
+        if (password.length < 6) errors.password = 'Password must be at least 6 characters';
+        if (!gender) errors.gender = 'Gender is required';
+
+        setFieldErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
-    // Submit registration
     const handleRegister = async () => {
-
         await AsyncStorage.removeItem('auth_token');
-        const validationError = validateInputs();
-        if (validationError) {
-            setError(validationError);
-            return;
-        }
 
-        setError('');
+        if (!validateInputs()) return;
+
         setLoading(true);
 
         try {
@@ -148,13 +145,11 @@ const RegistrationScreen = ({ navigation }) => {
             navigation.navigate('LoginScreen');
         } catch (err) {
             console.error('Registration error:', err);
-            setError(err.message || 'Registration failed. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
-    // Upload card UI
     const ImageUploadCard = ({ image, onPress }) => (
         <TouchableOpacity style={commonStyles.imageCard} onPress={onPress} activeOpacity={0.7}>
             {image ? (
@@ -191,23 +186,21 @@ const RegistrationScreen = ({ navigation }) => {
                         <Text style={commonStyles.subtitle}>Create your account to get started</Text>
                     </View>
 
-                    {error ? (
-                        <View style={commonStyles.errorContainer}>
-                            <MaterialIcons name="error-outline" size={20} color="#ef4444" />
-                            <Text style={commonStyles.errorText}>{error}</Text>
-                        </View>
-                    ) : null}
-
-                    {/* Personal Info */}
                     <View style={commonStyles.card}>
                         <Text style={commonStyles.cardTitle}>Personal Information</Text>
 
                         <ImageUploadCard image={profile_pic} onPress={() => pickImage(setProfilePic)} />
+                        {fieldErrors.profile_pic && (
+                            <View style={commonStyles.errorContainer}>
+                                <MaterialIcons name="error-outline" size={18} color="#ef4444" />
+                                <Text style={commonStyles.errorText}>{fieldErrors.profile_pic}</Text>
+                            </View>
+                        )}
 
-                        <CustomInput label="First Name" icon="person" value={first_name} onChangeText={setFirstName} placeholder="Enter First Name" />
-                        <CustomInput label="Last Name" icon="person" value={last_name} onChangeText={setLastName} placeholder="Enter Last Name" />
-                        <CustomInput label="Email" icon="email" value={email} onChangeText={setEmail} placeholder="Enter Email Address" keyboardType="email-address" />
-                        <CustomInput label="Phone" icon="phone" value={phone} onChangeText={setPhone} placeholder="Enter Phone Number" keyboardType="phone-pad" />
+                        <CustomInput label="First Name" icon="person" value={first_name} onChangeText={setFirstName} placeholder="Enter First Name" error={fieldErrors.first_name} />
+                        <CustomInput label="Last Name" icon="person" value={last_name} onChangeText={setLastName} placeholder="Enter Last Name" error={fieldErrors.last_name} />
+                        <CustomInput label="Email" icon="email" value={email} onChangeText={setEmail} placeholder="Enter Email Address" keyboardType="email-address" error={fieldErrors.email} />
+                        <CustomInput label="Phone" icon="phone" value={phone} onChangeText={setPhone} placeholder="Enter Phone Number" keyboardType="phone-pad" error={fieldErrors.phone} />
 
                         <View style={commonStyles.inputContainer}>
                             <Text style={commonStyles.inputLabel}>Gender</Text>
@@ -225,10 +218,15 @@ const RegistrationScreen = ({ navigation }) => {
                                     <Picker.Item label="Other" value="Other" />
                                 </Picker>
                             </View>
+                            {fieldErrors.gender && (
+                                <View style={commonStyles.errorContainer}>
+                                    <MaterialIcons name="error-outline" size={18} color="#ef4444" />
+                                    <Text style={commonStyles.errorText}>{fieldErrors.gender}</Text>
+                                </View>
+                            )}
                         </View>
                     </View>
 
-                    {/* Security */}
                     <View style={commonStyles.card}>
                         <Text style={commonStyles.cardTitle}>Security</Text>
                         <CustomInput
@@ -238,10 +236,10 @@ const RegistrationScreen = ({ navigation }) => {
                             onChangeText={setPassword}
                             placeholder="Enter Password"
                             secureTextEntry
+                            error={fieldErrors.password}
                         />
                     </View>
 
-                    {/* Register */}
                     <TouchableOpacity
                         style={[commonStyles.registerButton, loading && commonStyles.registerButtonDisabled]}
                         onPress={handleRegister}
@@ -268,7 +266,6 @@ const RegistrationScreen = ({ navigation }) => {
     );
 };
 
-// Reusable TextInput
 const CustomInput = ({
     label,
     icon,
@@ -277,6 +274,7 @@ const CustomInput = ({
     placeholder,
     secureTextEntry = false,
     keyboardType = 'default',
+    error,
 }) => (
     <View style={commonStyles.inputContainer}>
         <Text style={commonStyles.inputLabel}>{label}</Text>
@@ -293,6 +291,13 @@ const CustomInput = ({
                 autoCapitalize="none"
             />
         </View>
+
+        {error && (
+            <View style={commonStyles.errorContainer}>
+                <MaterialIcons name="error-outline" size={18} color="#ef4444" />
+                <Text style={commonStyles.errorText}>{error}</Text>
+            </View>
+        )}
     </View>
 );
 

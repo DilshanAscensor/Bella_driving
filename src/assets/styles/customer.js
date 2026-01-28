@@ -188,6 +188,7 @@ export default StyleSheet.create({
         borderRadius: moderateScale(12),
         padding: scale(12),
         marginBottom: verticalScale(20),
+        marginTop: verticalScale(10),
         borderLeftWidth: moderateScale(4),
         borderLeftColor: '#ef4444',
     },

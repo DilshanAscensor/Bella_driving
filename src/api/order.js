@@ -193,3 +193,29 @@ export const getDriverOrders = async () => {
 
     return response.data.data;
 };
+
+export const rejectOrder = async (order_id, reason = null) => {
+    try {
+        const token = await AsyncStorage.getItem("auth_token");
+
+
+        const response = await axios.post(
+            `${BASE_URL}/api/drivers/orders/${order_id}/reject`,
+            { reason },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/json'
+                }
+            }
+        );
+
+
+        return response.data;
+
+
+    } catch (error) {
+        console.log("🔥 Reject API Error:", error.response?.data || error.message);
+        throw error;
+    }
+};

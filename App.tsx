@@ -16,10 +16,10 @@ import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 
 /* ================= NAVIGATION ================= */
-import { navigationRef, navigate } from './src/navigation/NavigationService';
+import { navigationRef, navigate, onNavigationReady } from './src/navigation/NavigationService';
 
 /* ================= UTILS ================= */
-import { playOrderSound } from './src/utils/notificationSound';
+import { playOrderSound, stopOrderSound } from './src/utils/notificationSound';
 import apiClient from './src/api/apiClient';
 import { isDriverOnline } from './src/utils/driverStatus';
 import { isCameraActive } from './src/utils/appLock';
@@ -55,6 +55,7 @@ const RootNavigator = () => {
     if (lastNavigatedOrderRef.current === orderId) return;
 
     lastNavigatedOrderRef.current = orderId;
+    console.log('Navigating to Accept Delivery for order:', orderId);
     navigate('AcceptDeliveryScreen', { order_id: orderId });
   };
 
@@ -109,11 +110,12 @@ const RootNavigator = () => {
     /* ---------- APP STATE ---------- */
     const appStateSub = AppState.addEventListener('change', state => {
       if (state === 'active') {
-        if (isCameraActive()) return; // 🛑 BLOCK CAMERA RESUME
+        if (isCameraActive()) return;
         checkActiveOrder();
+      } else {
+        stopOrderSound(); // 🔇 STOP SOUND WHEN APP BACKGROUNDS
       }
     });
-
     /* ---------- COLD START ---------- */
     messaging().getInitialNotification().then(remoteMessage => {
       if (remoteMessage?.data?.type === 'new_order') {
@@ -132,14 +134,53 @@ const RootNavigator = () => {
     /* ---------- FOREGROUND ---------- */
     const unsubscribeForeground =
       messaging().onMessage(async remoteMessage => {
-        const online = await isDriverOnline();
-        if (!online) return;
 
+        // 🔔 NEW ORDER
         if (remoteMessage?.data?.type === 'new_order') {
+          const online = await isDriverOnline();
+          if (!online) return;
+
+          const hasActiveOrder = await checkDriverActiveOrder(); // NEW
+
+          if (hasActiveOrder) {
+            stopOrderSound(); // 🔇 stop immediately
+            return; // 🚫 do not open accept screen
+          }
+
           playOrderSound();
           safeNavigateToAccept(remoteMessage.data.order_id);
         }
+
+
+        if (remoteMessage?.data?.type === 'order_cancelled') {
+          stopOrderSound();
+
+          notifee.displayNotification({
+            id: `order_${remoteMessage.data.order_id}`,
+            title: 'Order Cancelled',
+            body: 'Order was accepted by another driver',
+            android: {
+              channelId: 'orders',
+              importance: AndroidImportance.HIGH,
+            },
+          });
+
+          navigationRef.resetRoot({
+            index: 0,
+            routes: [{ name: 'HomeScreen' }],
+          });
+        }
       });
+
+    const checkDriverActiveOrder = async () => {
+      try {
+        const res = await apiClient.get('/drivers/active-order');
+        return !!res?.data?.data;
+      } catch {
+        return false;
+      }
+    };
+
 
     /* ---------- NOTIFEE PRESS ---------- */
     const unsubscribeNotifee =
@@ -196,7 +237,12 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <PaperProvider>
-          <NavigationContainer ref={navigationRef}>
+          <NavigationContainer
+            ref={navigationRef}
+            onReady={() => {
+              onNavigationReady();
+            }}
+          >
             <RootNavigator />
           </NavigationContainer>
         </PaperProvider>

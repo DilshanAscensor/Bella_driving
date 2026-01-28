@@ -31,6 +31,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
   const scheme = useColorScheme();
   const isDarkMode = scheme === 'dark';
   const dispatch = useDispatch();
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const [first_name, setFirstName] = useState('');
   const [last_name, setLastName] = useState('');
@@ -135,40 +136,32 @@ const DriverRegistrationScreen = ({ navigation }) => {
 
 
   const validateInputs = () => {
-    if (!first_name.trim()) return 'First name is required';
-    if (!last_name.trim()) return 'Last name is required';
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return 'Please enter a valid email';
-    if (!phone.match(/^\+?\d{10,15}$/)) return 'Please enter a valid phone number';
-    if (!/^(?:\d{9}[Vv]|\d{12})$/.test(nic)) {
-      return 'NIC must be either 9 digits followed by V, or exactly 12 digits';
-    }
-    if (!gender) return 'Gender is required';
-    if (!district) return 'District is required';
-    if (!license_number.trim()) return 'Driver’s License Number is required';
-    if (!profile_pic) return 'Profile picture is required';
-    if (password.length < 6) return 'Password must be at least 6 characters';
-    if (confirmPassword !== password) return 'Passwords do not match';
-    if (!nic_front_pic) return 'NIC front image is required';
-    if (!nic_back_pic) return 'NIC back image is required';
-    if (!license_front_pic) return 'License front image is required';
-    if (!license_back_pic) return 'License back image is required';
-    if (!dob) return 'Date of birth is required';
-    if (!isAtLeast18(dob)) return 'You must be at least 18 years old to register';
-    const images = [
-      { img: profile_pic, label: 'Profile picture' },
-      { img: nic_front_pic, label: 'NIC front image' },
-      { img: nic_back_pic, label: 'NIC back image' },
-      { img: license_front_pic, label: 'License front image' },
-      { img: license_back_pic, label: 'License back image' },
-    ];
+    let errors = {};
 
-    for (const { img, label } of images) {
-      if (img?.fileSize && img.fileSize > MAX_IMAGE_SIZE) {
-        return `${label} must be less than 2 MB`;
-      }
-    }
-    return '';
+    if (!first_name.trim()) errors.first_name = 'First name is required';
+    if (!last_name.trim()) errors.last_name = 'Last name is required';
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) errors.email = 'Please enter a valid email';
+    if (!phone.match(/^\+?\d{10,15}$/)) errors.phone = 'Please enter a valid phone number';
+    if (!/^(?:\d{9}[Vv]|\d{12})$/.test(nic)) errors.nic = 'NIC must be either 9 digits + V or 12 digits';
+    if (!gender) errors.gender = 'Gender is required';
+    if (!district) errors.district = 'District is required';
+    if (!license_number.trim()) errors.license_number = 'License number required';
+    if (!dob) errors.dob = 'Date of birth required';
+    else if (!isAtLeast18(dob)) errors.dob = 'Must be at least 18 years old';
+
+    if (!profile_pic) errors.profile_pic = 'Profile picture required';
+    if (!nic_front_pic) errors.nic_front_pic = 'NIC front image required';
+    if (!nic_back_pic) errors.nic_back_pic = 'NIC back image required';
+    if (!license_front_pic) errors.license_front_pic = 'License front image required';
+    if (!license_back_pic) errors.license_back_pic = 'License back image required';
+
+    if (password.length < 6) errors.password = 'Password must be at least 6 characters';
+    if (confirmPassword !== password) errors.confirmPassword = 'Passwords do not match';
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
+
 
   const isAtLeast18 = (dob) => {
     const today = new Date();
@@ -184,10 +177,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     const validationError = validateInputs();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+    if (!validateInputs()) return;
 
     setError('');
     setLoading(true);
@@ -275,6 +265,15 @@ const DriverRegistrationScreen = ({ navigation }) => {
     }
   };
 
+  const FieldError = ({ error }) => {
+    if (!error) return null;
+    return (
+      <View style={styles.formErrorBox}>
+        <MaterialIcons name="error" size={22} color="#ec2121" />
+        <Text style={styles.formErrorText}>{error}</Text>
+      </View>
+    );
+  };
 
   const ImageUploadCard = ({ image, title, icon, type, setImage }) => (
     <TouchableOpacity style={styles.imageCard} onPress={() => pickImage(setImage, type)} activeOpacity={0.7}>
@@ -329,6 +328,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   returnKeyType="next"
                 />
               </View>
+              <FieldError error={fieldErrors.first_name} />
             </View>
 
             {/* Last Name */}
@@ -346,6 +346,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   returnKeyType="next"
                 />
               </View>
+              <FieldError error={fieldErrors.last_name} />
             </View>
 
             {/* Email */}
@@ -364,6 +365,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   returnKeyType="next"
                 />
               </View>
+              <FieldError error={fieldErrors.email} />
             </View>
 
             {/* Phone */}
@@ -381,6 +383,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   returnKeyType="next"
                 />
               </View>
+              <FieldError error={fieldErrors.phone} />
             </View>
 
             {/* NIC */}
@@ -401,6 +404,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   returnKeyType="next"
                 />
               </View>
+              <FieldError error={fieldErrors.nic} />
             </View>
 
             {/* Gender */}
@@ -420,6 +424,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   <Picker.Item label="Other" value="Other" />
                 </Picker>
               </View>
+              <FieldError error={fieldErrors.gender} />
             </View>
 
             {/* District */}
@@ -443,6 +448,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   ))}
                 </Picker>
               </View>
+              <FieldError error={fieldErrors.district} />
             </View>
 
             {/* DOB */}
@@ -460,6 +466,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   </Text>
                 </TouchableOpacity>
               </View>
+              <FieldError error={fieldErrors.dob} />
             </View>
 
             {showDatePicker && (
@@ -493,6 +500,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   returnKeyType="next"
                 />
               </View>
+              <FieldError error={fieldErrors.license_number} />
             </View>
 
             {/* License Expiry */}
@@ -510,6 +518,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   </Text>
                 </TouchableOpacity>
               </View>
+              <FieldError error={fieldErrors.license_expiry} />
             </View>
 
             {showExpiryPicker && (
@@ -532,6 +541,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
               type="profile picture"
               setImage={setProfilePic}
             />
+            <FieldError error={fieldErrors.profile_pic} />
 
             <Text style={styles.inputLabel}>NIC Front</Text>
             <ImageUploadCard
@@ -541,6 +551,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
               type="NIC front"
               setImage={setNicFrontPic}
             />
+            <FieldError error={fieldErrors.nic_front_pic} />
 
             <Text style={styles.inputLabel}>NIC Back</Text>
             <ImageUploadCard
@@ -550,6 +561,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
               type="NIC back"
               setImage={setNicBackPic}
             />
+            <FieldError error={fieldErrors.nic_back_pic} />
 
             <Text style={styles.inputLabel}>License Front</Text>
             <ImageUploadCard
@@ -559,6 +571,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
               type="license front"
               setImage={setLicenseFrontPic}
             />
+            <FieldError error={fieldErrors.license_front_pic} />
 
             <Text style={styles.inputLabel}>License Back</Text>
             <ImageUploadCard
@@ -568,7 +581,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
               type="license back"
               setImage={setLicenseBackPic}
             />
-
+            <FieldError error={fieldErrors.license_back_pic} />
 
           </View>
 
@@ -596,6 +609,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   />
                 </TouchableOpacity>
               </View>
+              <FieldError error={fieldErrors.password} />
             </View>
 
             <View style={styles.inputContainer}>
@@ -619,6 +633,7 @@ const DriverRegistrationScreen = ({ navigation }) => {
                   />
                 </TouchableOpacity>
               </View>
+              <FieldError error={fieldErrors.confirmPassword} />
             </View>
 
 
