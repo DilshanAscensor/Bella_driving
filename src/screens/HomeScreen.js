@@ -1,108 +1,143 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
     View,
     Text,
     TouchableOpacity,
     Image,
-    StyleSheet,
     StatusBar,
-    SafeAreaView,
     useColorScheme,
     Animated,
+    ScrollView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { PRIMARY_COLOR, ACCENT_COLOR } from '../assets/theme/colors';
-import Styles from '../assets/styles/home';
+import {
+    PRIMARY_COLOR,
+    ACCENT_COLOR,
+    TEXT_DARK,
+    TEXT_LIGHT,
+} from '../assets/theme/colors';
+import homeStyles from '../assets/styles/home'; // ← your updated styles file
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const HomeScreen = () => {
     const navigation = useNavigation();
     const scheme = useColorScheme();
     const isDarkMode = scheme === 'dark';
-    const fadeAnim = new Animated.Value(0);
 
-    const styles = Styles;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
+    const scaleAnim = useRef(new Animated.Value(0.92)).current;
 
     useEffect(() => {
-        Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-        }).start();
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 900,
+                useNativeDriver: true,
+            }),
+            Animated.spring(scaleAnim, {
+                toValue: 1,
+                friction: 9,
+                tension: 45,
+                useNativeDriver: true,
+            }),
+        ]).start();
     }, []);
 
-    const backgroundColors = isDarkMode ? ['#000', '#172554'] : [PRIMARY_COLOR, '#e0e7ff'];
-    const textColor = isDarkMode ? '#fff' : '#000';
-    const buttonSecondaryBg = isDarkMode ? '#334155' : '#f1f5f9';
-    const footerTextColor = isDarkMode ? '#a5b4fc' : '#64748b';
+    const gradientColors = isDarkMode
+        ? [PRIMARY_COLOR, '#0f1e3a']
+        : [PRIMARY_COLOR, '#1e3a5f'];
 
+    const textSecondary = isDarkMode ? TEXT_LIGHT : '#d1d5db';
+    const backgroundColors = isDarkMode ? ['#000', '#172554'] : [PRIMARY_COLOR, '#e0e7ff'];
     return (
         <LinearGradient
             colors={backgroundColors}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
-            style={styles.gradient}
+            style={homeStyles.gradient}
         >
-            <SafeAreaView style={styles.container}>
-                <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+            <StatusBar
+                barStyle="light-content"
+                backgroundColor="transparent"
+                translucent
+            />
 
-                <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
-                    <View style={[styles.logoContainer]}>
-                        <Image
-                            source={require('../assets/images/mickaido-main-logo.png')}
-                            style={styles.logo}
-                            resizeMode="contain"
-                        />
+            <SafeAreaView style={homeStyles.safeArea}>
+                <ScrollView
+                    contentContainerStyle={homeStyles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Header / Hero */}
+                    <Animated.View
+                        style={[
+                            homeStyles.header,
+                            { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+                        ]}
+                    >
+                        <View style={homeStyles.logoWrapper}>
+                            <Image
+                                source={require('../assets/images/mickaido-main-logo.png')}
+                                style={homeStyles.logo}
+                                resizeMode="contain"
+                            />
+                        </View>
+
+                        <Text style={[homeStyles.tagline, { color: textSecondary }]}>
+                            Safe • Simple • Reliable
+                        </Text>
+
+                        {/* <Text style={[homeStyles.subtitle, { color: textPrimary }]}>
+                            Your trusted ride & vehicle management solution
+                        </Text> */}
+                    </Animated.View>
+
+                    {/* Action Buttons */}
+                    <View style={homeStyles.buttonsContainer}>
+                        <TouchableOpacity
+                            style={[homeStyles.button, homeStyles.buttonPrimary]}
+                            activeOpacity={0.88}
+                            onPress={() => navigation.navigate('LoginScreen')}
+                        >
+                            <MaterialIcons name="login" size={24} color="#fff" />
+                            <Text style={homeStyles.buttonTextPrimary}>Login</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[homeStyles.button, homeStyles.buttonSecondary]}
+                            activeOpacity={0.88}
+                            onPress={() => navigation.navigate('DriverRegistration')}
+                        >
+                            <MaterialIcons name="directions-car" size={24} color="#dfdcdc" />
+                            <Text style={homeStyles.buttonTextSecondary}>Become a Driver</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[homeStyles.button, homeStyles.buttonSecondary]}
+                            activeOpacity={0.88}
+                            onPress={() => navigation.navigate('VehicleOwnerRegistration')}
+                        >
+                            <MaterialIcons name="business" size={24} color="#dfdcdc" />
+                            <Text style={homeStyles.buttonTextSecondary}>Vehicle Owner</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[homeStyles.button, homeStyles.buttonSecondary]}
+                            activeOpacity={0.88}
+                            onPress={() => navigation.navigate('CustomerRegistration')}
+                        >
+                            <MaterialIcons name="person-add" size={24} color="#dfdcdc" />
+                            <Text style={homeStyles.buttonTextSecondary}>Join as Customer</Text>
+                        </TouchableOpacity>
                     </View>
-                    {/* <Text style={[styles.title, { color: textColor }]}>Belle Driving Belle</Text> */}
-                    <Text style={[styles.subtitle, { color: isDarkMode ? '#d4deff' : '#475569' }]}>
-                        Safe, simple rides at your fingertips
+                </ScrollView>
+
+                {/* Footer */}
+                <View style={homeStyles.footer}>
+                    <Text style={homeStyles.footerText}>
+                        © {new Date().getFullYear()} Mickaido
                     </Text>
-                </Animated.View>
-
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity
-                        style={[styles.button, { backgroundColor: ACCENT_COLOR }]}
-                        activeOpacity={0.7}
-                        onPress={() => navigation.navigate('LoginScreen')}
-                    >
-                        <MaterialIcons name="login" size={28} color="#fff" style={styles.buttonIcon} />
-                        <Text style={styles.buttonText}>Login</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.button, { backgroundColor: buttonSecondaryBg, borderColor: ACCENT_COLOR, borderWidth: 2 }]}
-                        activeOpacity={0.7}
-                        onPress={() => navigation.navigate('DriverRegistration')}
-                    >
-                        <MaterialIcons name="directions-car" size={28} color={ACCENT_COLOR} style={styles.buttonIcon} />
-                        <Text style={[styles.buttonText, { color: ACCENT_COLOR }]}>Driver Registration</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={[styles.button, { backgroundColor: buttonSecondaryBg, borderColor: ACCENT_COLOR, borderWidth: 2 }]}
-                        activeOpacity={0.7}
-                        onPress={() => navigation.navigate('VehicleOwnerRegistration')}
-                    >
-                        <MaterialIcons name="business" size={28} color={ACCENT_COLOR} />
-                        <Text style={[styles.buttonText, { color: ACCENT_COLOR }]}>Vehicle Owner Registration</Text>
-                    </TouchableOpacity>
-
-
-                    <TouchableOpacity
-                        style={[styles.button, { backgroundColor: buttonSecondaryBg, borderColor: ACCENT_COLOR, borderWidth: 2 }]}
-                        activeOpacity={0.7}
-                        onPress={() => navigation.navigate('CustomerRegistration')}
-                    >
-                        <MaterialIcons name="person-add" size={28} color={ACCENT_COLOR} style={styles.buttonIcon} />
-                        <Text style={[styles.buttonText, { color: ACCENT_COLOR }]}>Customer Registration</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Footer - Subtle */}
-                <View style={styles.footer}>
-                    <Text style={[styles.footerText, { color: footerTextColor }]}>© 2025 Mickaido</Text>
                 </View>
             </SafeAreaView>
         </LinearGradient>

@@ -119,10 +119,20 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                 }
 
                 if (role === 'customer') {
+                    Alert.alert('Success', 'Customer');
                     dispatch(setUser(user));
                     navigation.reset({
                         index: 0,
                         routes: [{ name: 'CustomerDashboard' }],
+                    });
+                    return;
+                }
+                if (role === 'vehicle_owner') {
+                    Alert.alert('Success', 'Vehicle Owner');
+                    dispatch(setUser(user));
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'VehicleOwnerDashboard' }],
                     });
                     return;
                 }

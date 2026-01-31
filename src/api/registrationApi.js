@@ -13,3 +13,16 @@ export const registerDriver = async (formData) => {
     });
     return response.data;
 };
+
+export const registerVehicleOwner = async (fd) => {
+    console.log("Registering Vehicle Owner with data:", fd);
+    const response = await apiClient.post('/vehicle-owner/register', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+};
+
+export const registerOwnerVehicle = (fd) =>
+    apiClient.post('/vehicle-owner/vehicles', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    });

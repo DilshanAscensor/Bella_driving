@@ -27,6 +27,7 @@ import { isCameraActive } from './src/utils/appLock';
 /* ================= NAVIGATORS ================= */
 import DriverNavigator from './src/navigation/DriverNavigator';
 import CustomerNavigator from './src/navigation/CustomerNavigator';
+import VehicleOwnerNavigator from './src/navigation/VehicleOwnerNavigator';
 
 /* ================= SCREENS ================= */
 import HomeScreen from './src/screens/HomeScreen';
@@ -225,10 +226,16 @@ const RootNavigator = () => {
       </Stack.Navigator>
     );
   }
+  if (user.role === 'customer') {
+    return <CustomerNavigator />;
+  }
 
-  return user.role === 'driver'
-    ? <DriverNavigator />
-    : <CustomerNavigator />;
+  if (user.role === 'driver') {
+    return <DriverNavigator />;
+  }
+  return <VehicleOwnerNavigator />;
+
+
 };
 
 /* ======================================================

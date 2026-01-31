@@ -1,86 +1,122 @@
-import { StyleSheet } from 'react-native';
+// ../assets/styles/home.js
+import { StyleSheet, Platform } from 'react-native';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+
+const isIOS = Platform.OS === 'ios';
 
 export default StyleSheet.create({
     gradient: {
         flex: 1,
     },
 
-    container: {
+    safeArea: {
         flex: 1,
-        justifyContent: 'center',
-        paddingHorizontal: scale(20),
-        paddingVertical: verticalScale(40),
+    },
+
+    scrollContent: {
+        flexGrow: 1,
+        paddingHorizontal: scale(24),
+        paddingTop: verticalScale(70),
+        paddingBottom: verticalScale(160),
     },
 
     header: {
         alignItems: 'center',
-        marginBottom: verticalScale(40),
+        marginBottom: verticalScale(30),
     },
 
-    logoContainer: {
-        padding: moderateScale(25),
-        borderRadius: moderateScale(100),
-        marginBottom: verticalScale(15),
+    logoWrapper: {
+        width: moderateScale(140),
+        height: moderateScale(140),
+        borderRadius: moderateScale(999),
+        // backgroundColor: 'rgba(255, 165, 0, 0.12)',     // very subtle orange tint
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: verticalScale(24),
+        // borderWidth: 1,
+        // borderColor: 'rgba(255, 165, 0, 0.25)',
+        ... (isIOS ? { overflow: 'hidden' } : {}),      // helps with rounded bg
     },
 
     logo: {
-        width: moderateScale(110),
-        height: moderateScale(110),
+        width: moderateScale(100),
+        height: moderateScale(100),
     },
 
-    title: {
-        fontSize: moderateScale(26),
-        fontWeight: '700',
-        letterSpacing: 0.4,
-        textAlign: 'center',
+    tagline: {
+        fontSize: moderateScale(14.5),
+        fontWeight: '600',
+        letterSpacing: 1.8,
+        textTransform: 'uppercase',
+        color: 'rgba(255,255,255,0.90)',
+        marginBottom: verticalScale(10),
     },
 
     subtitle: {
-        fontSize: moderateScale(15),
+        fontSize: moderateScale(17),
+        fontWeight: '500',
         textAlign: 'center',
-        marginTop: verticalScale(6),
-        lineHeight: moderateScale(20),
-        opacity: 0.85,
-        paddingHorizontal: scale(15),
+        lineHeight: moderateScale(26),
+        color: 'rgba(255,255,255,0.95)',
+        paddingHorizontal: scale(16),
     },
 
     buttonsContainer: {
-        width: '100%',
-        marginTop: verticalScale(10),
+        gap: verticalScale(18),
     },
 
     button: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: verticalScale(10),
-        borderRadius: moderateScale(15),
-        marginVertical: verticalScale(8),
+        paddingVertical: verticalScale(20),
+        borderRadius: moderateScale(20),
+        gap: scale(14),
+        minHeight: verticalScale(58),           // better touch target
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-        elevation: 2,
+        shadowOffset: { width: 0, height: 5 },
+        shadowOpacity: 0.22,
+        shadowRadius: 10,
+        // elevation: 7,
     },
 
-    buttonIcon: {
-        marginRight: scale(10),
+    // Primary (Login) → solid orange
+    buttonPrimary: {
+        backgroundColor: '#FFA500',
     },
 
-    buttonText: {
-        fontSize: moderateScale(15),
-        fontWeight: '600',
-        color: '#fff',
+    buttonSecondary: {
+        backgroundColor: 'rgba(99, 113, 131, 0.55)',
+        borderWidth: 1.5,
+        borderColor: '#FFA500',
+        backdropFilter: isIOS ? 'blur(8px)' : undefined,
+    },
+
+    buttonTextPrimary: {
+        fontSize: moderateScale(17),
+        fontWeight: '700',
+        color: '#ffffff',
+        letterSpacing: 0.3,
+    },
+
+    buttonTextSecondary: {
+        fontSize: moderateScale(17),
+        fontWeight: '700',
+        color: '#ffa600ec',
+        letterSpacing: 0.3,
     },
 
     footer: {
+        position: 'absolute',
+        bottom: verticalScale(28),
+        left: 0,
+        right: 0,
         alignItems: 'center',
-        marginTop: verticalScale(25),
     },
 
     footerText: {
-        fontSize: moderateScale(11),
-        opacity: 0.65,
+        fontSize: moderateScale(13),
+        color: 'rgba(117, 117, 117, 0.77)',
+        fontWeight: '500',
     },
 });

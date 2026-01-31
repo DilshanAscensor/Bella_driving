@@ -280,7 +280,7 @@ const DriverDashboardScreen = () => {
         );
     }
 
-    const driverName = driver.first_name || 'Driver';
+    const driverName = driver?.first_name || 'Driver';
     const profilePic = driver?.driver_details?.profile_pic
         ? `${BASE_URL}/storage/${driver.driver_details.profile_pic}`
         : null;

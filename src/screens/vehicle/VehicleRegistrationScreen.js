@@ -10,7 +10,6 @@ import {
     Image,
     Alert,
     Linking,
-    SafeAreaView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -19,6 +18,7 @@ import { Picker } from '@react-native-picker/picker';
 import { MaterialIcons } from '@react-native-vector-icons/material-icons';
 import commonStyles from '../../assets/styles/driver';
 import { registerVehicle } from '../../api/vehicleApi';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const VehicleRegistrationScreen = ({ route, navigation }) => {

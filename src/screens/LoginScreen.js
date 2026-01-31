@@ -93,6 +93,11 @@ const LoginScreen = ({ navigation }) => {
                         if (otpResponse.status === true) {
                             navigation.navigate('OtpScreen', { email });
                         }
+                    } else if (response.user.role === 'vehicle_owner') {
+                        const otpResponse = await sendOtp(email);
+                        if (otpResponse.status === true) {
+                            navigation.navigate('OtpScreen', { email });
+                        }
                     }
                 } else {
                     navigation.navigate('HomeScreen');

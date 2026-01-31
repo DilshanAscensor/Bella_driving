@@ -21,6 +21,13 @@ export default StyleSheet.create({
         paddingBottom: verticalScale(120),
         backgroundColor: '#f8fafc',
     },
+    fieldErrorText: {
+        color: '#ff0000',          // 🔴 RED (force red)
+        fontSize: 12,
+        marginTop: 4,
+        marginLeft: 4,
+        fontWeight: '500',
+    },
 
     header: {
         alignItems: 'center',
