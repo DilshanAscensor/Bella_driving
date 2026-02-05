@@ -36,9 +36,9 @@ const LoginScreen = ({ navigation }) => {
     useEffect(() => {
         DeviceInfo.getUniqueId().then(setDeviceId);
     }, []);
-    const backgroundColors = isDarkMode ? ['#000', '#172554'] : [PRIMARY_COLOR, '#e0e7ff'];
+    const backgroundColors = isDarkMode ? ['#ffffff', '#ffffff'] : [PRIMARY_COLOR, '#e0e7ff'];
     const textColor = isDarkMode ? '#fff' : '#000';
-    const inputBgColor = isDarkMode ? '#334155' : '#f1f5f9';
+    const inputBgColor = isDarkMode ? '#334155' : '#dbdddd';
     const placeholderColor = isDarkMode ? '#a5b4fc' : '#94a3b8';
     const buttonTextColor = '#fff';
 
@@ -120,100 +120,94 @@ const LoginScreen = ({ navigation }) => {
     };
 
     return (
-        <LinearGradient
-            colors={backgroundColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.gradient}
-        >
-            <SafeAreaView style={styles.container}>
-                <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                    style={{ flex: 1 }}
-                >
-                    <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-                        <View style={styles.header}>
-                            <View style={[styles.logoContainer]}>
-                                <Image
-                                    source={require('../assets/images/mickaido-main-logo.png')}
-                                    style={styles.logo}
-                                    resizeMode="contain"
-                                />
-                            </View>
-                            <Text style={[styles.title, { color: textColor }]}>Welcome Back</Text>
-                            <Text style={[styles.subtitle, { color: placeholderColor }]}>
-                                Login to your account
-                            </Text>
+
+        <SafeAreaView style={styles.container}>
+            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                style={{ flex: 1 }}
+            >
+                <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+                    <View style={styles.header}>
+                        <View style={[styles.logoContainer]}>
+                            <Image
+                                source={require('../assets/images/mickaido-main-logo.png')}
+                                style={styles.logo}
+                                resizeMode="contain"
+                            />
+                        </View>
+                        <Text style={[styles.title, { color: textColor }]}>Welcome Back</Text>
+                        <Text style={[styles.subtitle, { color: placeholderColor }]}>
+                            Login to your account
+                        </Text>
+                    </View>
+
+                    {/* Input Fields */}
+                    <View style={styles.form}>
+                        <View style={[styles.inputContainer, { backgroundColor: inputBgColor }]}>
+                            <MaterialIcons name="email" size={24} color={placeholderColor} style={styles.inputIcon} />
+                            <TextInput
+                                style={[styles.input, { color: textColor }]}
+                                placeholder="Email"
+                                placeholderTextColor={placeholderColor}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                value={email}
+                                onChangeText={setEmail}
+                            />
                         </View>
 
-                        {/* Input Fields */}
-                        <View style={styles.form}>
-                            <View style={[styles.inputContainer, { backgroundColor: inputBgColor }]}>
-                                <MaterialIcons name="email" size={24} color={placeholderColor} style={styles.inputIcon} />
-                                <TextInput
-                                    style={[styles.input, { color: textColor }]}
-                                    placeholder="Email"
-                                    placeholderTextColor={placeholderColor}
-                                    keyboardType="email-address"
-                                    autoCapitalize="none"
-                                    value={email}
-                                    onChangeText={setEmail}
+                        <View style={[styles.inputContainer, { backgroundColor: inputBgColor }]}>
+                            <MaterialIcons name="lock" size={24} color={placeholderColor} style={styles.inputIcon} />
+                            <TextInput
+                                style={[styles.input, { color: textColor }]}
+                                placeholder="Password"
+                                placeholderTextColor={placeholderColor}
+                                secureTextEntry={hidden}
+                                value={password}
+                                onChangeText={setPassword}
+                            />
+                            <TouchableOpacity onPress={() => setHidden(!hidden)}>
+                                <MaterialIcons
+                                    name={hidden ? 'visibility-off' : 'visibility'}
+                                    size={22}
+                                    color={placeholderColor}
                                 />
-                            </View>
-
-                            <View style={[styles.inputContainer, { backgroundColor: inputBgColor }]}>
-                                <MaterialIcons name="lock" size={24} color={placeholderColor} style={styles.inputIcon} />
-                                <TextInput
-                                    style={[styles.input, { color: textColor }]}
-                                    placeholder="Password"
-                                    placeholderTextColor={placeholderColor}
-                                    secureTextEntry={hidden}
-                                    value={password}
-                                    onChangeText={setPassword}
-                                />
-                                <TouchableOpacity onPress={() => setHidden(!hidden)}>
-                                    <MaterialIcons
-                                        name={hidden ? 'visibility-off' : 'visibility'}
-                                        size={22}
-                                        color={placeholderColor}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-
-                            {/* show error if any */}
-                            {error ? (
-                                <Text style={[styles.errorText, { color: '#ff4d4f', marginTop: 8 }]}>{error}</Text>
-                            ) : null}
-
-                            {/* Login Button */}
-                            <TouchableOpacity
-                                style={[styles.button, { backgroundColor: ACCENT_COLOR, opacity: loading ? 0.7 : 1 }]}
-                                onPress={handleLogin}
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <ActivityIndicator size="small" color={buttonTextColor} style={styles.buttonIcon} />
-                                ) : (
-                                    <MaterialIcons name="login" size={24} color={buttonTextColor} style={styles.buttonIcon} />
-                                )}
-                                <Text style={[styles.buttonText, { color: buttonTextColor, marginLeft: 8 }]}>
-                                    {loading ? 'Signing in...' : 'Login'}
-                                </Text>
                             </TouchableOpacity>
-
-                            {/* Secondary Actions */}
-                            <View style={styles.footer}>
-                                <Text style={[styles.footerText, { color: placeholderColor }]}>Don't have an account?</Text>
-                                <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
-                                    <Text style={[styles.footerLink, { color: ACCENT_COLOR }]}> Register</Text>
-                                </TouchableOpacity>
-                            </View>
                         </View>
-                    </ScrollView>
-                </KeyboardAvoidingView>
-            </SafeAreaView>
-        </LinearGradient>
+
+                        {/* show error if any */}
+                        {error ? (
+                            <Text style={[styles.errorText, { color: '#ff4d4f', marginTop: 8 }]}>{error}</Text>
+                        ) : null}
+
+                        {/* Login Button */}
+                        <TouchableOpacity
+                            style={[styles.button, { backgroundColor: ACCENT_COLOR, opacity: loading ? 0.7 : 1 }]}
+                            onPress={handleLogin}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator size="small" color={buttonTextColor} style={styles.buttonIcon} />
+                            ) : (
+                                <MaterialIcons name="login" size={24} color={buttonTextColor} style={styles.buttonIcon} />
+                            )}
+                            <Text style={[styles.buttonText, { color: buttonTextColor, marginLeft: 8 }]}>
+                                {loading ? 'Signing in...' : 'Login'}
+                            </Text>
+                        </TouchableOpacity>
+
+                        {/* Secondary Actions */}
+                        <View style={styles.footer}>
+                            <Text style={[styles.footerText, { color: placeholderColor }]}>Don't have an account?</Text>
+                            <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
+                                <Text style={[styles.footerLink, { color: ACCENT_COLOR }]}> Register</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 };
 

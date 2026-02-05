@@ -87,9 +87,9 @@ export default StyleSheet.create({
     },
 
     statusBadge: {
-        paddingHorizontal: scale(14),
+        paddingHorizontal: scale(10),
         paddingVertical: scale(6),
-        borderRadius: scale(20),
+        borderRadius: scale(10),
     },
 
     statusBadgeText: {
@@ -101,7 +101,7 @@ export default StyleSheet.create({
 
     statusButton: {
         marginTop: scale(16),
-        borderRadius: scale(14),
+        borderRadius: scale(8),
         paddingVertical: scale(6),
     },
 

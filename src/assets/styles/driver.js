@@ -3,7 +3,7 @@ import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 export default StyleSheet.create({
     PRIMARY_COLOR: '#122948',
-    ACCENT_COLOR: '#FFA500',
+    ACCENT_COLOR: '#ec932a',
     BACKGROUND_COLOR: '#f8fafc',
     CARD_COLOR: '#ffffff',
 
@@ -87,7 +87,7 @@ export default StyleSheet.create({
         backgroundColor: '#e2e8f0',
         paddingHorizontal: scale(15),
         paddingVertical: verticalScale(5),
-        borderRadius: scale(15),
+        borderRadius: scale(10),
         borderWidth: 1,
         borderColor: '#cbd5e1',
     },
@@ -191,11 +191,11 @@ export default StyleSheet.create({
     },
 
     registerButton: {
-        backgroundColor: '#FFA500',
+        backgroundColor: '#ec932a',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: moderateScale(15),
+        borderRadius: moderateScale(10),
         paddingVertical: verticalScale(16),
     },
 

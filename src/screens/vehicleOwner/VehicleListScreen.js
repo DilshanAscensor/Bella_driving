@@ -60,6 +60,10 @@ const VehicleListScreen = ({ navigation, route }) => {
                             await deleteVehicle(vehicle.id);
                             setVehicles((prev) => prev.filter((v) => v.id !== vehicle.id));
                             Alert.alert('Done', 'Vehicle removed');
+                            navigation.reset({
+                                index: 0,
+                                routes: [{ name: 'VehicleOwnerDashboard' }],
+                            });
                         } catch (err) {
                             Alert.alert('Error', 'Deletion failed');
                         }
@@ -74,7 +78,7 @@ const VehicleListScreen = ({ navigation, route }) => {
             <View style={styles.emptyIconWrap}>
                 <MaterialIcons name="directions-car" size={moderateScale(100)} color={ACCENT_COLOR} />
             </View>
-            <Text style={styles.emptyTitle}>Your Garage is Empty</Text>
+            <Text style={styles.emptyTitle}>Your Fleet is Empty</Text>
             <Text style={styles.emptySubtitle}>
                 Add vehicles to manage registrations, documents and maintenance easily.
             </Text>
@@ -97,7 +101,7 @@ const VehicleListScreen = ({ navigation, route }) => {
             <SafeAreaView style={styles.safe}>
                 {/* Header */}
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>My Garage</Text>
+                    <Text style={styles.headerTitle}>My Fleet</Text>
                     <TouchableOpacity
                         style={styles.headerAdd}
                         onPress={() => navigation.navigate('MultiVehicleRegistrationScreen', { owner })}
@@ -150,7 +154,7 @@ const VehicleListScreen = ({ navigation, route }) => {
 
                                             <TouchableOpacity
                                                 style={styles.iconBtn}
-                                            // onPress={() => handleDelete(v)}
+                                                onPress={() => handleDelete(v)}
                                             >
                                                 <MaterialIcons name="delete-outline" size={moderateScale(22)} color="#ef4444" />
                                             </TouchableOpacity>

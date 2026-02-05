@@ -8,6 +8,7 @@ import {
 import {
     PRIMARY_COLOR,
     TEXT_DARK,
+    CARD_BG,
 } from '../../assets/theme/colors';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
@@ -370,7 +371,7 @@ const DriverDashboardScreen = () => {
                                 <Avatar.Icon
                                     {...props}
                                     icon="truck"
-                                    color={PRIMARY_COLOR}
+                                    color={CARD_BG}
                                     style={styles.iconStyle}
                                 />
                             )}
@@ -393,7 +394,7 @@ const DriverDashboardScreen = () => {
                                 <Avatar.Icon
                                     {...props}
                                     icon="package-variant"
-                                    color={PRIMARY_COLOR}
+                                    color={CARD_BG}
                                     style={styles.iconStyle}
                                 />
                             )}

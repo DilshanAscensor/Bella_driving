@@ -1,122 +1,135 @@
-// ../assets/styles/home.js
 import { StyleSheet, Platform } from 'react-native';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import { Dimensions } from 'react-native';
 
-const isIOS = Platform.OS === 'ios';
+const { width } = Dimensions.get('window');
+const IS_SMALL_WIDTH = width < 360;
+
+
+const { height } = Dimensions.get('window');
+const IS_SMALL_DEVICE = height < 700;
 
 export default StyleSheet.create({
-    gradient: {
-        flex: 1,
-    },
-
     safeArea: {
         flex: 1,
+        backgroundColor: '#ffffff',
     },
 
     scrollContent: {
         flexGrow: 1,
         paddingHorizontal: scale(24),
-        paddingTop: verticalScale(70),
-        paddingBottom: verticalScale(160),
+        paddingTop: verticalScale(IS_SMALL_DEVICE ? 20 : 40),
+        paddingBottom: verticalScale(32),
+        alignItems: 'center',
     },
 
-    header: {
+    hero: {
         alignItems: 'center',
-        marginBottom: verticalScale(30),
+        marginBottom: verticalScale(IS_SMALL_DEVICE ? 32 : 56),
     },
 
     logoWrapper: {
-        width: moderateScale(140),
-        height: moderateScale(140),
-        borderRadius: moderateScale(999),
-        // backgroundColor: 'rgba(255, 165, 0, 0.12)',     // very subtle orange tint
+        width: moderateScale(IS_SMALL_DEVICE ? 120 : 160),
+        height: moderateScale(IS_SMALL_DEVICE ? 120 : 160),
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: verticalScale(24),
-        // borderWidth: 1,
-        // borderColor: 'rgba(255, 165, 0, 0.25)',
-        ... (isIOS ? { overflow: 'hidden' } : {}),      // helps with rounded bg
     },
 
     logo: {
-        width: moderateScale(100),
-        height: moderateScale(100),
+        width: '70%',
+        height: '70%',
+    },
+
+    welcomeTitle: {
+        fontSize: moderateScale(26),
+        fontWeight: '700',
+        marginBottom: verticalScale(6),
+        textAlign: 'center',
     },
 
     tagline: {
-        fontSize: moderateScale(14.5),
+        fontSize: moderateScale(14),
         fontWeight: '600',
-        letterSpacing: 1.8,
-        textTransform: 'uppercase',
-        color: 'rgba(255,255,255,0.90)',
-        marginBottom: verticalScale(10),
+        letterSpacing: 2,
+        color: '#ec932a',
     },
 
     subtitle: {
-        fontSize: moderateScale(17),
-        fontWeight: '500',
+        fontSize: moderateScale(15),
+        color: 'rgba(80, 80, 90, 0.82)',
         textAlign: 'center',
-        lineHeight: moderateScale(26),
-        color: 'rgba(255,255,255,0.95)',
+        lineHeight: moderateScale(24),
         paddingHorizontal: scale(16),
     },
 
-    buttonsContainer: {
-        gap: verticalScale(18),
+    actionsWrapper: {
+        width: '100%',
     },
 
-    button: {
+    ctaButton: {
+        width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: verticalScale(20),
-        borderRadius: moderateScale(20),
-        gap: scale(14),
-        minHeight: verticalScale(58),           // better touch target
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 5 },
-        shadowOpacity: 0.22,
-        shadowRadius: 10,
-        // elevation: 7,
+        paddingVertical: verticalScale(16),
+        borderRadius: 10,
+        marginBottom: verticalScale(14),
     },
 
-    // Primary (Login) → solid orange
-    buttonPrimary: {
-        backgroundColor: '#FFA500',
+    primaryButton: {
+        backgroundColor: '#ec932a',
     },
 
-    buttonSecondary: {
-        backgroundColor: 'rgba(99, 113, 131, 0.55)',
-        borderWidth: 1.5,
-        borderColor: '#FFA500',
-        backdropFilter: isIOS ? 'blur(8px)' : undefined,
+    secondaryButton: {
+        width: '100%',
+        backgroundColor: 'rgba(198, 104, 27, 0.06)',
+        borderWidth: 1.4,
+        borderColor: 'rgba(198, 104, 27, 0.35)',
     },
 
-    buttonTextPrimary: {
+    secondaryButtonFull: {
+        backgroundColor: 'rgba(198, 104, 27, 0.06)',
+        borderWidth: 1.2,
+        borderColor: 'rgba(198, 104, 27, 0.35)',
+    },
+
+    buttonPressed: {
+        opacity: 0.85,
+        transform: [{ scale: 0.98 }],
+    },
+
+    ctaTextPrimary: {
         fontSize: moderateScale(17),
         fontWeight: '700',
         color: '#ffffff',
-        letterSpacing: 0.3,
+        marginLeft: scale(10),
     },
 
-    buttonTextSecondary: {
-        fontSize: moderateScale(17),
-        fontWeight: '700',
-        color: '#ffa600ec',
-        letterSpacing: 0.3,
+    ctaTextSecondary: {
+        fontSize: moderateScale(15),
+        fontWeight: '600',
+        color: '#ec932a',
+        marginLeft: 8,
+        flexShrink: 1,
     },
+
+    secondaryButtonsRow: {
+        flexDirection: 'column',
+        width: '100%',
+        gap: 10,
+        marginBottom: 10,
+    },
+
 
     footer: {
-        position: 'absolute',
-        bottom: verticalScale(28),
-        left: 0,
-        right: 0,
-        alignItems: 'center',
+        marginTop: verticalScale(24),
+        marginBottom: verticalScale(8),
     },
 
     footerText: {
-        fontSize: moderateScale(13),
-        color: 'rgba(117, 117, 117, 0.77)',
+        fontSize: moderateScale(12.5),
+        color: 'rgba(130, 130, 140, 0.7)',
         fontWeight: '500',
     },
 });

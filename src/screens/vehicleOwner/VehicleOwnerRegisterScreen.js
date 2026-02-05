@@ -143,6 +143,8 @@ const VehicleOwnerRegisterScreen = () => {
                 <TextInput
                     style={styles.input}
                     value={form[key]}
+                    placeholder={props.placeholder || label}
+                    placeholderTextColor="#94a3b8"
                     onChangeText={v => setForm({ ...form, [key]: v })}
                     {...props}
                 />
@@ -168,10 +170,23 @@ const VehicleOwnerRegisterScreen = () => {
                         <View style={styles.card}>
                             <Text style={styles.cardTitle}>Owner Information</Text>
 
-                            {renderInput('first_name', 'First Name', 'person')}
-                            {renderInput('last_name', 'Last Name', 'person')}
-                            {renderInput('email', 'Email', 'email', { keyboardType: 'email-address' })}
-                            {renderInput('phone', 'Phone', 'phone', { keyboardType: 'phone-pad' })}
+                            {renderInput('first_name', 'First Name', 'person', {
+                                placeholder: 'Enter first name'
+                            })}
+
+                            {renderInput('last_name', 'Last Name', 'person', {
+                                placeholder: 'Enter last name'
+                            })}
+
+                            {renderInput('email', 'Email', 'email', {
+                                placeholder: 'example@email.com',
+                                keyboardType: 'email-address'
+                            })}
+
+                            {renderInput('phone', 'Phone', 'phone', {
+                                placeholder: '07XXXXXXXX',
+                                keyboardType: 'phone-pad'
+                            })}
 
                             {/* PASSWORD */}
                             <View style={styles.inputContainer}>
@@ -180,6 +195,8 @@ const VehicleOwnerRegisterScreen = () => {
                                     <MaterialIcons name="lock" size={20} color={PRIMARY_COLOR} />
                                     <TextInput
                                         style={styles.input}
+                                        placeholder="Enter password"
+                                        placeholderTextColor="#94a3b8"
                                         secureTextEntry={!showPassword}
                                         value={form.password}
                                         onChangeText={v => setForm({ ...form, password: v })}
@@ -201,6 +218,8 @@ const VehicleOwnerRegisterScreen = () => {
                                     <MaterialIcons name="lock" size={20} color={PRIMARY_COLOR} />
                                     <TextInput
                                         style={styles.input}
+                                        placeholder="Confirm password"
+                                        placeholderTextColor="#94a3b8"
                                         secureTextEntry={!showConfirmPassword}
                                         value={form.confirmPassword}
                                         onChangeText={v => setForm({ ...form, confirmPassword: v })}
@@ -222,13 +241,33 @@ const VehicleOwnerRegisterScreen = () => {
                         <View style={styles.card}>
                             <Text style={styles.cardTitle}>Business Information</Text>
 
-                            {renderInput('business_name', 'Business Name', 'store')}
-                            {renderInput('business_email', 'Business Email', 'email')}
-                            {renderInput('business_phone', 'Business Phone', 'phone')}
-                            {renderInput('business_address', 'Business Address', 'location-on')}
-                            {renderInput('business_registration_no', 'Business Reg No', 'assignment')}
-                            {renderInput('owner_name', 'Owner Name', 'badge')}
-                            {renderInput('owner_nic', 'Owner NIC', 'credit-card')}
+                            {renderInput('business_name', 'Business Name', 'store', {
+                                placeholder: 'ABC Transport Services'
+                            })}
+
+                            {renderInput('business_email', 'Business Email', 'email', {
+                                placeholder: 'business@email.com'
+                            })}
+
+                            {renderInput('business_phone', 'Business Phone', 'phone', {
+                                placeholder: '07XXXXXXXX'
+                            })}
+
+                            {renderInput('business_address', 'Business Address', 'location-on', {
+                                placeholder: 'No 123, Main Street, Colombo'
+                            })}
+
+                            {renderInput('business_registration_no', 'Business Reg No', 'assignment', {
+                                placeholder: 'BR-XXXXXXX'
+                            })}
+
+                            {renderInput('owner_name', 'Owner Name', 'badge', {
+                                placeholder: 'Full owner name'
+                            })}
+
+                            {renderInput('owner_nic', 'Owner NIC', 'credit-card', {
+                                placeholder: '123456789V'
+                            })}
                         </View>
 
                         {/* IMAGE */}

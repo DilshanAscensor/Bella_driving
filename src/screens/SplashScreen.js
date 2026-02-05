@@ -1,9 +1,15 @@
 import React, { useEffect } from 'react';
-import { View, Text, Image, StyleSheet, StatusBar, SafeAreaView, useColorScheme } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import {
+    View,
+    Text,
+    Image,
+    StatusBar,
+    useColorScheme,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { PRIMARY_COLOR, ACCENT_COLOR } from '../assets/theme/colors';
+import { PRIMARY_COLOR } from '../assets/theme/colors';
 import styles from '../assets/styles/splashScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SplashScreen = () => {
     const navigation = useNavigation();
@@ -16,35 +22,39 @@ const SplashScreen = () => {
                 index: 0,
                 routes: [{ name: 'HomeScreen' }],
             });
-        }, 2500);
+        }, 2200);
         return () => clearTimeout(timer);
     }, [navigation]);
 
-    // Gradient colors
-    const backgroundColors = isDarkMode ? ['#000', '#172554'] : [PRIMARY_COLOR, '#e0e7ff'];
-    const textColor = isDarkMode ? '#fff' : '#000';
-    const subtitleColor = isDarkMode ? '#d4deff' : '#475569';
+    const backgroundColor = isDarkMode ? '#0f172a' : '#ffffff';
+    const titleColor = isDarkMode ? '#ffffff' : '#0f172a';
+    const subtitleColor = isDarkMode ? '#cbd5f5' : '#64748b';
 
     return (
-        <LinearGradient
-            colors={backgroundColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.gradient}
-        >
-            <SafeAreaView style={styles.container}>
-                <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-                <View style={[styles.logoCircle]}>
-                    <Image
-                        source={require('../assets/images/mickaido-main-logo.png')}
-                        style={styles.logo}
-                        resizeMode="contain"
-                    />
-                </View>
-                <Text style={[styles.title, { color: textColor }]}>Mickaido</Text>
-                <Text style={[styles.subtitle, { color: subtitleColor }]}>Your Ride, Your Way</Text>
-            </SafeAreaView>
-        </LinearGradient>
+        <SafeAreaView style={[styles.container, { backgroundColor }]}>
+            <StatusBar
+                backgroundColor={backgroundColor}
+                barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            />
+
+            {/* Logo */}
+            <View style={styles.logoWrapper}>
+                <Image
+                    source={require('../assets/images/mickaido-main-logo.png')}
+                    style={styles.logo}
+                    resizeMode="contain"
+                />
+            </View>
+
+            {/* Text */}
+            <Text style={[styles.title, { color: titleColor }]}>
+                Mickaido
+            </Text>
+            <Text style={[styles.subtitle, { color: subtitleColor }]}>
+                Your Ride, Your Way
+            </Text>
+        </SafeAreaView>
     );
 };
+
 export default SplashScreen;

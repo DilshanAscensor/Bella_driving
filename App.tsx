@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 /* ================= REDUX ================= */
 import { Provider, useSelector } from 'react-redux';
 import { store, persistor } from './src/redux/store';
@@ -243,19 +243,21 @@ const RootNavigator = () => {
 ====================================================== */
 export default function App() {
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <PaperProvider>
-          <NavigationContainer
-            ref={navigationRef}
-            onReady={() => {
-              onNavigationReady();
-            }}
-          >
-            <RootNavigator />
-          </NavigationContainer>
-        </PaperProvider>
-      </PersistGate>
-    </Provider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <PaperProvider>
+            <NavigationContainer
+              ref={navigationRef}
+              onReady={() => {
+                onNavigationReady();
+              }}
+            >
+              <RootNavigator />
+            </NavigationContainer>
+          </PaperProvider>
+        </PersistGate>
+      </Provider>
+    </GestureHandlerRootView>
   );
 }

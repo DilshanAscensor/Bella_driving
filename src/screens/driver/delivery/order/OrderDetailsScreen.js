@@ -24,7 +24,7 @@ import {
 import { BASE_URL } from "../../../../config/api";
 
 const PRIMARY = "#122948";
-const ACCENT = "#FFA500";
+const ACCENT = "#ec932a";
 const TEXT_DARK = "#111";
 const TEXT_LIGHT = "#6b7280";
 

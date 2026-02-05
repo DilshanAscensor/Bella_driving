@@ -14,7 +14,7 @@ export default StyleSheet.create({
         paddingVertical: verticalScale(30),
         borderBottomLeftRadius: scale(25),
         borderBottomRightRadius: scale(25),
-        backgroundColor: '#FFA500',
+        backgroundColor: '#ec932a',
     },
     avatarContainer: {
         width: scale(110),
@@ -81,7 +81,7 @@ export default StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FFA500',
+        backgroundColor: '#ec932a',
         marginHorizontal: scale(16),
         marginTop: verticalScale(25),
         paddingVertical: verticalScale(12),
@@ -214,7 +214,7 @@ export default StyleSheet.create({
     },
     actionButtonSubtitle: {
         fontSize: moderateScale(13),
-        color: '#FFA500',
+        color: '#ec932a',
         marginTop: verticalScale(2),
     },
 

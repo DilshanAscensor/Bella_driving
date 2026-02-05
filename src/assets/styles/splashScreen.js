@@ -1,35 +1,45 @@
 import { StyleSheet } from 'react-native';
-import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import { PRIMARY_COLOR } from '../theme/colors';
 
 export default StyleSheet.create({
-    gradient: {
-        flex: 1,
-    },
     container: {
         flex: 1,
-        justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: scale(25),
+        justifyContent: 'center',
     },
-    logoCircle: {
-        marginBottom: verticalScale(25),
+
+    logoWrapper: {
+        width: 130,
+        height: 130,
+        borderRadius: 28,
+        backgroundColor: '#f8fafc',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 24,
+
+        // subtle professional shadow
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 6 },
         elevation: 6,
     },
+
     logo: {
-        width: scale(120),
-        height: scale(120),
+        width: 90,
+        height: 90,
     },
+
     title: {
-        fontSize: moderateScale(26),
+        fontSize: 28,
         fontWeight: '700',
         letterSpacing: 0.5,
-        textAlign: 'center',
-        marginBottom: verticalScale(6),
     },
+
     subtitle: {
-        fontSize: moderateScale(15),
-        textAlign: 'center',
-        opacity: 0.85,
-        lineHeight: verticalScale(20),
+        marginTop: 6,
+        fontSize: 14,
+        fontWeight: '500',
+        letterSpacing: 0.3,
     },
 });

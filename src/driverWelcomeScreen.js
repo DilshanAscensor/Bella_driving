@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-na
 import { MaterialIcons } from '@react-native-vector-icons/material-icons'
 
 const PRIMARY_COLOR = '#122948';
-const ACCENT_COLOR = '#FFA500';
+const ACCENT_COLOR = '#ec932a';
 const BACKGROUND_COLOR = '#f8fafc';
 const CARD_COLOR = '#ffffff';
 

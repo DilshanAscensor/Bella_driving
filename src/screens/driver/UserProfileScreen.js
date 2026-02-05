@@ -99,7 +99,7 @@ const UserProfileScreen = () => {
                             <Image source={{ uri: profilePic }} style={styles.profileAvatar} />
                         ) : (
                             <View style={styles.profileAvatarPlaceholder}>
-                                <MaterialIcons name="person" size={55} color="#FFA500" />
+                                <MaterialIcons name="person" size={55} color="#ec932a" />
                             </View>
                         )}
                     </View>
@@ -173,7 +173,7 @@ const UserProfileScreen = () => {
                                 View all your documents
                             </Text>
                         </View>
-                        <MaterialIcons name="chevron-right" size={28} color="#FFA500" />
+                        <MaterialIcons name="chevron-right" size={28} color="#ec932a" />
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -186,7 +186,7 @@ const UserProfileScreen = () => {
                                 View your vehicle details
                             </Text>
                         </View>
-                        <MaterialIcons name="chevron-right" size={28} color="#FFA500" />
+                        <MaterialIcons name="chevron-right" size={28} color="#ec932a" />
                     </TouchableOpacity>
                 </View>
 

@@ -37,7 +37,7 @@ export default StyleSheet.create({
     sectionTitle: {
         fontSize: moderateScale(18),
         fontWeight: '700',
-        color: '#FFA500',
+        color: '#ec932a',
         marginBottom: verticalScale(12),
     },
     labels: {
@@ -59,7 +59,7 @@ export default StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FFA500',
+        backgroundColor: '#ec932a',
         paddingVertical: verticalScale(14),
         borderRadius: scale(25),
         marginBottom: verticalScale(20),
@@ -91,7 +91,7 @@ export default StyleSheet.create({
     },
     placeholderText: {
         fontSize: moderateScale(12),
-        color: '#FFA500',
+        color: '#ec932a',
         marginTop: verticalScale(5),
     },
     row: {

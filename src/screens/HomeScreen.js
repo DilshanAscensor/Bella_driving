@@ -2,24 +2,24 @@ import React, { useEffect, useRef } from 'react';
 import {
     View,
     Text,
-    TouchableOpacity,
     Image,
-    StatusBar,
     useColorScheme,
     Animated,
     ScrollView,
+    Dimensions,
+    Pressable,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {
     PRIMARY_COLOR,
-    ACCENT_COLOR,
     TEXT_DARK,
     TEXT_LIGHT,
 } from '../assets/theme/colors';
-import homeStyles from '../assets/styles/home'; // ← your updated styles file
+import homeStyles from '../assets/styles/home';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const { height } = Dimensions.get('window');
 
 const HomeScreen = () => {
     const navigation = useNavigation();
@@ -27,120 +27,116 @@ const HomeScreen = () => {
     const isDarkMode = scheme === 'dark';
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
-    const scaleAnim = useRef(new Animated.Value(0.92)).current;
+    const buttonsFade = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
-                duration: 900,
+                duration: 700,
                 useNativeDriver: true,
             }),
-            Animated.spring(scaleAnim, {
+            Animated.timing(buttonsFade, {
                 toValue: 1,
-                friction: 9,
-                tension: 45,
+                duration: 900,
+                delay: 250,
                 useNativeDriver: true,
             }),
         ]).start();
     }, []);
 
-    const gradientColors = isDarkMode
-        ? [PRIMARY_COLOR, '#0f1e3a']
-        : [PRIMARY_COLOR, '#1e3a5f'];
+    const textColor = isDarkMode ? TEXT_LIGHT : TEXT_DARK;
 
-    const textSecondary = isDarkMode ? TEXT_LIGHT : '#d1d5db';
-    const backgroundColors = isDarkMode ? ['#000', '#172554'] : [PRIMARY_COLOR, '#e0e7ff'];
     return (
-        <LinearGradient
-            colors={backgroundColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={homeStyles.gradient}
-        >
-            <StatusBar
-                barStyle="light-content"
-                backgroundColor="transparent"
-                translucent
-            />
+        <SafeAreaView style={homeStyles.safeArea}>
+            <ScrollView
+                contentContainerStyle={homeStyles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* HERO */}
+                <Animated.View style={[homeStyles.hero, { opacity: fadeAnim }]}>
+                    <View style={homeStyles.logoWrapper}>
+                        <Image
+                            source={require('../assets/images/mickaido-main-logo.png')}
+                            style={homeStyles.logo}
+                            resizeMode="contain"
+                        />
+                    </View>
 
-            <SafeAreaView style={homeStyles.safeArea}>
-                <ScrollView
-                    contentContainerStyle={homeStyles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                >
-                    {/* Header / Hero */}
-                    <Animated.View
-                        style={[
-                            homeStyles.header,
-                            { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+                    <Text style={[homeStyles.welcomeTitle, { color: textColor }]}>
+                        Welcome to Mickaido
+                    </Text>
+
+                    <Text style={homeStyles.tagline}>
+                        Your Private Courier.
+                    </Text>
+                    {/* 
+                    <Text style={homeStyles.subtitle}>
+                        Your everyday ride & vehicle solution — ready when you are.
+                    </Text> */}
+                </Animated.View>
+
+                {/* ACTIONS */}
+                <Animated.View style={[homeStyles.actionsWrapper, { opacity: buttonsFade }]}>
+                    <Pressable
+                        style={({ pressed }) => [
+                            homeStyles.ctaButton,
+                            homeStyles.primaryButton,
+                            pressed && homeStyles.buttonPressed,
                         ]}
+                        onPress={() => navigation.navigate('LoginScreen')}
                     >
-                        <View style={homeStyles.logoWrapper}>
-                            <Image
-                                source={require('../assets/images/mickaido-main-logo.png')}
-                                style={homeStyles.logo}
-                                resizeMode="contain"
-                            />
-                        </View>
+                        <MaterialIcons name="login" size={22} color="#fff" />
+                        <Text style={homeStyles.ctaTextPrimary}>Login</Text>
+                    </Pressable>
 
-                        <Text style={[homeStyles.tagline, { color: textSecondary }]}>
-                            Safe • Simple • Reliable
-                        </Text>
-
-                        {/* <Text style={[homeStyles.subtitle, { color: textPrimary }]}>
-                            Your trusted ride & vehicle management solution
-                        </Text> */}
-                    </Animated.View>
-
-                    {/* Action Buttons */}
-                    <View style={homeStyles.buttonsContainer}>
-                        <TouchableOpacity
-                            style={[homeStyles.button, homeStyles.buttonPrimary]}
-                            activeOpacity={0.88}
-                            onPress={() => navigation.navigate('LoginScreen')}
-                        >
-                            <MaterialIcons name="login" size={24} color="#fff" />
-                            <Text style={homeStyles.buttonTextPrimary}>Login</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[homeStyles.button, homeStyles.buttonSecondary]}
-                            activeOpacity={0.88}
+                    <View style={homeStyles.secondaryButtonsRow}>
+                        <Pressable
+                            style={({ pressed }) => [
+                                homeStyles.ctaButton,
+                                homeStyles.secondaryButton,
+                                pressed && homeStyles.buttonPressed,
+                            ]}
                             onPress={() => navigation.navigate('DriverRegistration')}
                         >
-                            <MaterialIcons name="directions-car" size={24} color="#dfdcdc" />
-                            <Text style={homeStyles.buttonTextSecondary}>Become a Driver</Text>
-                        </TouchableOpacity>
+                            <MaterialIcons name="directions-car" size={20} color={PRIMARY_COLOR} />
+                            <Text style={homeStyles.ctaTextSecondary}>Driver Partner</Text>
+                        </Pressable>
 
-                        <TouchableOpacity
-                            style={[homeStyles.button, homeStyles.buttonSecondary]}
-                            activeOpacity={0.88}
+                        <Pressable
+                            style={({ pressed }) => [
+                                homeStyles.ctaButton,
+                                homeStyles.secondaryButton,
+                                pressed && homeStyles.buttonPressed,
+                            ]}
                             onPress={() => navigation.navigate('VehicleOwnerRegistration')}
                         >
-                            <MaterialIcons name="business" size={24} color="#dfdcdc" />
-                            <Text style={homeStyles.buttonTextSecondary}>Vehicle Owner</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[homeStyles.button, homeStyles.buttonSecondary]}
-                            activeOpacity={0.88}
-                            onPress={() => navigation.navigate('CustomerRegistration')}
-                        >
-                            <MaterialIcons name="person-add" size={24} color="#dfdcdc" />
-                            <Text style={homeStyles.buttonTextSecondary}>Join as Customer</Text>
-                        </TouchableOpacity>
+                            <MaterialIcons name="business" size={20} color={PRIMARY_COLOR} />
+                            <Text style={homeStyles.ctaTextSecondary}>Vehicle Owner</Text>
+                        </Pressable>
                     </View>
-                </ScrollView>
 
-                {/* Footer */}
+                    <Pressable
+                        style={({ pressed }) => [
+                            homeStyles.ctaButton,
+                            homeStyles.secondaryButtonFull,
+                            pressed && homeStyles.buttonPressed,
+                        ]}
+                        onPress={() => navigation.navigate('CustomerRegistration')}
+                    >
+                        <MaterialIcons name="person-add" size={20} color={PRIMARY_COLOR} />
+                        <Text style={homeStyles.ctaTextSecondary}>Join as Customer</Text>
+                    </Pressable>
+                </Animated.View>
+
+                {/* FOOTER (now scroll-safe) */}
                 <View style={homeStyles.footer}>
                     <Text style={homeStyles.footerText}>
                         © {new Date().getFullYear()} Mickaido
                     </Text>
                 </View>
-            </SafeAreaView>
-        </LinearGradient>
+            </ScrollView>
+        </SafeAreaView>
     );
 };
 

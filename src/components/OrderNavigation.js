@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     navButton: {
-        backgroundColor: "#FFA500",
+        backgroundColor: "#ec932a",
         padding: 12,
         borderRadius: 30,
     },

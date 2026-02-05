@@ -3,7 +3,7 @@ import { scale, verticalScale, moderateScale } from "react-native-size-matters";
 
 // Colors exported separately
 export const PRIMARY = "#122948";
-export const ACCENT = "#FFA500";
+export const ACCENT = "#ec932a";
 export const TEXT_DARK = "#111";
 export const TEXT_LIGHT = "#6b7280";
 export const BG = "#fff";

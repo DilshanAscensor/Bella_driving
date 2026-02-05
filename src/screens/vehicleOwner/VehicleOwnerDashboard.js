@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -8,47 +8,59 @@ import {
     Dimensions,
     Alert,
     Image,
+    Platform,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
-import { useSelector } from 'react-redux';
-import { PRIMARY_COLOR, ACCENT_COLOR } from '../../assets/theme/colors';
+import { useSelector, useDispatch } from 'react-redux';
+import { ACCENT_COLOR } from '../../assets/theme/colors';
 import { userLogout } from '../../api/authApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useDispatch } from 'react-redux';
 import { clearUser } from '../../redux/slices/userSlice';
 import { persistor } from '../../redux/store';
-import { BASE_URL } from "../../config/api";
+import { BASE_URL } from '../../config/api';
+import { getMyVehicles } from '../../api/vehicleApi';
 
 const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
 
 const VehicleOwnerDashboard = ({ navigation }) => {
-
     const owner = useSelector(state => state.user.user);
-    const [loggingOut, setLoggingOut] = useState(false);
     const dispatch = useDispatch();
-    const profilePic = owner?.vehicle_owner_details?.profile_pic;
 
+    const [vehicles, setVehicles] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [loggingOut, setLoggingOut] = useState(false);
+
+    const profilePic = owner?.vehicle_owner_details?.profile_pic;
     const imageUrl = profilePic
         ? `${BASE_URL}/storage/${profilePic}`
-        : 'https://ui-avatars.com/api/?name=Owner&background=6366f1&color=fff';
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            owner?.first_name || 'Owner'
+        )}&background=6366f1&color=fff&size=256`;
 
-    const handleLogout = async () => {
+    useEffect(() => {
+        loadVehicles();
+    }, []);
+
+    const loadVehicles = async () => {
         try {
-            Alert.alert(
-                'Logout',
-                'Are you sure you want to logout?',
-                [
-                    { text: 'Cancel', style: 'cancel' },
-                    { text: 'Logout', style: 'destructive', onPress: performLogout },
-                ]
-            );
-        } catch (e) {
-            performLogout();
+            setLoading(true);
+            const res = await getMyVehicles();
+            setVehicles(res?.vehicles || []);
+        } catch (err) {
+            console.error('Error fetching vehicles:', err);
+            Alert.alert('Error', 'Failed to load vehicles');
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const handleLogout = () => {
+        Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Sign Out', style: 'destructive', onPress: performLogout },
+        ]);
     };
 
     const performLogout = async () => {
@@ -56,262 +68,328 @@ const VehicleOwnerDashboard = ({ navigation }) => {
         setLoggingOut(true);
 
         try {
-
             await userLogout();
-
-            await AsyncStorage.multiRemove([
-                'auth_token',
-            ]);
-
+            await AsyncStorage.multiRemove(['auth_token']);
             dispatch(clearUser());
             await persistor.purge();
-
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'HomeScreen' }],
             });
         } catch (e) {
-            Alert.alert('Logout failed', 'Please try again');
+            Alert.alert('Sign out failed', 'Please try again.');
         } finally {
             setLoggingOut(false);
         }
     };
 
-
     return (
-        <LinearGradient
-            colors={[PRIMARY_COLOR, '#eef2ff']}
-            style={styles.gradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-        >
-            <SafeAreaView style={styles.safeArea}>
-                <ScrollView
-                    contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                >
+        <SafeAreaView style={styles.safeArea}>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* Header */}
+                <View style={styles.header}>
+                    <Image source={{ uri: imageUrl }} style={styles.avatar} />
+                    <Text style={styles.greeting}>
+                        Hello, {owner?.first_name || 'Owner'}
+                    </Text>
+                    <Text style={styles.subtitle}>Fleet Dashboard</Text>
+                </View>
 
-                    {/* ===== HERO HEADER ===== */}
-                    <View style={styles.hero}>
-                        <Image
-                            source={{ uri: imageUrl }}
-                            style={{
-                                width: scale(110),
-                                height: scale(110),
-                                borderRadius: scale(55),
-                                borderWidth: 3,
-                                borderColor: ACCENT_COLOR,
-                            }}
-                            resizeMode="cover"
-                        />
-                        <Text style={styles.heroTitle}>{owner?.first_name}</Text>
-                        <Text style={styles.heroSub}>Premium Fleet Management</Text>
-                    </View>
-
-                    {/* ===== STATS ===== */}
-                    <View style={styles.statsGrid}>
-                        {[
-                            { icon: 'local-taxi', label: 'Vehicles', value: '0', color: ACCENT_COLOR },
-                            { icon: 'verified', label: 'Status', value: 'Active', color: '#6366f1' },
-                        ].map((item, i) => (
-                            <View key={i} style={styles.statCard}>
-                                <MaterialIcons name={item.icon} size={28} color={item.color} />
-                                <Text style={[styles.statValue, { color: item.color }]}>{item.value}</Text>
-                                <Text style={styles.statLabel}>{item.label}</Text>
-                            </View>
-                        ))}
-                    </View>
-
-                    {/* ===== QUICK ACTIONS ===== */}
-                    <View style={styles.sectionCard}>
-                        <Text style={styles.sectionTitle}>Quick Actions</Text>
-
-                        <TouchableOpacity style={styles.rowAction} onPress={() => navigation.navigate('MultiVehicleRegistrationScreen', { owner })}>
-                            <MaterialIcons name="add-circle" size={26} color={ACCENT_COLOR} />
-                            <Text style={styles.rowText}>Register New Vehicle</Text>
-                            <MaterialIcons name="chevron-right" size={26} color="#9ca3af" />
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.rowAction} onPress={() => navigation.navigate('VehicleListScreen', { owner })}>
-                            <MaterialIcons name="directions-car" size={26} color={ACCENT_COLOR} />
-                            <Text style={styles.rowText}>View My Vehicles</Text>
-                            <MaterialIcons name="chevron-right" size={26} color="#9ca3af" />
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* ===== FLEET MANAGEMENT ===== */}
-                    <View style={styles.sectionCard}>
-                        <Text style={styles.sectionTitle}>Fleet Management</Text>
-
-                        <View style={styles.grid}>
-                            {[
-                                // { icon: 'assignment', label: 'Documents', route: 'DocumentsScreen' },
-                                { icon: 'settings', label: 'Settings', route: 'VehicleOwnerSettingsScreen' },
-                            ].map((item, i) => (
-                                <TouchableOpacity
-                                    key={i}
-                                    style={styles.manageCard}
-                                    activeOpacity={0.8}
-                                    onPress={() => navigation.navigate(item.route)}
-                                >
-                                    <MaterialIcons name={item.icon} size={26} color={ACCENT_COLOR} />
-                                    <Text style={styles.manageText}>{item.label}</Text>
-                                </TouchableOpacity>
-                            ))}
+                {/* Stats */}
+                <View style={styles.statsContainer}>
+                    {[
+                        {
+                            icon: 'local-taxi',
+                            label: 'Vehicles',
+                            value: vehicles.length,
+                            color: ACCENT_COLOR,
+                        },
+                        {
+                            icon: 'verified-user',
+                            label: 'Status',
+                            value: 'Active',
+                            color: '#122948',
+                        },
+                        // {
+                        //     icon: 'attach-money',
+                        //     label: 'This Month',
+                        //     value: '$4,820',
+                        //     color: '#f59e0b',
+                        // },
+                    ].map((item, index) => (
+                        <View key={index} style={styles.statCard}>
+                            <MaterialIcons
+                                name={item.icon}
+                                size={moderateScale(28)}
+                                color={item.color}
+                            />
+                            <Text style={styles.statValue}>{item.value}</Text>
+                            <Text style={styles.statLabel}>{item.label}</Text>
                         </View>
-                    </View>
+                    ))}
+                </View>
 
-                    {/* ===== ACCOUNT MANAGEMENT ===== */}
-                    <View style={styles.sectionCard}>
-                        <Text style={styles.sectionTitle}>Account Management</Text>
-
-                        {/* <TouchableOpacity
-                            style={styles.accountRow}
-                            onPress={() => navigation.navigate('EditProfile')}
+                {/* Quick Actions */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Quick Actions</Text>
+                    <View style={styles.actionGrid}>
+                        <TouchableOpacity
+                            style={styles.actionCard}
+                            onPress={() =>
+                                navigation.navigate(
+                                    'MultiVehicleRegistrationScreen',
+                                    { owner }
+                                )
+                            }
                         >
-                            <MaterialIcons name="edit" size={24} color="#2563eb" />
-                            <Text style={styles.accountText}>Edit Profile</Text>
-                            <MaterialIcons name="chevron-right" size={26} color="#9ca3af" />
-                        </TouchableOpacity> */}
+                            <MaterialIcons
+                                name="add-circle"
+                                size={moderateScale(36)}
+                                color={ACCENT_COLOR}
+                            />
+                            <Text style={styles.actionText}>
+                                Register Vehicle
+                            </Text>
+                        </TouchableOpacity>
 
                         <TouchableOpacity
-                            style={[styles.accountRow, styles.logoutRow]}
-                            onPress={handleLogout}
+                            style={styles.actionCard}
+                            onPress={() =>
+                                navigation.navigate('VehicleListScreen', {
+                                    owner,
+                                })
+                            }
                         >
-                            <MaterialIcons name="logout" size={24} color="#dc2626" />
-                            <Text style={[styles.accountText, { color: '#dc2626' }]}>Logout</Text>
-                            <MaterialIcons name="chevron-right" size={26} color="#fca5a5" />
+                            <MaterialIcons
+                                name="directions-car"
+                                size={moderateScale(36)}
+                                color={ACCENT_COLOR}
+                            />
+                            <Text style={styles.actionText}>My Vehicles</Text>
                         </TouchableOpacity>
                     </View>
+                </View>
 
-                    <View style={{ height: verticalScale(60) }} />
-                </ScrollView>
-            </SafeAreaView>
-        </LinearGradient>
+                {/* Management */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Fleet Management</Text>
+                    <TouchableOpacity
+                        style={styles.managementRow}
+                        onPress={() =>
+                            navigation.navigate(
+                                'VehicleOwnerSettingsScreen'
+                            )
+                        }
+                    >
+                        <MaterialIcons
+                            name="settings"
+                            size={moderateScale(26)}
+                            color={ACCENT_COLOR}
+                        />
+                        <Text style={styles.rowText}>
+                            Settings & Preferences
+                        </Text>
+                        <MaterialIcons
+                            name="chevron-right"
+                            size={24}
+                            color="#9ca3af"
+                        />
+                    </TouchableOpacity>
+                </View>
+
+                {/* Logout */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Account</Text>
+                    <TouchableOpacity
+                        style={styles.logoutRow}
+                        onPress={handleLogout}
+                        disabled={loggingOut}
+                    >
+                        <MaterialIcons
+                            name="logout"
+                            size={24}
+                            color="#ef4444"
+                        />
+                        <Text style={styles.logoutText}>
+                            {loggingOut ? 'Signing out...' : 'Sign Out'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={{ height: verticalScale(60) }} />
+            </ScrollView>
+        </SafeAreaView>
     );
 };
 
-/* ================= STYLES ================= */
-
 const styles = StyleSheet.create({
-    gradient: { flex: 1 },
-    safeArea: { flex: 1 },
-
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#f8fafc', // light grayish white – clean & modern
+    },
     scrollContent: {
-        paddingHorizontal: scale(18),
-        paddingTop: verticalScale(18),
-        paddingBottom: verticalScale(36),
+        paddingHorizontal: scale(20),
+        paddingTop: verticalScale(16),
+        paddingBottom: verticalScale(40),
     },
 
-    /* Hero */
-    hero: {
+    /* Header */
+    header: {
         alignItems: 'center',
-        marginBottom: verticalScale(28),
+        marginBottom: verticalScale(32),
     },
-    heroTitle: {
-        fontSize: moderateScale(28),
-        fontWeight: '800',
-        color: '#fff',
-        marginTop: verticalScale(6),
+    avatarContainer: {
+        marginBottom: verticalScale(16),
     },
-    heroSub: {
-        fontSize: moderateScale(14),
-        color: 'rgba(255,255,255,0.85)',
+    avatar: {
+        width: scale(100),
+        height: scale(100),
+        borderRadius: scale(50),
+        borderWidth: 3,
+        borderColor: '#ffffff',
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+            },
+            android: { elevation: 6 },
+        }),
+    },
+    greeting: {
+        fontSize: moderateScale(26),
+        fontWeight: '700',
+        color: '#0f172a',
+        marginBottom: verticalScale(4),
+    },
+    subtitle: {
+        fontSize: moderateScale(15),
+        color: '#64748b',
+        fontWeight: '500',
     },
 
     /* Stats */
-    statsGrid: {
+    statsContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: verticalScale(26),
+        flexWrap: 'wrap',
+        gap: scale(16),
+        marginBottom: verticalScale(32),
     },
     statCard: {
-        width: '48%',
-        backgroundColor: '#fff',
-        borderRadius: moderateScale(18),
-        paddingVertical: verticalScale(18),
+        flex: 1,
+        minWidth: '30%',
+        backgroundColor: '#ffffff',
+        borderRadius: moderateScale(16),
+        paddingVertical: verticalScale(20),
         alignItems: 'center',
-        elevation: 6,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
+            },
+            android: { elevation: 3 },
+        }),
     },
     statValue: {
-        fontSize: moderateScale(20),
-        fontWeight: '800',
-        marginTop: verticalScale(6),
+        fontSize: moderateScale(26),
+        fontWeight: '700',
+        color: '#0f172a',
+        marginVertical: verticalScale(6),
     },
     statLabel: {
-        fontSize: moderateScale(12),
-        color: '#6b7280',
-        marginTop: verticalScale(2),
+        fontSize: moderateScale(13),
+        color: '#64748b',
+        fontWeight: '500',
     },
 
-    /* Section */
-    sectionCard: {
-        backgroundColor: '#fff',
-        borderRadius: moderateScale(20),
-        padding: moderateScale(18),
+    /* Sections */
+    section: {
+        backgroundColor: '#ffffff',
+        borderRadius: moderateScale(16),
+        padding: moderateScale(20),
         marginBottom: verticalScale(20),
-        elevation: 6,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.07,
+                shadowRadius: 6,
+            },
+            android: { elevation: 2 },
+        }),
     },
     sectionTitle: {
         fontSize: moderateScale(17),
-        fontWeight: '800',
-        color: '#111827',
-        marginBottom: verticalScale(14),
+        fontWeight: '700',
+        color: '#1e293b',
+        marginBottom: verticalScale(16),
     },
 
-    /* Rows */
-    rowAction: {
+    /* Quick Actions */
+    actionGrid: {
+        flexDirection: 'row',
+        gap: scale(16),
+    },
+    actionCard: {
+        flex: 1,
+        backgroundColor: 'rgba(99, 102, 241, 0.06)', // very faint accent tint
+        borderRadius: moderateScale(16),
+        paddingVertical: verticalScale(28),
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(99, 102, 241, 0.15)',
+    },
+    actionText: {
+        marginTop: verticalScale(12),
+        fontSize: moderateScale(15),
+        fontWeight: '600',
+        color: '#1e293b',
+    },
+
+    /* Management Row */
+    managementRow: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: verticalScale(14),
+        paddingHorizontal: scale(12),
+        backgroundColor: 'rgba(249, 250, 251, 0.6)',
+        borderRadius: moderateScale(12),
     },
     rowText: {
         flex: 1,
-        marginLeft: scale(12),
-        fontSize: moderateScale(15),
-        fontWeight: '600',
-        color: '#1f2937',
-    },
-
-    /* Management */
-    grid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-    },
-    manageCard: {
-        width: '48%',
-        backgroundColor: '#f8fafc',
-        borderRadius: moderateScale(16),
-        paddingVertical: verticalScale(18),
-        alignItems: 'center',
-        marginBottom: verticalScale(14),
-    },
-    manageText: {
-        fontSize: moderateScale(13.5),
+        marginLeft: scale(16),
+        fontSize: moderateScale(15.5),
         fontWeight: '600',
         color: '#374151',
-        marginTop: verticalScale(6),
     },
 
-    /* Account */
-    accountRow: {
+    /* Logout */
+    logoutRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: verticalScale(14),
+        paddingVertical: verticalScale(16),
+        paddingHorizontal: scale(16),
+        backgroundColor: 'rgba(239, 68, 68, 0.08)',
+        borderRadius: moderateScale(14),
+        borderWidth: 1,
+        borderColor: 'rgba(239, 68, 68, 0.2)',
     },
-    accountText: {
+    logoutText: {
         flex: 1,
-        marginLeft: scale(12),
-        fontSize: moderateScale(15),
-        fontWeight: '600',
-        color: '#1f2937',
-    },
-    logoutRow: {
-        borderTopWidth: 1,
-        borderTopColor: '#f1f5f9',
-        marginTop: verticalScale(6),
-        paddingTop: verticalScale(18),
+        marginLeft: scale(16),
+        fontSize: moderateScale(16),
+        fontWeight: '700',
+        color: '#ef4444',
     },
 });
 

@@ -45,7 +45,7 @@ export default StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: scale(15),
         paddingVertical: verticalScale(6),
-        borderRadius: scale(15),
+        borderRadius: scale(10),
         marginVertical: verticalScale(8),
     },
     inputIcon: {
@@ -60,7 +60,7 @@ export default StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: verticalScale(10),
-        borderRadius: moderateScale(15),
+        borderRadius: moderateScale(10),
         marginVertical: verticalScale(18),
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
